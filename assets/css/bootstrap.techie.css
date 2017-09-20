@@ -4384,9 +4384,9 @@ a.list-group-item.active > .badge,
 .jumbotron {
   padding: 30px;
   margin-bottom: 30px;
-  color: inherit;
-  background-color: #eeeeee;
-}
+  color: #089183;
+  background-color: rgba(238,238,238,0.9);
+ }
 .jumbotron h1,
 .jumbotron .h1 {
   color: inherit;
