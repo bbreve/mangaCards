@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<?php 
-include('AmazonWrapper.php');
-
-?>
 <html lang="en">
 <head>
   
@@ -1366,8 +1362,7 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
             </div>
             <div id="collapseOne" class="accordion-body collapse in">
               <div class="accordion-inner">
-                <?php $amazon = new AmazonWrapper('bleach', 2); 
-						$amazon -> execute();	?>
+                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
               </div>
             </div>
           </div>
@@ -1754,7 +1749,7 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
           </blockquote>
         </div>
       </div>
-	  
+    
       <!-- Panels -->
 
       <h2>Panels</h2>
