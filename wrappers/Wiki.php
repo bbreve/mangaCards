@@ -13,18 +13,17 @@
 	/* Createa a new DomDocument object */
 	$dom = new DomDocument;
 	/* Load the HTML */
-	$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Capitoli_di_Saint_Seiya_-_Next_Dimension_-_Myth_of_Hades");
+	$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Capitoli_di_One_Piece");
 	/* Create a new XPath object */
 	$xpath = new DomXPath($dom);
 	
-	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');	
-	$number = 10;
+	
+	$number = 83;
 
 	$titles = extractTitles($titles, $number, $xpath);
-	
-	if (count($titles) != $number)
+	/*if (count($titles) != $number)
 	{
-		echo $xml->asXML();
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
 	}
 	else 
 	{
@@ -34,10 +33,16 @@
 		
 		$xml = writeVolumesXML($datesIT, $titles, $numvol, $stories, $xml);
 		echo $xml->asXML();
-	}
+	}*/
 	
 	$nameChapters = extractNameChapters($nameChapters, $number, $xpath);
 	$numChapters = extractNumChapters($numChapters, $number, $xpath);
+	
+	//var_dump(count($nameChapters)." ".count($numChapters));
+	
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_chapters></list_chapters>');	
+	$xml = writeChaptersXML($nameChapters, $numChapters, $xml);
+	echo $xml->asXML();
 	
 	function writeVolumesXML($datesIT, $titles, $numvol, $stories, $xml)
 	{
@@ -51,6 +56,19 @@
 			
 			if (count($stories) > 0)
 				$prodotto->addChild("story", $stories[$i]);
+		}
+		
+		return $xml;
+	}
+	
+	function writeChaptersXML($nameChapters, $numChapters, $xml)
+	{
+		for ($i = 0; $i < count($numChapters); $i++)
+		{
+			$capitolo = $xml->addChild("chapter");
+			
+			$capitolo->addChild("title", $nameChapters[$i]);
+			$capitolo->addChild("number", $numChapters[$i]);
 		}
 		
 		return $xml;
@@ -164,12 +182,18 @@
 			{
 				$arrays = explode("(", $node->nodeValue);
 				$arrays1 = explode(". ", $arrays[0]);
-				if (count($arrays1) == 2)
-					$nameChapters[] = trim($arrays1[1]);
-				else $nameChapters[] = trim($arrays1[0]);
+				if (count($arrays1) >= 2)
+				{
+					$string = "";
+					for ($i = 1; $i < count($arrays1); $i++)
+						$string = $string.trim($arrays1[$i])." ";
+
+					$nameChapters[] = trim($string);
+				}
 			}
 		}
 		
+		//var_dump($nameChapters);
 		return $nameChapters;
 	}
 	
@@ -227,7 +251,7 @@
 				switch($current_date[0])
 				{
 					case "1" : $current_date[0] = "01"; break;
-					case "1º": $current_date[0] = "01"; break;
+					case "1ยบ": $current_date[0] = "01"; break;
 					case "2" : $current_date[0] = "02"; break;
 					case "3" : $current_date[0] = "03"; break;
 					case "4" : $current_date[0] = "04"; break;
