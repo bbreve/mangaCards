@@ -13,17 +13,17 @@
 	/* Createa a new DomDocument object */
 	$dom = new DomDocument;
 	/* Load the HTML */
-	$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Capitoli_di_One_Piece");
+	$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Capitoli_di_Naruto");
 	/* Create a new XPath object */
 	$xpath = new DomXPath($dom);
 	
-	
-	$number = 83;
+	$number = 73;
 
 	$titles = extractTitles($titles, $number, $xpath);
-	/*if (count($titles) != $number)
+	if (count($titles) != $number)
 	{
 		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
+		$xml->asXML();
 	}
 	else 
 	{
@@ -31,18 +31,20 @@
 		$numvol = extractNumvol($numvol, $number, $xpath);
 		$stories = extractStories($stories, $number, $xpath);
 		
+		//var_dump($titles);
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
 		$xml = writeVolumesXML($datesIT, $titles, $numvol, $stories, $xml);
-		echo $xml->asXML();
-	}*/
+		//echo $xml->asXML();
+	}
 	
 	$nameChapters = extractNameChapters($nameChapters, $number, $xpath);
 	$numChapters = extractNumChapters($numChapters, $number, $xpath);
 	
-	//var_dump(count($nameChapters)." ".count($numChapters));
+	//var_dump(count($numChapters)." ".count($nameChapters));
 	
-	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_chapters></list_chapters>');	
-	$xml = writeChaptersXML($nameChapters, $numChapters, $xml);
-	echo $xml->asXML();
+	$xml2 = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_chapters></list_chapters>');	
+	$xml2 = writeChaptersXML($nameChapters, $numChapters, $xml2);
+	echo $xml2->asXML();
 	
 	function writeVolumesXML($datesIT, $titles, $numvol, $stories, $xml)
 	{
@@ -68,7 +70,10 @@
 			$capitolo = $xml->addChild("chapter");
 			
 			$capitolo->addChild("title", $nameChapters[$i]);
-			$capitolo->addChild("number", $numChapters[$i]);
+			
+			if (is_numeric($numChapters[$i]) == FALSE)
+				$capitolo->addChild("speciale");	
+			else $capitolo->addChild("number", $numChapters[$i]);
 		}
 		
 		return $xml;
@@ -188,12 +193,14 @@
 					for ($i = 1; $i < count($arrays1); $i++)
 						$string = $string.trim($arrays1[$i])." ";
 
+					//echo trim($string)."<br />";
 					$nameChapters[] = trim($string);
 				}
+				else $nameChapters[] = trim($arrays1[0]);
 			}
 		}
 		
-		//var_dump($nameChapters);
+		
 		return $nameChapters;
 	}
 	
@@ -208,9 +215,15 @@
 				$arrays = explode("(", $node->nodeValue);
 				$arrays1 = explode(". ", $arrays[0]);
 				if (is_numeric($arrays1[0]) == FALSE && stripos($arrays1[0], "Special") === false)
+				{
+					//echo strval($count)."<br />";
 					$numChapters[] = strval($count);
-				else $numChapters[] = trim($arrays1[0]);
-				
+				}
+				else 
+				{
+					//echo trim($arrays1[0])."<br />";
+					$numChapters[] = trim($arrays1[0]);
+				}
 				$count += 1;
 			}
 		}
