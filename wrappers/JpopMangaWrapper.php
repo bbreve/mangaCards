@@ -1,9 +1,11 @@
 <?php
 include 'FunctionsJpop.php';
+header("Content-type: text/xml");
 function creaPagina($url,$search){
 
 $numUltimapagina=RitornaButtonPagine($url);
-$ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><prodotti></prodotti>');
+$ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
+header("Content-type: text/xml");
 if($numUltimapagina !=0){
 
 for($i=1;$i<=$numUltimapagina;$i++){
@@ -17,14 +19,14 @@ for($i=1;$i<=$numUltimapagina;$i++){
 	$PaginaDettaglio=ritornaLinkPagina($newUrl);
 for($l=0;$l<count($immagini); $l++){
 	if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false){
-    $user=$ReturnXml->addChild('prodotto');
-	$user->addChild('nome', trim($PaginaDettaglio['Titoli'][$l]));
-	$user->addChild('prezzo', trim($prezzi[$l]));
-	$user->addChild('autore', trim($PaginaDettaglio['Autori'][$l]));
-	$user->addChild('disponibilita', trim($PaginaDettaglio['Disponibilita'][$l]));
-	$user->addChild('immagine', trim($immagini[$l]));
-	$user->addChild('link_acquisto', trim($PaginaDettaglio['Links'][$l]));
-	$user->addChild('dettagli', trim($PaginaDettaglio['Riassunto'][$l]));
+		$user=$ReturnXml->addChild('product');
+    $user->addChild('name', trim($PaginaDettaglio['Titoli'][$l]));
+	$user->addChild('product_type', "Manga");
+	$user->addChild('price', trim($prezzi[$l]));
+	$user->addChild('author', trim($PaginaDettaglio['Autori'][$l]));
+	$user->addChild('image', trim($immagini[$l]));
+	$user->addChild('link', trim($PaginaDettaglio['Links'][$l]));
+	$user->addChild('details', trim($PaginaDettaglio['Riassunto'][$l]));
 	
 	
 	
@@ -52,14 +54,14 @@ for($l=0;$l<count($immagini); $l++){
 	$PaginaDettaglio=ritornaLinkPagina($url);
 for($l=0;$l<count($immagini); $l++){
    if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false){
-	   $user=$ReturnXml->addChild('prodotto');
-	$user->addChild('nome', trim($PaginaDettaglio['Titoli'][$l]));
-	$user->addChild('prezzo', trim($prezzi[$l]));
-	$user->addChild('autore', trim($PaginaDettaglio['Autori'][$l]));
-	$user->addChild('disponibilita', trim($PaginaDettaglio['Disponibilita'][$l]));
-	$user->addChild('immagine', trim($immagini[$l]));
-	$user->addChild('link_acquisto', trim($PaginaDettaglio['Links'][$l]));
-	$user->addChild('dettagli', trim($PaginaDettaglio['Riassunto'][$l]));
+	   $user=$ReturnXml->addChild('product');
+	$user->addChild('name', trim($PaginaDettaglio['Titoli'][$l]));
+	$user->addChild('product_type', "Manga");
+	$user->addChild('price', trim($prezzi[$l]));
+	$user->addChild('author', trim($PaginaDettaglio['Autori'][$l]));
+	$user->addChild('image', trim($immagini[$l]));
+	$user->addChild('link', trim($PaginaDettaglio['Links'][$l]));
+	$user->addChild('details', trim($PaginaDettaglio['Riassunto'][$l]));
 	   
 	   /*
     <div  align="center">
