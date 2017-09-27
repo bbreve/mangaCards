@@ -3,7 +3,7 @@ libxml_use_internal_errors(true);
 /* Createa a new DomDocument object */
 $dom = new DomDocument;
 /* Load the HTML */
-$dom->loadHTMLFile("https://it.wikipedia.org/wiki/My_Hero_Academia");
+$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Uomo_Ragno");
 /* Create a new XPath object */
 header("Content-type: text/xml");
 $xpath = new DomXPath($dom);
@@ -19,10 +19,25 @@ $prova=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sino
 $numeroTankobon=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]]");
 
 for($i=1;$i<=$numeroTankobon->length;$i++){
-	$nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[th/i][1]");
-	$autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[1]/td//text()");
-	if($autore->length==0){
+	//Vedere toradora per controllo nome
+	
+	$ControlloAutore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[1]/td//text()");
+	//Questo controllo serve per vedere se sotto la scrittura manga della tabella ho gli autori o il nome del manga, se ho il titolo, allora gli autori sono al di sotto del titolo.
+	if($ControlloAutore->length==0){
+		$nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[th/i][1]");
+		$autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[2]/td/a");
+		//Questo controllo serve per vedere se ci i tag a sono assenti dalla sezione autori e quindi bisogna prendere il testo contentuto nel tag td.
+		if($autore->length==0)
 		$autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[2]/td//text()");
+	
+	}else{
+		$nomeProdotto=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_testata']/th/i");
+		$autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[1]/td/a");
+		//Questo controllo serve per vedere se ci i tag a sono assenti dalla sezione autori e quindi bisogna prendere il testo contentuto nel tag td.
+		if($autore->length==0)
+		$autore=$ControlloAutore;
+		
+		
 	}//faccio questa cosa con gli autori perchè nella tabella ci sono casi in cui sotto la scritta manga abbiamo il nome del manga e non l'autore, quindi devo andare sul secondo tr
 	$numVolumiJp=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/td/text()");
 	$editoriIt=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/following-sibling::tr[contains(th,'Editore') and th[contains(span,'it')]][1]/td//text()");
@@ -49,7 +64,8 @@ for($i=1;$i<=$numeroTankobon->length;$i++){
   // echo "<p>Volumi it. : ".trim($numVolumiItalia[0]->nodeValue)."</p>";
   $user->addChild('volumes_jp', trim($numVolumiJp[0]->nodeValue));
     if($numVolumiIt->length!=0){
-       $user->addChild('volumes_it', trim($numVolumiIt[0]->nodeValue));
+		$nnome=explode(" ",trim($numVolumiIt[0]->nodeValue));
+       $user->addChild('volumes_it', $nnome[0]);
     }else{
 	  $user->addChild('volumes_it', trim($numVolumiJp[0]->nodeValue));
     }
