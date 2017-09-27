@@ -4,7 +4,7 @@
     
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
     
-    <title>MangaCards</title>
+    <title>Manga Cards</title>
     
     <link href='https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900' rel='stylesheet' type='text/css'>
 	<link href="assets/css/theme/style.css" rel="stylesheet" type="text/css" media="all" />
@@ -49,26 +49,27 @@
 									<p style="font-weight:bold; text-align:center">Cerca informazioni sui tuoi manga e comics preferiti e confronta i prezzi!</p>
 								</div>
 							</div> 
-							<div class="agile-row">
-							  <div> 
-								<div class="input-group">
-								  <div class="input-group-btn">
-									<button type="button" id="typeButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Manga <span class="caret"></span></button>
-									<ul class="dropdown-menu">
-									  <li><a href="javascript:changeType('Manga');">Manga</a></li>
-									  <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>
-									</ul>
-								  </div><!-- /btn-group -->
-								  <input id="title" type="text" class="form-control" placeholder="Inserisci il titolo del manga">
-								</div><!-- /input-group -->
-							  </div>
-							  <div class="agile-row">
-								<div style="text-align: center;">
-									<a class="btn btn-primary btn-lg" href="#">Cerca</a>
+							<form id="main" action="info.php" method="post">
+								<div class="agile-row">
+								  <div> 
+									<div class="input-group">
+									  <div class="input-group-btn">
+										<button type="button" id="typeButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Manga <span class="caret"></span></button>
+										<ul class="dropdown-menu">
+										  <li><a href="javascript:changeType('Manga');">Manga</a></li>
+										  <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>
+										</ul>
+									  </div><!-- /btn-group -->
+									  <input id="title" name="title" type="text" class="form-control" placeholder="Inserisci il titolo del manga">
+									</div><!-- /input-group -->
+								  </div>
+								  <div class="agile-row">
+									<div style="text-align: center;">
+										<a class="btn btn-primary btn-lg btn-search">Cerca</a>
+									</div>
+								  </div>
 								</div>
-							  </div>
-							</div>
-							
+							</form>
 							<div class="agile-row">
 							<footer class="text-center">
 								<div class="credits">
@@ -106,6 +107,12 @@
 
       }
     </script>
+    <script>
+    	$(".btn-search").click(function(){
+    		console.log("CLicked");
+    		$("form#main").submit();
 
+    	});
+    </script>
   </body>
 </html>
