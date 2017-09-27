@@ -85,7 +85,7 @@ else{
         	   $editors->addChild('editor', trim($node->nodeValue));
 
         	   }
-			   $user->addChild('link_immagine',"https:".trim($immagine[0]->nodeValue));
+			   $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
 
         	   /* foreach ($editoreIt as $node){ 
 
@@ -203,7 +203,7 @@ function create_XML($ReturnXml, $xpath)
 
         }
          
-		 $user->addChild('link_immagine',"https:".trim($immagine[0]->nodeValue));
+		 $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
 		 
     }
 
