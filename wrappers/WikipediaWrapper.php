@@ -73,16 +73,19 @@ else{
         	 $editore=$xpath->query("//table[@class='sinottico'][1]//tr[th[.='Editore']]/td//text()");
 
         	 // $editoreIt=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Editore') and th[contains(span,'it')]]/td//text()");
+			 $immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
 
         	  $user=$ReturnXml->addChild('comic');
+			  $editors=$user->addChild('editors');
 
         	   $user->addChild('name', trim($nomeProdotto[0]->nodeValue));
 
         	   foreach ($editore as $node){ 
 
-        	    $user->addChild('editor', trim($node->nodeValue));
+        	   $editors->addChild('editor', trim($node->nodeValue));
 
         	   }
+			   $user->addChild('link_immagine',"https:".trim($immagine[0]->nodeValue));
 
         	   /* foreach ($editoreIt as $node){ 
 
@@ -145,9 +148,12 @@ function create_XML($ReturnXml, $xpath)
 
         $numVolumiIt=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/following-sibling::tr[contains(th,'Volumi') and th[contains(span,'it')]][1]/td/text()");
 
+		$immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
         
 
         $user=$ReturnXml->addChild('manga');
+		$editors=$user->addChild('editors');
+	    $authors=$user->addChild('authors');
 
      foreach ($nomeProdotto as $node){
 
@@ -163,7 +169,7 @@ function create_XML($ReturnXml, $xpath)
 
        //echo "<p>Autore: ".trim($node->nodeValue)."</p>";
 
-       $user->addChild('author', trim($node->nodeValue));
+       $authors->addChild('author', trim($node->nodeValue));
 
      }
 
@@ -175,7 +181,7 @@ function create_XML($ReturnXml, $xpath)
 
          //echo "<p>Editore: ".trim($node->nodeValue)."</p>";
 
-         $user->addChild('editor', trim($node->nodeValue));
+         $editors->addChild('editor', trim($node->nodeValue));
 
        
 
@@ -196,7 +202,9 @@ function create_XML($ReturnXml, $xpath)
           $user->addChild('volumes_it', trim($numVolumiJp[0]->nodeValue));
 
         }
-
+         
+		 $user->addChild('link_immagine',"https:".trim($immagine[0]->nodeValue));
+		 
     }
 
     return $ReturnXml;
