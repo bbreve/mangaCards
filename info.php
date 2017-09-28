@@ -6,16 +6,7 @@
   $page_info = ob_get_clean(); 
   $work_info = simplexml_load_string($page_info);
 
-  ob_start();
-  $number = $work_info->work->volumes_it;
-  require __DIR__.'\wrappers\Wiki.php';
-  $volumes_wrapper_info = ob_get_clean(); 
-  $volumes_info = simplexml_load_string($volumes_wrapper_info);
-
-  echo '<pre>';
-  print_r($number);
-  print_r($volumes_info);
-  echo '</pre>';
+ 
 
 ?>
 <!DOCTYPE html>
@@ -143,7 +134,7 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
  </div>
 
   <footer class="text-center">
-    <p>&copy; work Cards</p>
+    <p>&copy; Manga Cards</p>
   </footer>
 
   <!-- Main Scripts-->

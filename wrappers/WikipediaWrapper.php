@@ -20,6 +20,7 @@ $xpath = new DomXPath($dom);
 
 $numeroManga=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_divisione' and th[.='Manga']]");
 
+searchForVolumes($xpath);
 
 
 $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
@@ -41,6 +42,8 @@ else{
 
             $xpath = new DomXPath($dom);
 
+
+            searchForVolumes($xpath);
             /* Query all <td> nodes containing specified class name */
 
             $numeroManga=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_divisione' and th[.='Manga']]");
@@ -80,12 +83,14 @@ else{
 
         	   foreach ($editore as $node){ 
 
-        	   $editors->addChild('editor', trim($node->nodeValue));
+        	       $editors->addChild('editor', trim($node->nodeValue));
 
         	   }
+
 			   if($immagine->length!=0){
 	              $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
-	          }else{
+	           }
+                else{
 		           $user->addChild('link_image',"");
 	                }
         	   /* foreach ($editoreIt as $node){ 
@@ -109,7 +114,6 @@ else{
 
 
 function create_XML($ReturnXml, $xpath)
-
 {
 
      // vedo se ci sono all'interno delle caselle manga quelli che hanno il titolo sotto, e si trovano nella prima posizione
@@ -196,7 +200,8 @@ function create_XML($ReturnXml, $xpath)
 
         if($numVolumiIt->length!=0){
 
-           $user->addChild('volumes_it', trim($numVolumiIt[0]->nodeValue));
+           $nnome=explode(" ",trim($numVolumiIt[0]->nodeValue));
+           $user->addChild('volumes_it', $nnome[0]);
 
         }else{
 
@@ -204,15 +209,25 @@ function create_XML($ReturnXml, $xpath)
 
         }
          
-		  if($immagine->length!=0){
-	              $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
-	          }else{
-		           $user->addChild('link_image',"");
-	                }
+		if($immagine->length!=0){
+	        $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
+	    }
+        else{
+		  $user->addChild('link_image',"");
+	    }
     }
 
     return $ReturnXml;
 
 }
+
+function searchForVolumes($xpath)
+    {
+        echo 'HELLO';
+        $test = $xpath->query('//a[contains(@href, "Capitoli")]');
+        echo '<pre>';
+        print_r($test);
+        echo '</pre>';
+    }
 
 ?>
