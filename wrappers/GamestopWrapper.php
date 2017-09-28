@@ -1,6 +1,8 @@
 <?php 
 	include "curl.php";
 	
+	header("Content-type: application/xml");
+	
 	//Platform 10 PC
 	//Platform 27 PS4
 	//Platform 18 PSVITA
@@ -28,7 +30,7 @@
 	$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
 
 	$images = extractImages($images, $ch2);
-	$links = extractLink($links, $url, $ch2);	
+	$links = extractLink($links, $ch2);	
 	$names = extractNames($names, $ch2);
 	$pDates = extractDates($pDates, $ch2);
 	$producers = extractProducers($producers, $ch2);
@@ -43,7 +45,7 @@
 	$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
 
 	$images = extractImages($images, $ch2);
-	$links = extractLink($links, $url, $ch2);	
+	$links = extractLink($links, $ch2);	
 	$pDates = extractDates($pDates, $ch2);
 	$names = extractNames($names, $ch2);
 	$producers = extractProducers($producers, $ch2);
@@ -58,7 +60,7 @@
 	$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
 
 	$images = extractImages($images, $ch2);
-	$links = extractLink($links, $url, $ch2);	
+	$links = extractLink($links, $ch2);	
 	$names = extractNames($names, $ch2);
 	$producers = extractProducers($producers, $ch2);
 	$platforms = extractPlatform($platforms, $ch2);
@@ -73,7 +75,7 @@
 	$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
 
 	$images = extractImages($images, $ch2);
-	$links = extractLink($links, $url, $ch2);	
+	$links = extractLink($links, $ch2);	
 	$names = extractNames($names, $ch2);
 	$producers = extractProducers($producers, $ch2);
 	$platforms = extractPlatform($platforms, $ch2);
@@ -88,7 +90,7 @@
 	$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
 
 	$images = extractImages($images, $ch2);
-	$links = extractLink($links, $url, $ch2);	
+	$links = extractLink($links, $ch2);	
 	$names = extractNames($names, $ch2);
 	$infos = extractInfo($infos, $ch2);
 	$producers = extractProducers($producers, $ch2);
@@ -97,8 +99,34 @@
 	$type = extractType($type, $ch2);	
 	$pDates = extractDates($pDates, $ch2);	
 	
-	$xml = writeXML($images, $links, $names, $prices, $infos, $platforms, $producers, $type, $pDates);
-	var_dump($xml);
+	//var_dump(count($images)." ".count($links)." ".count($names)." ".count($infos)." ".count($producers)." ".count($platforms)." ".count($prices)." ".count($type)." ".count($pDates));
+	
+	//Dichiaro l'XML di ritorno
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
+	$xml = writeXML($images, $links, $names, $prices, $infos, $platforms, $producers, $type, $pDates, $xml);
+	echo $xml->asXML();
+	
+	function writeXML($images, $links, $names, $prices, $infos, $platforms, $producers, $type, $pDates, $xml)
+	{					
+			
+			for ($n = 0; $n < count($links); $n++)
+			{
+				$prodotto = $xml->addChild("product");
+				
+				$prodotto->addChild("name", $names[$n]);
+				$prodotto->addChild("platform", $platforms[$n]);
+				$prodotto->addChild("producer", $producers[$n]);
+				$prodotto->addChild("product_type", "Videogioco");
+				$prodotto->addChild("price", $prices[$n]);
+				$prodotto->addChild("date", $pDates[$n]);
+				$prodotto->addChild("info_extra", $infos[$n]);
+				$prodotto->addChild("purchase_type", $type[$n]);
+				$prodotto->addChild("image", $images[$n]);
+				$prodotto->addChild("link", $links[$n]);
+			}
+			
+			return $xml;
+	}
 	
 	function extractImages($images, $ch2)
 	{
@@ -114,11 +142,16 @@
 			return $images;
 	}
 	
-	function extractLink($links, $url, $ch2)
+	function extractLink($links, $ch2)
 	{
-			$res = $ch2->returnData('//div[@class="singleProduct" and div/p/a/span/strong != "Prenotalo" and contains(div/p/a/@class, "cartAddNoRadio")]//div[@class="singleProdInfo"]//h3/a');
+			$res = $ch2->returnData('//div[@class="singleProduct" and div/p/a/span/strong != "Prenotalo" and contains(div/p/a/@class, "cartAddNoRadio")]//div[@class="singleProdInfo"]//h3/a/@href');
 			foreach ($res as $curr)
-				$links[] = $url;
+			{
+				$string = $curr->nodeValue;
+				if ($string == "" || $string == " " || $string == NULL)
+					$links[] = "";
+				else $links[] = trim("http://www.gamestop.it".$curr->nodeValue);
+			}
 			
 			return $links;
 	}
@@ -223,20 +256,5 @@
 			return $type;
 	}
 	
-	function writeXML($images, $links, $names, $prices, $infos, $platforms, $producers, $type, $pDates)
-	{
-			//Dichiaro l'XML di ritorno
-			$xml = '<?xml version="1.0"><list_products>';
-			
-			$len = count($links);
-			
-			for ($n = 0; $n < $len; $n++)
-			{
-				$xml = $xml.'<product><name>'.$names[$n].'</name><platform>'.$platforms[$n].'</platforms><producer>'.$producers[$n].'</producer>';
-				$xml = $xml.'<price>'.$prices[$n].'</price><date>'.$pDates[$n].'</date><info_extra>'.$infos[$n].'</info><purchaseType>'.$type[$n].'</publication_date><image>'.$images[$n].'</image><link>'.$links[$n].'</link></product>';
-			}
-			
-			$xml = $xml.'</list_products>';	
-			return $xml;
-	}
+	
 ?>

@@ -1,18 +1,22 @@
 <?php
 	include "curl.php";
+	
+	header("Content-type: application/xml");
 
 	//Dichiaro gli array per le informazioni
 	$editions = array();
 	$images = array();
 	$links = array();
 	$names = array();
+	$numvol = array();
 	$prices = array();
 	$specials = array();
 	$pDates = array();
 	
 	//Parametri di ricerca
 	$search = "bleach";
-
+	$prod = "Comic";
+	
 	$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=1&q=".urlencode($search);
 	$ch1 = new CurlExecution($url);	//crei l'esecutore dello scraper
 
@@ -20,8 +24,8 @@
 	$res1 = $ch1->returnData('//div[@class="text-center"]');      //estrai dati usando un XPATH
 	
 	//Dichiaro l'XML di ritorno
-	$xml = '<?xml version="1.0"><list_products>';
-			
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');			
+	
 	if ($res1->length != 0)
 	{
 		//Ottengo il numero di pagine della ricerca
@@ -45,17 +49,44 @@
 			$editions = extractEdition($editions, $ch2);
 			$links = extractLink($links, $ch2);	
 			$names = extractNames($names, $ch2);
+			$numvol = extractNumber($numvol, $ch2);
 			$prices = extractPrices($prices, $ch2);
 			$pDates = extractDates($pDates, $ch2);
 			$specials = extractSpecials($specials, $ch2);
+			
 		}
 		
-		$xml = $xml.writeXML($images, $links, $names, $prices, $specials, $pDates, $editions, $search);
+		$xml = writeXML($images, $links, $names, $prices, $specials, $pDates, $editions, $numvol, $prod, $search, $xml);
 	}
 	
-	$xml = $xml.'</list_products>';	
 	//var_dump(count($images)." ".count($links)." ".count($names)." ".count($prices)." ".count($specials)." ".count($pDates)." ".count($editions));
-	var_dump($xml);
+	echo $xml->asXML();
+	
+	function writeXML($images, $links, $names, $prices, $specials, $pDates, $editions, $numvol, $prod, $search, $xml)
+	{
+			for ($n = 0; $n < count($links); $n++)
+			{
+				//echo $n." ".$names[$n]." ".$search."<br />";
+				if (stripos($names[$n], $search) === false)
+					continue;
+				$prodotto = $xml->addChild("product");
+				
+				$prodotto->addChild("name", $names[$n]);
+				$prodotto->addChild("product_type", $prod);
+				$prodotto->addChild("volume_number", $numvol[$n]);
+				
+				if ($editions[$n] <> "Edizione originale")
+					$prodotto->addChild("edition", $editions[$n]);
+				
+				$prodotto->addChild("old_price", $prices[$n]);
+				$prodotto->addChild("curr_price", $specials[$n]);
+				$prodotto->addChild("date", $pDates[$n]);
+				$prodotto->addChild("image", $images[$n]);
+				$prodotto->addChild("link", $links[$n]);
+			}
+			
+			return $xml;
+	}
 	
 	function extractImages($images, $ch2)
 	{
@@ -124,6 +155,37 @@
 			}
 			
 			return $names;
+	}
+	
+	function extractNumber($numvol, $ch2)
+	{
+			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//h3/a/text()');
+			foreach ($res as $curr)
+			{
+				$string = trim($curr->nodeValue);
+				if ($string == "" || $string == " " || $string == NULL)
+					continue;
+				else 
+				{
+					$arrays = explode(" ", $string);
+					$numvol[] = intval($arrays[count($arrays)-1]);
+				}
+			}
+			
+			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//h3/a/text()');
+			foreach ($res as $curr)
+			{
+				$string = trim($curr->nodeValue);
+				if ($string == "" || $string == " " || $string == NULL)
+					continue;
+				else
+				{
+					$arrays = explode(" ", $string);
+					$numvol[] = intval($arrays[count($arrays)-1]);
+				}
+			}
+			
+			return $numvol;
 	}
 	
 	function extractPrices($prices, $ch2)
@@ -234,28 +296,5 @@
 			}
 			
 			return $editions;
-	}
-	
-	function writeXML($images, $links, $names, $prices, $specials, $pDates, $editions, $search)
-	{
-			$xml = "";
-			
-			for ($n = 0; $n < count($links); $n++)
-			{
-				//echo $n." ".$names[$n]." ".$search."<br />";
-				if (stripos($names[$n], $search) === false)
-					continue;
-				
-				$xml = $xml.'<product><name>'.$names[$n].'</name>';
-				
-				if ($editions[$n] <> "Edizione originale")
-					$xml = $xml.'<edition>'.$editions[$n].'</edition>';
-				
-				$xml = $xml.'<prices>'.$prices[$n].'</prices>';
-				$xml = $xml.'<current_price>'.$specials[$n].'</current_price><publication_date>'.$pDates[$n].'</publication_date>';
-				$xml = $xml.'<image>'.$images[$n].'</image><link>'.$links[$n].'</link></product>';
-			}
-			
-			return $xml;
 	}
 ?>	

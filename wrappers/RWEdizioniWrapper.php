@@ -1,5 +1,7 @@
 <?php 
 	include "curl.php";
+	
+	header("Content-type: application/xml");
 
 	//Dichiaro gli array per le informazioni
 	$images = array();
@@ -61,8 +63,10 @@
 		$series = extractSeries($series, $ch2);
 	}
 	
-	$xml = writeXML($images, $links, $names, $prices, $availables, $pDates, $authors, $imprints, $collections, $series);
-	var_dump($xml);
+	//Dichiaro l'XML di ritorno
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
+	$xml = writeXML($images, $links, $names, $prices, $availables, $pDates, $authors, $imprints, $collections, $series, $xml);
+	echo $xml->asXML();
 	
 	function extractImages($images, $ch2)
 	{
@@ -190,33 +194,34 @@
 			return $series;
 	}
 	
-	function writeXML($images, $links, $names, $prices, $availables, $pDates, $authors, $imprints, $collections, $series)
+	function writeXML($images, $links, $names, $prices, $availables, $pDates, $authors, $imprints, $collections, $series, $xml)
 	{
-			//Dichiaro l'XML di ritorno
-			$xml = '<?xml version="1.0"><list_products>';
-			
-			$len = count($links);
-			
-			for ($n = 0; $n < $len; $n++)
+			for ($n = 0; $n < count($links); $n++)
 			{
-				$xml = $xml.'<product><name>'.$names[$n].'</name><series>'.$series[$n].'</series>';
+				$prodotto = $xml->addChild("product");
+				
+				$prodotto->addChild("name", $names[$n]);
+				$prodotto->addChild("product_type", "Comic");
+				$prodotto->addChild("editorial_series", $series[$n]);
 			
 				if ($collections[$n] <> "")
-					$xml = $xml.'<collection>'.$collections[$n].'</collections>';
+					$prodotto->addChild("collection", $collections[$n]);
 		
 				if ($imprints[$n] <> "")
-					$xml = $xml.'<imprint>'.$imprints[$n].'</imprint>';
+					$prodotto->addChild("imprint", $imprints[$n]);
 		
 				if ($authors[$n] <> "")
-					$xml = $xml.'<authors>'.$authors[$n].'</authors>';
+					$prodotto->addChild("authors", $authors[$n]);
 			
-				$xml = $xml.'<price>'.$prices[$n].'</price>';
+				$prodotto->addChild("price", $prices[$n]);
 				
 				if ($pDates[$n] <> "")
-					$xml = $xml.'<publication_date>'.$pDates[$n].'</publication_date><image>'.$images[$n].'</image><link>'.$links[$n].'</link></product>';
+					$prodotto->addChild("date", $pDates[$n]);
+				
+				$prodotto->addChild("image", $images[$n]);
+				$prodotto->addChild("link", $links[$n]);
 			}
 			
-			$xml = $xml.'</list_products>';	
 			return $xml;
 	}
 	
@@ -227,7 +232,7 @@
 				return "";
 			else {
 				$current_date = explode(" ", $string);
-				switch($current_date[1])
+				switch($current_date[0])
 				{
 					case "1" : $current_date[0] = "01"; break;
 					case "2" : $current_date[0] = "02"; break;

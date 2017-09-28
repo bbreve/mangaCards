@@ -1,9 +1,12 @@
 <?php
 
+	header("Content-type: application/xml");
+	
 	$datesIT = array();
 	$numvol = array();
 	$numChapters = array();
 	$nameChapters = array();
+	$volChapters = array();
 	$stories = array();
 	$titles = array();
 	
@@ -11,61 +14,127 @@
 	/* Createa a new DomDocument object */
 	$dom = new DomDocument;
 	/* Load the HTML */
-	$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Capitoli_di_Dragon_Ball");
+	$url = "https://it.wikipedia.org/wiki/Capitoli_di_Bleach";
+	$dom->loadHTMLFile($url);
 	/* Create a new XPath object */
 	$xpath = new DomXPath($dom);
 	
-	$xml = "";
+	$series = "One Piece";
 	
-	$titles = extractTitles($titles, 83, $xpath);
-	print_r($titles);
-	if (count($titles) != 83)
+	$num_manga = 1;
+	
+	if (stripos($url, "Capitoli") !== FALSE)
+		$format_page = 1;
+	else $format_page = 2;
+	
+	$number = 73;
+	$numberJ = 74;
+	
+	extractTitles();
+	extractDatesIt();
+	extractNumvol();
+	
+	/*var_dump($titles);
+	echo "<br />";
+	var_dump(count($titles));
+	echo "<br />";
+	var_dump($datesIT);
+	echo "<br />";
+	var_dump(count($datesIT));
+	echo "<br />";
+	var_dump($numvol);
+	echo "<br />";
+	var_dump(count($numvol));
+	echo "<br />";*/
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
+	//$xml->addChild("io", count($numvol));
+	//$xml->addChild("io", count($datesIT));
+	//$xml->addChild("io", count($titles));
+	if (count($titles) == $number && count($datesIT) == $number && count($numvol) == $number)
 	{
-		$xml = "<?xml version='1.0'><list_series></list_series>";
+		
+		extractVolChapters();
+		extractStories();
+		//$xml->addChild("Ciao");
+		writeVolumesXML();
 	}
-	else 
-	{
-		$datesIT = extractDatesIt($datesIT, 83, $xpath);
-		$numvol = extractNumvol($numvol, 83, $xpath);
-		$stories = extractStories($stories, 83, $xpath);
-		
-		
-		//var_dump(count($datesIT)." ".count($titles)." ".count($numvol)." ".count($nameChapters)." ".count($numChapters)." ".count($stories));
-		
-		/*$xml = "<list_volumes>";
-		$xml = $xml.writeVolumesXML($datesIT, $titles, $numvol, $stories, $xml);
-		$string = new SimpleXMLElement($xml);
-		
-		$string->asXML('vol.xml');*/
-	}
 	
-	$nameChapters = extractNameChapters($nameChapters, 83, $xpath);
-	$numChapters = extractNumChapters($numChapters, 83, $xpath);
+	extractNameChapters();
+	extractNumChapters();
+	//var_dump($nameChapters);
+	//var_dump($numChapters);
+	$xml2 = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_chapters></list_chapters>');
+	//$xml2->addChild("io", count($numChapters));
+	//$xml2->addChild("io", count($nameChapters));
+	if (count($nameChapters) == count($numChapters))
+		writeChaptersXML();
 	
-	function writeVolumesXML($datesIT, $titles, $numvol, $stories, $xml)
+	echo $xml->asXML();
+	//echo $xml2->asXML();
+	
+	function writeVolumesXML()
 	{
-		$len = count($titles);
+		global $datesIT, $titles, $numvol, $stories, $volChapters, $xml;
 		
-		for ($i = 0; $i < $len; $i++)
+		for ($i = 0; $i < count($titles); $i++)
 		{
-			$xml = $xml."<volume><title>".$titles[$i]."</title>";
-			$xml = $xml."<number>".$numvol[$i]."</number>";
-			$xml = $xml."<publication_date>".$datesIT[$i]."</publication_date>";
+			$prodotto = $xml->addChild("volume");
 			
-			if (count($stories) > 0)
-				$xml = $xml."<story>".$stories[$i]."</story>";
+			$prodotto->addChild("title", $titles[$i]);
+			$prodotto->addChild("number", $numvol[$i]);
+			$prodotto->addChild("date", $datesIT[$i]);
 			
-			$xml = $xml."</volume>";
+			if (count($stories) == count($titles))
+				$prodotto->addChild("story", $stories[$i]);
+			
+			if (count($volChapters) == count($titles))
+			{
+				$list = $prodotto->addChild("chapters_list");
+				foreach ($volChapters[$i] as $node)
+					$list->addChild("chapter", trim($node->nodeValue));
+			}			
+		}
+	}
+	
+	function writeChaptersXML()
+	{
+		global $nameChapters, $numChapters, $xml2;
+		
+		for ($n = 0; $n < count($nameChapters); $n++)
+		{
+			if ($nameChapters[$n] <> "")
+			{
+				$capitolo = $xml2->addChild("chapter");
+					
+				$capitolo->addChild("title", $nameChapters[$n]);
+			
+				if (is_numeric($numChapters[$n]) == FALSE)
+					$capitolo->addChild("speciale");
+				else 
+					$capitolo->addChild("number", $numChapters[$n]);
+			}
+		}
+	}
+	
+	function extractDatesIt()
+	{
+		global $number, $datesIT, $xpath, $format_page, $num_manga, $series;
+		
+		if ($format_page == 2)
+			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");	
+		else 
+		{
+			if ($num_manga == 1)
+			{	
+				if ($series == "One Piece" || $series == "Naruto")
+					$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");
+				else
+					$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");
+			}
+			else 
+				$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");
 		}
 		
-		$xml = $xml."</list_volumes>";
-		
-		return $xml;
-	}
-	
-	function extractDatesIt($datesIT, $num, $xpath)
-	{
-		$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num."]/td[last()]/text()");
 		foreach ($query as $node)
 		{
 			if ($node == "" || $node == " " || $node == NULL)
@@ -86,14 +155,62 @@
 				
 				$datesIT[] = transformDate(trim($node->nodeValue));
 			}
-			}
-		
-		return $datesIT;
+		}
 	}
 	
-	function extractTitles($titles, $num, $xpath)
+	function extractVolChapters()
 	{
-		$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num."]//b");
+		global $volChapters, $number, $xpath, $format_page;
+		
+		if ($format_page == 2)
+			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
+		else 
+			$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
+
+		if ($query->length == 0)
+		{
+			if ($format_page == 2)
+				$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/following::tr[1]//ul");
+			else
+				$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]/following::tr[1]//ul");
+
+			if ($query->length == $number)
+			{
+				foreach ($query as $node)
+				{
+					
+					if ($node == "" || $node == " " || $node == NULL)
+						continue;
+					
+					$single_volume = $xpath->query(".//li", $node);
+					$volChapters[] = $single_volume;
+								
+				}
+			}				
+		}
+	}
+	
+	function extractTitles()
+	{
+		global $titles, $number, $numberJ, $xpath, $format_page, $series, $num_manga;
+		
+		$counter = 1;
+		
+		if ($format_page == 2)
+			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]//b");	
+		else 
+		{
+			if ($num_manga == 1)
+			{
+				if ($series == "One Piece" || $series == "Naruto")
+					$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]//b");
+				else 
+					$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]//b");
+			}
+			else 
+				$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number."]//b");
+		}	
+		
 		foreach ($query as $node)
 		{
 			if ($node == "" || $node == " " || $node == NULL)
@@ -102,21 +219,50 @@
 			if (stripos($node->nodeValue, "/") !== false)
 			{
 				$arrays = explode("/", $node->nodeValue);
-				for ($i = 0; $i < count($arrays); $i++)
+				if (is_numeric($arrays[count($arrays)-1]) == TRUE)
+					$titles[] = trim($node->nodeValue);
+				else 
 				{
-					if ($arrays[$i] == "" || $arrays[$i] == " " || $arrays[$i] == NULL)
-						continue;
-					
-					if (count($titles) > 0)
+					for ($i = 0; $i < count($arrays); $i++)
 					{
-						if (stripos($titles[count($titles)-1], $arrays[$i]) !== false || $titles[count($titles)-1] == $arrays[$i])
+						if ($arrays[$i] == "" || $arrays[$i] == " " || $arrays[$i] == NULL)
 							continue;
-					}	
 					
-					$titles[] = trim($arrays[$i]);
-				}		
+						if (count($titles) > 0)
+						{
+							if (stripos($titles[count($titles)-1], $arrays[$i]) !== false || $titles[count($titles)-1] == $arrays[$i])
+								continue;
+						}	
+					
+						$titles[] = trim($arrays[$i]);
+					}
+				}
 			}
-			else $titles[] = trim($node->nodeValue);
+			else 
+			{	
+				if ($format_page == 2)
+					$query1 = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
+				else 
+				{	
+					if ($num_manga == 1)
+						$query1 = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
+					else 
+						$query1 = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
+				}
+				
+				if ($query1->length != 0 && $query->length == $numberJ)
+				{
+					$count = count(explode(" ", $series));
+				
+					$array = explode(" ", $node->nodeValue);
+					$countT = count($array);
+
+					$titles[] = trim($series." ".$counter++);
+					$titles[] = trim($series." ".$counter++);
+				}
+				else
+					$titles[] = trim($node->nodeValue);
+			}
 		}
 		
 		
@@ -129,13 +275,22 @@
 			else if (count($arrays) == 1)
 				$titles[$i] = $arrays[0];
 		}
-		
-		return $titles;
 	}
 	
-	function extractNumvol($numvol, $num, $xpath)
+	function extractNumvol()
 	{
-		$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num." and td[2]/@rowspan > 0]/td[2]");
+		global $numvol, $number, $xpath, $format_page, $num_manga, $series;
+		
+		if ($format_page == 2)
+			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");	
+		else
+		{
+			if ($num_manga == 1)
+				$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
+			else 
+				$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
+		}
+		
 		if ($query->length != 0)
 		{
 			foreach ($query as $node)
@@ -154,16 +309,44 @@
 		}
 		else
 		{
-			$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num."]/td[1]");
+			if ($format_page == 2)
+				$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");	
+			else
+			{
+				if ($num_manga == 1)
+				{	
+					if ($series == "One Piece" || $series == "Naruto")
+						$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");
+					else
+						$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");
+				}
+				else 
+					$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");
+			}
+			
 			foreach ($query as $node)
 				$numvol[] = trim($node->nodeValue);
 		}
-		return $numvol;
 	}
 	
-	function extractNameChapters($nameChapters, $num, $xpath)
+	function extractNameChapters()
 	{
-		$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num."]/following::tr[1]//li");
+		global $nameChapters, $numberJ, $xpath, $format_page, $series, $num_manga;
+		
+		if ($format_page == 2)
+			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+		else	
+		{
+			if ($num_manga == 1)
+			{
+				if ($series == "One Piece" || $series == "Naruto")
+					$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+				else 
+					$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+			}
+			else
+				$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+		}
 		
 		if ($query->length != 0)
 		{
@@ -171,46 +354,142 @@
 			{
 				$arrays = explode("(", $node->nodeValue);
 				$arrays1 = explode(". ", $arrays[0]);
-				if (count($arrays1) == 2)
-					$nameChapters[] = trim($arrays1[1]);
+				if (count($arrays1) >= 2)
+				{
+					$string = "";
+					for ($i = 1; $i < count($arrays1); $i++)
+						$string = $string.trim($arrays1[$i])." ";
+
+					$nameChapters[] = trim($string);
+				}
 				else $nameChapters[] = trim($arrays1[0]);
 			}
 		}
 		
-		return $nameChapters;
-	}
-	
-	function extractNumChapters($numChapters, $num, $xpath)
-	{
-		$count = 1;
-		$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num."]/following::tr[1]//li");
+		$query = $xpath->query("//span[contains(string(.), 'Capitoli non ancora') and contains(@class, 'headline')]/following::ul[1]//li");
 		if ($query->length != 0)
 		{
 			foreach ($query as $node)
 			{
 				$arrays = explode("(", $node->nodeValue);
 				$arrays1 = explode(". ", $arrays[0]);
-				if (is_numeric($arrays1[0]) == FALSE && stripos($arrays1[0], "Special") === false)
-					$numChapters[] = strval($count);
-				else $numChapters[] = trim($arrays1[0]);
+				if (count($arrays1) >= 2)
+				{
+					$string = "";
+					for ($i = 1; $i < count($arrays1); $i++)
+						$string = $string.trim($arrays1[$i])." ";
+
+					$nameChapters[] = trim($string);
+				}
+				else $nameChapters[] = trim($arrays1[0]);
+			}
+		}	
+	}
+	
+	function extractNumChapters()
+	{
+		global $numChapters, $numberJ, $xpath, $format_page, $series, $num_manga;
+		
+		$count = 1;
+		if ($format_page == 2)
+			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+		else	
+		{
+			if ($num_manga == 1)
+			{
+				if ($series == "One Piece"  || $series == "Naruto")
+					$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+				else 
+					$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+			}
+			else
+				$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$numberJ."]/following::tr[1]//li");
+		}
+		
+		if ($query->length != 0)
+		{
+			foreach ($query as $node)
+			{
+				$arrays = explode("(", $node->nodeValue);
+				if (stripos($arrays[0], ".") !== FALSE)
+					$arrays1 = explode(". ", $arrays[0]);
+				else if (stripos($arrays[0], ":") !== FALSE)
+					$arrays1 = explode(": ", $arrays[0]);
 				
-				$count += 1;
+				if (stripos($arrays1[0], "Special") !== FALSE || stripos($arrays1[0], "Gaiden") !== FALSE || stripos($arrays1[0], "Extra") !== FALSE || stripos($arrays1[0], "Bonus") !== FALSE)
+					$numChapters[] = "special";
+				else
+				{
+					if (is_numeric($arrays1[0]) == FALSE)
+					{
+						$arraysF = explode(" ", $arrays1[0]);
+						if (is_numeric($arraysF[count($arraysF)-1]) == FALSE)
+							$numChapters[] = "special";
+						else 
+							$numChapters[] = $count++;
+					}
+					else 
+					{
+						$numChapters[] = $count++;
+					}
+				}
 			}
 		}
 		
-		return $numChapters;
+		$query = $xpath->query("//span[contains(string(.), 'Capitoli non ancora') and contains(@class, 'headline')]/following::ul[1]//li");
+		if ($query->length != 0)
+		{
+			foreach ($query as $node)
+			{
+				$arrays = explode("(", $node->nodeValue);
+				$arrays1 = explode(". ", $arrays[0]);
+				
+				if (stripos($arrays1[0], "Special") !== FALSE || stripos($arrays1[0], "Gaiden") !== FALSE || stripos($arrays1[0], "Extra") !== FALSE || stripos($arrays1[0], "Bonus") !== FALSE)
+					$numChapters[] = "special";
+				else
+				{
+					if (is_numeric($arrays1[0]) == FALSE)
+					{
+						$arraysF = explode(" ", trim($arrays1[0]));
+						$word = $arraysF[count($arraysF)-1];
+						if (is_numeric($word[strlen($word)-1]) == FALSE)
+						{
+							$word1 = substr($word, 0, strlen($word)-1);
+							if (is_numeric($word1) != FALSE)
+								$numChapters[] = $count++;
+							else
+								$numChapters[] = "special";
+						}
+						else
+							$numChapters[] = $count++;
+					}
+					else 
+					{
+						$numChapters[] = $count++;
+					}
+				}
+			}
+		}
 	}
-	
-	function extractStories($stories, $num, $xpath)
+
+	function extractStories()
 	{
-		$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num." and td[2]/@rowspan > 0]/td[2]");
+		global $stories, $number, $xpath, $format_page;
+		
+		if ($format_page == 2)
+			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");	
+		else 
+			$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
 		
 		//Se il volume giapponese corrisponde a quello italiano, ne estraggo la trama
 		if ($query->length == 0)
 		{
-			$query = $xpath->query("//tr[td[1] > 0 and td[1] <= ".$num."]/following::tr[2]/td[1]");
+			if ($format_page == 2)
+				$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/following::tr[2 and contains(string(.), 'Trama')]/td[1]");
+			else
+				$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]/following::tr[2 and contains(string(.), 'Trama')]/td[1]");
 		
-			if ($query->length != 0)
+			if ($query->length != 0 && $query->length == $number)
 			{
 				foreach ($query as $node)
 				{
@@ -219,8 +498,6 @@
 				}
 			}
 		}
-		
-		return $stories;
 	}
 	
 	//funzione ausiliaria per la correzione della data
@@ -230,6 +507,8 @@
 				return "";
 			else {
 				$current_date = explode(" ", $string);
+				if (count($current_date) != 3)
+					return $string;
 					
 				switch($current_date[0])
 				{
