@@ -2,7 +2,7 @@
   $title = $_POST['title'];
 
   ob_start();
-  require '\wrappers\WikipediaWrapper.php';
+  require __DIR__.'\wrappers\WikipediaWrapper.php';
   $page_info = ob_get_clean(); 
   $work_info = simplexml_load_string($page_info);
 
