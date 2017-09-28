@@ -8,7 +8,7 @@ $dom = new DomDocument;
 
 /* Load the HTML */
 
-$dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title."_(manga)");
+$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Bleach_(manga)");
 
 /* Create a new XPath object */
 
@@ -20,16 +20,15 @@ $xpath = new DomXPath($dom);
 
 $numeroManga=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_divisione' and th[.='Manga']]");
 
-searchForVolumes($xpath);
 
 
 $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
 
  if($numeroManga->length!=0 ){
 
-	$ReturnXml = create_XML($ReturnXml, $xpath);
+    $ReturnXml = create_XML($ReturnXml, $xpath);
 
-	
+    
 
 }
 
@@ -42,8 +41,6 @@ else{
 
             $xpath = new DomXPath($dom);
 
-
-            searchForVolumes($xpath);
             /* Query all <td> nodes containing specified class name */
 
             $numeroManga=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_divisione' and th[.='Manga']]");
@@ -61,47 +58,42 @@ else{
             else
             {
 
-        	   if($xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td")->length==0){
+               if($xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td")->length==0){
 
-        	       $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
+                   $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
 
-        	   }else{
+               }else{
 
-        		   $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td");
+                   $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td");
 
-        	   }
+               }
 
-        	 $editore=$xpath->query("//table[@class='sinottico'][1]//tr[th[.='Editore']]/td//text()");
+             $editore=$xpath->query("//table[@class='sinottico'][1]//tr[th[.='Editore']]/td//text()");
 
-        	 // $editoreIt=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Editore') and th[contains(span,'it')]]/td//text()");
-			 $immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
+             // $editoreIt=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Editore') and th[contains(span,'it')]]/td//text()");
+             $immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
 
-        	  $user=$ReturnXml->addChild('work');
-			  $editors=$user->addChild('editors');
+              $user=$ReturnXml->addChild('work');
+              $editors=$user->addChild('editors');
 
-        	   $user->addChild('name', trim($nomeProdotto[0]->nodeValue));
+               $user->addChild('name', trim($nomeProdotto[0]->nodeValue));
 
-        	   foreach ($editore as $node){ 
+               foreach ($editore as $node){ 
 
-        	       $editors->addChild('editor', trim($node->nodeValue));
+               $editors->addChild('editor', trim($node->nodeValue));
 
-        	   }
+               }
+               $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
 
-			   if($immagine->length!=0){
-	              $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
-	           }
-                else{
-		           $user->addChild('link_image',"");
-	                }
-        	   /* foreach ($editoreIt as $node){ 
+               /* foreach ($editoreIt as $node){ 
 
-        	    $user->addChild('editore_it', trim($node->nodeValue));
+                $user->addChild('editore_it', trim($node->nodeValue));
 
-        	   }*/
+               }*/
 
             }
 
-        	 
+             
 
  }
 
@@ -129,36 +121,36 @@ function create_XML($ReturnXml, $xpath)
     for($i=1;$i<=$numeroTankobon->length;$i++){
 
         $ControlloAutore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[1]/td//text()");
-	//Questo controllo serve per vedere se sotto la scrittura manga della tabella ho gli autori o il nome del manga, se ho il titolo, allora gli autori sono al di sotto del titolo.
-	if($ControlloAutore->length==0){
-		$nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[th/i][1]");
-		$autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[2]/td/a");
-		//Questo controllo serve per vedere se ci i tag a sono assenti dalla sezione autori e quindi bisogna prendere il testo contentuto nel tag td.
-		if($autore->length==0)
-		$autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[2]/td//text()");
-	
-	}else{
-		$nomeProdotto=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_testata']/th/i");
-		$autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[1]/td/a");
-		//Questo controllo serve per vedere se ci i tag a sono assenti dalla sezione autori e quindi bisogna prendere il testo contentuto nel tag td.
-		if($autore->length==0)
-		$autore=$ControlloAutore;
-		
-		
-	}//faccio questa cosa con gli autori perchè nella tabella ci sono casi in cui sotto la scritta manga abbiamo il nome del manga e non l'autore, quindi devo andare sul secondo tr
-	
+    //Questo controllo serve per vedere se sotto la scrittura manga della tabella ho gli autori o il nome del manga, se ho il titolo, allora gli autori sono al di sotto del titolo.
+    if($ControlloAutore->length==0){
+        $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[th/i][1]");
+        $autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[2]/td/a");
+        //Questo controllo serve per vedere se ci i tag a sono assenti dalla sezione autori e quindi bisogna prendere il testo contentuto nel tag td.
+        if($autore->length==0)
+        $autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[2]/td//text()");
+    
+    }else{
+        $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_testata']/th/i");
+        $autore=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/preceding-sibling::tr[@class='sinottico_divisione' and th[.='Manga']][1]/following::tr[1]/td/a");
+        //Questo controllo serve per vedere se ci i tag a sono assenti dalla sezione autori e quindi bisogna prendere il testo contentuto nel tag td.
+        if($autore->length==0)
+        $autore=$ControlloAutore;
+        
+        
+    }//faccio questa cosa con gli autori perchè nella tabella ci sono casi in cui sotto la scritta manga abbiamo il nome del manga e non l'autore, quindi devo andare sul secondo tr
+    
         $numVolumiJp=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/td/text()");
 
         $editoriIt=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/following-sibling::tr[contains(th,'Editore') and th[contains(span,'it')]][1]/td//text()");
 
         $numVolumiIt=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]][".$i."]/following-sibling::tr[contains(th,'Volumi') and th[contains(span,'it')]][1]/td/text()");
 
-		$immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
+        $immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
         
 
         $user=$ReturnXml->addChild('work');
-		$editors=$user->addChild('editors');
-	    $authors=$user->addChild('authors');
+        $editors=$user->addChild('editors');
+        $authors=$user->addChild('authors');
 
      foreach ($nomeProdotto as $node){
 
@@ -215,6 +207,8 @@ function create_XML($ReturnXml, $xpath)
         else{
 		  $user->addChild('link_image',"");
 	    }
+         $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
+         
     }
 
     return $ReturnXml;

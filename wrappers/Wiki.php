@@ -1,6 +1,6 @@
 <?php
 
-	header("Content-type: application/xml");
+//	header("Content-type: application/xml");
 	
 	$datesIT = array();
 	$numvol = array();
