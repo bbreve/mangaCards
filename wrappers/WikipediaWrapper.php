@@ -75,7 +75,7 @@ else{
         	 // $editoreIt=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Editore') and th[contains(span,'it')]]/td//text()");
 			 $immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
 
-        	  $user=$ReturnXml->addChild('comic');
+        	  $user=$ReturnXml->addChild('work');
 			  $editors=$user->addChild('editors');
 
         	   $user->addChild('name', trim($nomeProdotto[0]->nodeValue));
@@ -151,7 +151,7 @@ function create_XML($ReturnXml, $xpath)
 		$immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
         
 
-        $user=$ReturnXml->addChild('manga');
+        $user=$ReturnXml->addChild('work');
 		$editors=$user->addChild('editors');
 	    $authors=$user->addChild('authors');
 

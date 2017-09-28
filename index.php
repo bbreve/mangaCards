@@ -8,6 +8,7 @@
     
     <link href='https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900' rel='stylesheet' type='text/css'>
 	<link href="assets/css/theme/style.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="assets/css/animate.css" rel="stylesheet" type="text/css" media="all" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="description" content="Techie Bootstrap 3 skin">
@@ -60,7 +61,11 @@
 										  <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>
 										</ul>
 									  </div><!-- /btn-group -->
-									  <input id="title" name="title" type="text" class="form-control" placeholder="Inserisci il titolo del manga">
+									   <div class="form-group has-feedback">							           		
+							            	 <input id="title" name="title" type="text" class="form-control" placeholder="Inserisci il titolo del manga">
+							            	 <span class="hidden fa fa-times form-control-feedback"></span>
+							           </div>  
+									 
 									</div><!-- /input-group -->
 								  </div>
 								  <div class="agile-row">
@@ -91,8 +96,10 @@
     <script src="assets/js/typeahead.min.js"></script>
 	<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
     <script type="text/javascript">
+    	var type_work = "Manga";
       function changeType(type)
       {
+      	type_work=type;
         $("#typeButton").html(type + " <span class=\"caret\">");
         if(type == "Fumetto")
         {
@@ -106,13 +113,30 @@
         }
 
       }
-    </script>
-    <script>
-    	$(".btn-search").click(function(){
-    		console.log("CLicked");
-    		$("form#main").submit();
+      $(".btn-search").click(function(){
+    		if($("#title").text() != "")
+    			$("form#main").submit();
+    		else
+    		{
+    			$(".form-group.has-feedback").addClass("has-error");
+    			$(".fa.fa-times").removeClass("hidden");
+    			$('#title').attr("placeholder", "Il titolo dell'opera è obbligatorio");
+    			$("#title").addClass("animated shake");
+    			setTimeout(clear, 3000);
+    		}
 
     	});
+    	function clear()
+    	{
+    		$(".form-group.has-feedback").removeClass("has-error");
+    		$("#title").removeClass("animated shake");
+    		$(".fa.fa-times").addClass("hidden");
+
+    		if(type_work == "Manga")
+    			$('#title').attr("placeholder", "Inserisci il titolo del manga");
+    		else
+    			$('#title').attr("placeholder", "Inserisci il titolo della serie");
+    	}
     </script>
   </body>
 </html>

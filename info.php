@@ -4,7 +4,7 @@
   ob_start();
   require '\wrappers\WikipediaWrapper.php';
   $page_info = ob_get_clean(); 
-  $load = simplexml_load_string($page_info);
+  $work_info = simplexml_load_string($page_info);
 
 ?>
 <!DOCTYPE html>
@@ -13,7 +13,7 @@
   
   <meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
   
-  <title>Techie - Bootstrap 3 modern skin</title>
+  <title>work Cards - Dettaglio</title>
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900' rel='stylesheet' type='text/css'>
 
@@ -46,24 +46,38 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
     <div class="row">
        <div class="col-lg-4 col-sm-4 ">
           <a href="#" class="thumbnail">
-            <img src="assets/img/image-placeholder.png" alt="">
+            <img src=<?php echo $work_info->work->link_image; ?> alt="">
           </a>
        </div>
       <div class="col-lg-5 col-sm-5">
         <div class="agile-row">
-          <h1><?php echo $load->manga->name?></h1>
+          <h1><?php echo $work_info->work->name?></h1>
         </div>
         <div class="agile-row">
-          <h5>Creato da: <?php echo $load->manga->author?></h5>
+          <h5>Creato da: <?php  $authors_list = "";
+                                foreach($work_info->work->authors->author as $author) 
+                                {
+                                  $authors_list .= $author.", ";
+                                }
+                                $authors_list = rtrim($authors_list, ", ");
+                                echo $authors_list;
+                          ?></h5>
         </div>
         <div class="agile-row">
-          <h5>Editore: <?php echo $load->manga->editor?></h5>
+          <h5>Editore: <?php  $editors_list = "";
+                                foreach($work_info->work->editors->editor as $editor) 
+                                {
+                                  $editors_list .= $editor.", ";
+                                }
+                                $editors_list = rtrim($editors_list, ", ");
+                                echo $editors_list;
+                        ?></h5>
         </div>
         <div class="agile-row">
-          <h5>Volumi giapponesi: <?php echo $load->manga->volumes_jp?></h5>
+          <h5>Volumi giapponesi: <?php echo $work_info->work->volumes_jp?></h5>
         </div>
         <div class="agile-row">
-          <h5>Volumi italiani: <?php echo $load->manga->volumes_it?></h5>
+          <h5>Volumi italiani: <?php echo $work_info->work->volumes_it?></h5>
         </div>
       </div>
     </div>
@@ -118,7 +132,7 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
  </div>
 
   <footer class="text-center">
-    <p>&copy; Manga Cards</p>
+    <p>&copy; work Cards</p>
   </footer>
 
   <!-- Main Scripts-->
