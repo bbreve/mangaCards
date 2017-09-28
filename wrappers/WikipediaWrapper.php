@@ -195,7 +195,8 @@ function create_XML($ReturnXml, $xpath)
 
         if($numVolumiIt->length!=0){
 
-           $user->addChild('volumes_it', trim($numVolumiIt[0]->nodeValue));
+           $nnome=explode(" ",trim($numVolumiIt[0]->nodeValue));
+           $user->addChild('volumes_it', $nnome[0]);
 
         }else{
 
