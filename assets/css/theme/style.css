@@ -100,23 +100,7 @@ h1 {
 	-ms-border-radius: 15px;
     border-radius: 15px;
 }
-.login-form input[type="text"], .login-form input[type="password"] {
-    outline: none;
-    font-size: 1em;
-    color: #000;
-    padding: .6em;
-    margin: 0;
-    width: 95%;
-    border: none;
-    -webkit-appearance: none;
-    display: block;
-    background: #fff;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-	-o-border-radius: 2px;
-	-ms-border-radius: 2px;
-    border-radius: 2px;
-} 
+
 
 /*-- checkbox --*/
 .anim {
