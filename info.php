@@ -2,9 +2,20 @@
   $title = $_POST['title'];
 
   ob_start();
-  require '\wrappers\WikipediaWrapper.php';
+  require __DIR__.'\wrappers\WikipediaWrapper.php';
   $page_info = ob_get_clean(); 
   $work_info = simplexml_load_string($page_info);
+
+  ob_start();
+  $number = $work_info->work->volumes_it;
+  require __DIR__.'\wrappers\Wiki.php';
+  $volumes_wrapper_info = ob_get_clean(); 
+  $volumes_info = simplexml_load_string($volumes_wrapper_info);
+
+  echo '<pre>';
+  print_r($number);
+  print_r($volumes_info);
+  echo '</pre>';
 
 ?>
 <!DOCTYPE html>
@@ -13,7 +24,7 @@
   
   <meta http-equiv="content-type" content="text/html; charset=UTF-8"> 
   
-  <title>work Cards - Dettaglio</title>
+  <title>Manga Cards - Dettaglio</title>
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900' rel='stylesheet' type='text/css'>
 
@@ -88,12 +99,12 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
           <div class="panel panel-default">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#collapseOnePanel">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#volume1">
                   Collapsible Group Item #1
                 </a>
               </h4>
             </div>
-            <div id="collapseOnePanel" class="panel-collapse collapse in">
+            <div id="volume1" class="panel-collapse collapse in">
               <div class="panel-body">
                 Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. 
               </div>

@@ -1,14 +1,14 @@
 <?php
 
 libxml_use_internal_errors(true);
-
+error_reporting(E_ERROR | E_PARSE);
 /* Createa a new DomDocument object */
 
 $dom = new DomDocument;
 
 /* Load the HTML */
 
-$dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title);
+$dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title."_(manga)");
 
 /* Create a new XPath object */
 
@@ -34,10 +34,9 @@ $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_pro
 
 else{
 
-            $dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title."_(manga)");
+            $dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title);
 
-            /* Create a new XPath object */
-
+            
             //header("Content-type: text/xml");
 
             $xpath = new DomXPath($dom);
@@ -57,12 +56,11 @@ else{
             }
 
             else
-
             {
 
         	   if($xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td")->length==0){
 
-        	 $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
+        	       $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
 
         	   }else{
 
@@ -195,8 +193,7 @@ function create_XML($ReturnXml, $xpath)
 
         if($numVolumiIt->length!=0){
 
-           $nnome=explode(" ",trim($numVolumiIt[0]->nodeValue));
-           $user->addChild('volumes_it', $nnome[0]);
+           $user->addChild('volumes_it', trim($numVolumiIt[0]->nodeValue));
 
         }else{
 

@@ -114,24 +114,39 @@
 
       }
       $(".btn-search").click(function(){
-    		if($("#title").text() != "")
+    		if($("#title").val() != "")
     			$("form#main").submit();
     		else
     		{
-    			$(".form-group.has-feedback").addClass("has-error");
-    			$(".fa.fa-times").removeClass("hidden");
-    			$('#title').attr("placeholder", "Il titolo dell'opera è obbligatorio");
-    			$("#title").addClass("animated shake");
-    			setTimeout(clear, 3000);
+    			showError();
     		}
 
     	});
+
+     $("form#main").submit(function(e){
+    		if($("#title").val() != "")
+    			return true;
+    		else
+    		{
+    			showError();
+    			return false;
+    		}
+		});
+
+      	function showError()
+      	{
+      		$(".form-group.has-feedback").addClass("has-error");
+    		$(".fa.fa-times").removeClass("hidden");
+    		$('#title').attr("placeholder", "Il titolo dell'opera è obbligatorio");
+    		$("#title").addClass("animated shake");
+    		setTimeout(clear, 3000);
+      	}
+
     	function clear()
     	{
     		$(".form-group.has-feedback").removeClass("has-error");
     		$("#title").removeClass("animated shake");
     		$(".fa.fa-times").addClass("hidden");
-
     		if(type_work == "Manga")
     			$('#title').attr("placeholder", "Inserisci il titolo del manga");
     		else

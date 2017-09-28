@@ -1,6 +1,6 @@
 <?php
 
-	header("Content-type: application/xml");
+	//header("Content-type: application/xml");
 	
 	$datesIT = array();
 	$numvol = array();
@@ -14,11 +14,9 @@
 	/* Createa a new DomDocument object */
 	$dom = new DomDocument;
 	/* Load the HTML */
-	$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Capitoli_di_Bleach");
+	$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Capitoli_di_".$title);
 	/* Create a new XPath object */
 	$xpath = new DomXPath($dom);
-	
-	$number = 73;
 
 	$titles = extractTitles($titles, $number, $xpath);
 	if (count($titles) != $number)
