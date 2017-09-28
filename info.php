@@ -1,5 +1,7 @@
 <?php
-  $title = $_POST['title'];
+  $title = $_POST['work_selected'];
+
+
 
   ob_start();
   require __DIR__.'\wrappers\WikipediaWrapper.php';

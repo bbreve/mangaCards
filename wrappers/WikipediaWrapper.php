@@ -8,7 +8,7 @@ $dom = new DomDocument;
 
 /* Load the HTML */
 
-$dom->loadHTMLFile("https://it.wikipedia.org/wiki/Bleach_(manga)");
+$dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title."_(manga)");
 
 /* Create a new XPath object */
 
@@ -106,6 +106,7 @@ else{
 
 
 function create_XML($ReturnXml, $xpath)
+
 {
 
      // vedo se ci sono all'interno delle caselle manga quelli che hanno il titolo sotto, e si trovano nella prima posizione
@@ -116,7 +117,7 @@ function create_XML($ReturnXml, $xpath)
 
     $numeroTankobon=$xpath->query("//table[@class='sinottico'][1]//tr[th/a[contains(text(),'Tankōbon')]]");
 
-
+    $chapters_link = $xpath->query('//b/a[contains(@href, "Capitoli")]/@href');
 
     for($i=1;$i<=$numeroTankobon->length;$i++){
 
@@ -201,27 +202,13 @@ function create_XML($ReturnXml, $xpath)
 
         }
          
-		if($immagine->length!=0){
-	        $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
-	    }
-        else{
-		  $user->addChild('link_image',"");
-	    }
          $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
+         $user->addChild('chapters_link', "https://it.wikipedia.org".$chapters_link[0]->nodeValue);
          
     }
 
     return $ReturnXml;
 
 }
-
-function searchForVolumes($xpath)
-    {
-        echo 'HELLO';
-        $test = $xpath->query('//a[contains(@href, "Capitoli")]');
-        echo '<pre>';
-        print_r($test);
-        echo '</pre>';
-    }
 
 ?>
