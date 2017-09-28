@@ -83,8 +83,11 @@ else{
         	   $editors->addChild('editor', trim($node->nodeValue));
 
         	   }
-			   $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
-
+			   if($immagine->length!=0){
+	              $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
+	          }else{
+		           $user->addChild('link_image',"");
+	                }
         	   /* foreach ($editoreIt as $node){ 
 
         	    $user->addChild('editore_it', trim($node->nodeValue));
@@ -201,8 +204,11 @@ function create_XML($ReturnXml, $xpath)
 
         }
          
-		 $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
-		 
+		  if($immagine->length!=0){
+	              $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
+	          }else{
+		           $user->addChild('link_image',"");
+	                }
     }
 
     return $ReturnXml;
