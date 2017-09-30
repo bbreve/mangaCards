@@ -8,7 +8,7 @@ $dom = new DomDocument;
 
 /* Load the HTML */
 
-$dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title."_(manga)");
+$dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title);
 
 /* Create a new XPath object */
 
@@ -33,31 +33,6 @@ $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_pro
 }
 
 else{
-
-            $dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title);
-
-            
-            //header("Content-type: text/xml");
-
-            $xpath = new DomXPath($dom);
-
-            /* Query all <td> nodes containing specified class name */
-
-            $numeroManga=$xpath->query("//table[@class='sinottico'][1]/descendant::tr[@class='sinottico_divisione' and th[.='Manga']]");
-
-
-
-            if($numeroManga -> length != 0)
-
-            {
-
-                $ReturnXml = create_XML($ReturnXml, $xpath);
-
-            }
-
-            else
-            {
-
                if($xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td")->length==0){
 
                    $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
@@ -90,10 +65,7 @@ else{
                 $user->addChild('editore_it', trim($node->nodeValue));
 
                }*/
-
-            }
-
-             
+            
 
  }
 

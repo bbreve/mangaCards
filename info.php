@@ -8,7 +8,14 @@
   $page_info = ob_get_clean(); 
   $work_info = simplexml_load_string($page_info);
 
- 
+
+  $num_jp = $work_info->work->volumes_jp;
+  $num_it = $work_info->work->volumes_it;
+  $chapters_link = $work_info->work->chapters_link;
+  ob_start();  
+  require __DIR__.'\wrappers\Wiki.php';
+  $chapters_info = ob_get_clean(); 
+  $chapters_xml = simplexml_load_string($chapters_info);
 
 ?>
 <!DOCTYPE html>
@@ -50,7 +57,7 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
     <div class="row">
        <div class="col-lg-4 col-sm-4 ">
           <a href="#" class="thumbnail">
-            <img src=<?php echo $work_info->work->link_image; ?> alt="">
+            <img src=<?php if($work_info->work->link_image != "https:") echo $work_info->work->link_image; else echo '""';?> style="text-align: center" alt="Immagine non disponbile">
           </a>
        </div>
       <div class="col-lg-5 col-sm-5">
@@ -78,10 +85,10 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
                         ?></h5>
         </div>
         <div class="agile-row">
-          <h5>Volumi giapponesi: <?php echo $work_info->work->volumes_jp?></h5>
+          <h5>Volumi giapponesi: <?php echo $num_jp; ?></h5>
         </div>
         <div class="agile-row">
-          <h5>Volumi italiani: <?php echo $work_info->work->volumes_it?></h5>
+          <h5>Volumi italiani: <?php echo $num_it; ?></h5>
         </div>
       </div>
     </div>
@@ -89,48 +96,28 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
       <div class="col-sm-12 col-lg-12">
         <h3>Volumi</h3>
         <div class="panel-group" id="accordion-panel">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#volume1">
-                  Collapsible Group Item #1
-                </a>
-              </h4>
-            </div>
-            <div id="volume1" class="panel-collapse collapse in">
-              <div class="panel-body">
-                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. 
+          <?php
+
+          foreach($chapters_xml->volume as $volume) 
+          {
+            $content = insertPanelContent($volume);
+            echo '
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#volume'.$volume->number.'">['.$volume->number."] ".$volume->title.'
+                  </a>
+                </h4>
               </div>
-            </div>
-          </div>
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#collapseTwoPanel">
-                  Collapsible Group Item #2
-                </a>
-              </h4>
-            </div>
-            <div id="collapseTwoPanel" class="panel-collapse collapse">
-              <div class="panel-body">
-                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. 
+              <div id="volume'.$volume->number.'" class="panel-collapse collapse">
+                <div class="panel-body">';
+            echo $content;
+            echo'
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4 class="panel-title">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#collapseThreePanel">
-                  Collapsible Group Item #3
-                </a>
-              </h4>
-            </div>
-            <div id="collapseThreePanel" class="panel-collapse collapse">
-              <div class="panel-body">
-                Aliquam facilisis, orci in vulputate posuere, sapien dolor dapibus orci, vitae venenatis dui elit vitae lorem. Sed porta fermentum felis in molestie. Sed porta fermentum felis in molestie. Sed porta fermentum felis in molestie. 
-              </div>
-            </div>
-          </div>
+            </div>';
+          } 
+          ?>
         </div>        
       </div>
  </div>
@@ -145,7 +132,39 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
   
     <!-- Bootstrap 3 has typeahead optionally -->
     <script src="assets/js/typeahead.min.js"></script>
-    
+    <?php
+      function insertPanelContent($volume)
+      {
+        $toReturn = "";
+
+        $plot = $volume->story;
+        $date_published = $volume->date;
+        $chapters_list = $volume->chapters_list;
+        
+        if($date_published != "")
+          $toReturn .= "<h5><b>Data/e pubblicazione:</b></h5> <div>".$date_published."</div>";
+
+        if($plot != "")
+        {
+          $toReturn .= "<h5><b>Trama:</b></h5><p>".$plot."</p>";
+        }
+
+        if(count($chapters_list) > 0)
+        {
+          $toReturn .= "<h5 class=\"panel-heading\"><b>Capitoli:</b></h5>";
+          $toReturn .= "<ul>";
+          foreach($chapters_list->chapter as $chapter)
+          {
+            $toReturn .= "<li>".$chapter."</li>";
+          }
+          $toReturn .= "</ul>";
+        }
+
+        return $toReturn;
+
+                   
+      }
+    ?>
 
 </body>
 </html>
