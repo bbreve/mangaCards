@@ -160,12 +160,18 @@ function create_XML($ReturnXml, $xpath)
      
 
       // echo "<p>Volumi it. : ".trim($numVolumiItalia[0]->nodeValue)."</p>";
-
+	  
+     if(stristr(trim($numVolumiJp[0]->nodeValue),'unico')==true)
+		 $numVolumiJp[0]->nodeValue='1';
+		 
       $user->addChild('volumes_jp', trim($numVolumiJp[0]->nodeValue));
 
         if($numVolumiIt->length!=0){
-
+           
            $nnome=explode(" ",trim($numVolumiIt[0]->nodeValue));
+		   if(stristr($nnome[0],'unico')==true)
+			   $nnome[0]='1';
+		   
            $user->addChild('volumes_it', $nnome[0]);
 
         }else{
