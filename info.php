@@ -142,7 +142,15 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
         $chapters_list = $volume->chapters_list;
         
         if($date_published != "")
-          $toReturn .= "<h5><b>Data/e pubblicazione:</b></h5> <div>".$date_published."</div>";
+        {
+          $toReturn .= "<h5><b>Data/e pubblicazione:</b></h5> <ul>";
+          $dates_published = explode("-", $date_published);
+          foreach ($dates_published as $single_date) {
+            if($single_date != "")
+              $toReturn .= "<li>".$single_date."</li>";
+          }
+          $toReturn .= "</ul>";
+        }
 
         if($plot != "")
         {

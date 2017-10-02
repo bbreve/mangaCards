@@ -9,7 +9,9 @@
 	$volChapters = array();
 	$stories = array();
 	$titles = array();
-	
+
+	$double_numeration = 0;
+
 	libxml_use_internal_errors(true);
 	/* Createa a new DomDocument object */
 	$dom = new DomDocument;
@@ -30,8 +32,9 @@
 	$number = $num_it;
 	$numberJ = $num_jp;
 	
-	extractTitles();
+
 	extractNumvol();
+	extractTitles();
 	extractDatesIt();
 	/*var_dump($titles);
 	echo "<br />";
@@ -84,7 +87,7 @@
 				$dates_publication = "";
 				foreach($datesIT[$i] as $date)
 				{
-					$dates_publication .= $date."<br>";
+					$dates_publication .= $date."-";
 				}
 				$prodotto->addChild("date", $dates_publication);	
 			}	
@@ -93,15 +96,15 @@
 				$prodotto->addChild("date", $datesIT[$i][0]);
 			}
 			
-			if (count($stories) == count($titles))
-				$prodotto->addChild("story", $stories[$i]);
+			//if (count($stories) == count($titles))
+			//	$prodotto->addChild("story", $stories[$i]);
 			
-			if (count($volChapters) == count($titles))
-			{
-				$list = $prodotto->addChild("chapters_list");
-				foreach ($volChapters[$i] as $node)
-					$list->addChild("chapter", trim($node->nodeValue));
-			}			
+			//if (count($volChapters) == count($titles))
+			//{
+		//		$list = $prodotto->addChild("chapters_list");
+		//		foreach ($volChapters[$i] as $node)
+			//		$list->addChild("chapter", trim($node->nodeValue));
+			//}			
 		}
 	}
 	
@@ -136,8 +139,8 @@
 			if ($date_it == "" || $date_it == " " || $date_it == NULL)
 				continue;
 
-			preg_match_all("!\d+ (\w+) \d+!", $date_it->nodeValue, $match);
 
+			preg_match_all("#(\d+ )?\w+ \d+#", $date_it->nodeValue, $match);
 
 			$temp = [];
 			foreach($match[0] as $date_in_volume)
@@ -226,24 +229,36 @@
 
 	function extractTitles()
 	{
-		global $titles, $number, $numberJ, $xpath, $format_page, $series, $num_manga;
+		global $titles, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
 		
-		$titles_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[./i/b]');
+		$titles_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[.="-"])]');
 
+		$i = 1;
 		foreach($titles_query as $title_query)
 		{	
-			$titles[] = $title_query->nodeValue;
+			//Se non è stata adottata una doppia numerazione, devo verif
+			if(!$double_numeration)
+			{
+				if($i <= $number)
+				{
+					$titles[] = $title_query->nodeValue;
+					$i++;
+				}
+			}
+			else
+				$titles[] = $title_query->nodeValue;
 		}
+
 	}
 
 	function extractNumVol()
 	{
-		global $titles, $numvol, $number, $numberJ, $xpath, $format_page, $series, $num_manga;
-		
-		$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap"))]');
-		//Se è presente un solo tipo di numerazione
+		global $titles, $numvol, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
 
-		if($nums_query->length == $numberJ)
+		$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and contains(text(), "-")])]');
+
+		//Se è presente un solo tipo di numerazione
+		if($nums_query->length == $number)
 		{
 			foreach($nums_query as $num_query)
 			{	
@@ -253,6 +268,7 @@
 		//Se invece sono presenti due tipi di numerazione: quella italiana e giapponese
 		else if($nums_query->length == (2*$numberJ))
 		{
+			$double_numeration = true;
 			$num_vol_jp = array();
 			$italian = false;
 			foreach ($nums_query as $num_query) {
@@ -266,6 +282,15 @@
 					$numvol[] = $num_query->nodeValue;
 					$italian = false;
 				}
+			}
+		}
+		//Se invece non sono riuscito ad estrarre il numero dei volumi, fornisco una numerazione arbistraria;
+		else
+		{
+			foreach($nums_query as $num_query)
+			{	
+				if($num_query->nodeValue <= $number)
+					$numvol[] = $num_query->nodeValue;
 			}
 		}
 	}
