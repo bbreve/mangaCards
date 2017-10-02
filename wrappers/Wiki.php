@@ -231,12 +231,13 @@
 	{
 		global $titles, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
 		
-		$titles_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[.="-"])]');
+		$titles_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-"])]');
 
 		$i = 1;
 		foreach($titles_query as $title_query)
 		{	
-			//Se non è stata adottata una doppia numerazione, devo verif
+			//Se non è stata adottata una doppia numerazione, devo verificare di 
+			//recuperare solo il titolo dei capitoli con data d'uscita italiana
 			if(!$double_numeration)
 			{
 				if($i <= $number)
@@ -255,7 +256,7 @@
 	{
 		global $titles, $numvol, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
 
-		$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and contains(text(), "-")])]');
+		$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and (./text()="-")])]');
 
 		//Se è presente un solo tipo di numerazione
 		if($nums_query->length == $number)
@@ -284,9 +285,10 @@
 				}
 			}
 		}
-		//Se invece non sono riuscito ad estrarre il numero dei volumi, fornisco una numerazione arbistraria;
+		//Se invece non sono riuscito ad estrarre il numero dei volumi, fornisco una numerazione arbitraria;
 		else
 		{
+
 			foreach($nums_query as $num_query)
 			{	
 				if($num_query->nodeValue <= $number)
