@@ -47,6 +47,10 @@
   <!-- Docs Custom styles -->
   <style>
 body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid #ddd;padding:30px;margin-top:50px}.row>[class*=col-]{margin-bottom:40px}.navbar-container{position:relative;min-height:100px}.navbar.navbar-fixed-bottom,.navbar.navbar-fixed-top{position:absolute;top:50px;z-index:0}.navbar.navbar-fixed-bottom .container,.navbar.navbar-fixed-top .container{max-width:90%}.btn-group{margin-bottom:10px}.form-inline input[type=password],.form-inline input[type=text],.form-inline select{width:180px}.input-group{margin-bottom:10px}.pagination{margin-top:0}.navbar-inverse{margin:110px 0}
+
+.panel-default > .panel-heading {
+
+  }
   </style>
   
 </head>
@@ -105,11 +109,11 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
             <div class="panel panel-default">
               <div class="panel-heading">
                 <h4 class="panel-title">
-                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#volume'.$volume->number.'">['.$volume->number."] ".$volume->title.'
+                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#volume'.str_replace(' ', '', $volume->number).'">['.$volume->number."] ".$volume->title.'
                   </a>
                 </h4>
               </div>
-              <div id="volume'.$volume->number.'" class="panel-collapse collapse">
+              <div id="volume'.str_replace(' ', '', $volume->number).'" class="panel-collapse collapse">
                 <div class="panel-body">';
             echo $content;
             echo'

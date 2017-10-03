@@ -295,7 +295,7 @@ input.checkbox:checked:after {
 .item .block {
     width: 30%;
     padding: 3.5em 3em;
-    margin: 4em auto;
+    margin: 0em auto;
     -webkit-transition: box-shadow 0.5s;
     transition: box-shadow 0.5s;
     overflow: hidden;

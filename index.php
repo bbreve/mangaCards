@@ -42,20 +42,20 @@
 
       <!-- Docs Custom styles -->
       <style>
-    body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid #ddd;padding:30px;margin-top:50px}.row>[class*=col-]{margin-bottom:40px}.navbar-container{position:relative;min-height:100px}.navbar.navbar-fixed-bottom,.navbar.navbar-fixed-top{position:absolute;top:50px;z-index:0}.navbar.navbar-fixed-bottom .container,.navbar.navbar-fixed-top .container{max-width:90%}.btn-group{margin-bottom:10px}.form-inline input[type=password],.form-inline input[type=text],.form-inline select{width:180px}.input-group{margin-bottom:10px}.pagination{margin-top:0}.navbar-inverse{margin:110px 0}
+    body,html{overflow-x:hidden}body{padding:0px 20px 0}footer{border-top:1px solid #ddd;padding:30px;margin-top:50px}.row>[class*=col-]{margin-bottom:40px}.navbar-container{position:relative;min-height:100px}.navbar.navbar-fixed-bottom,.navbar.navbar-fixed-top{position:absolute;top:50px;z-index:0}.navbar.navbar-fixed-bottom .container,.navbar.navbar-fixed-top .container{max-width:90%}.btn-group{margin-bottom:10px}.form-inline input[type=password],.form-inline input[type=text],.form-inline select{width:180px}.input-group{margin-bottom:10px}.pagination{margin-top:0}.navbar-inverse{margin:110px 0}
       </style>
       
     </head>
 
     <body>
-    <div id="bg" class="bg_Manga"></div>
+    <div id="bg" class="bg_Manga"></div>z
     	<!-- main --> 
   	<div class="main-agileinfo slider ">
   		<div class="items-group">
   			<div class="item agileits-w3layouts">
   				<div class="block text main-agileits"> 
   					<div class="login-form loginw3-agile"> 
-  						<div class="login-agileits-top jumbotron">
+  						<div class="login-agileits-top jumbotest">
   							<div class="agile-row">
   								<div>
   									<h1 style="font-weight:bold">Manga<br><br>Cards</h1>
@@ -63,33 +63,28 @@
   								</div>
   							</div> 
   							<form id="main" action="info.php" method="post">
-  								<div class="agile-row">
-  								  <div> 
-  									<div class="input-group">
-  									  <div class="input-group-btn">
+  								<div class="row">
+  									  <div class="col-md-4">
   										<button type="button" id="typeButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Manga <span class="caret"></span></button>
   										<ul class="dropdown-menu">
   										  <li><a href="javascript:changeType('Manga');">Manga</a></li>
   										  <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>
   										</ul>
   									  </div><!-- /btn-group -->
-  									   <div class="form-group has-feedback" style="margin-bottom: 0px">		
+  									   <div class="form-group has-feedback col-md-8" style="margin-bottom: 0px">		
                               <input id="work_selected" name="work_selected" type="hidden" value=""/>					           		
                               <select class="form-control" name="select">
 
                               </select>
   							            	 <!--<input id="title" name="title" type="text" class="form-control" placeholder="Inserisci il titolo del manga">-->
   							            	 <span class="hidden fa fa-times form-control-feedback"></span>
-  							           </div>  
-  									 
-  									</div><!-- /input-group -->
-  								  </div>
+  							       </div> 
+                  </div>
   								  <div class="agile-row">
   									<div style="text-align: center;">
   										<a class="btn btn-primary btn-lg btn-search">Cerca</a>
   									</div>
   								  </div>
-  								</div>
   							</form>
   							<div class="agile-row">
   							<footer class="text-center">
@@ -103,7 +98,7 @@
   				</div>
   			</div>	
   		</div>
-  	</div>		
+  	</div>	
       <!-- Main Scripts-->
       <script src="assets/js/jquery.js"></script>
       <script src="assets/js/bootstrap.min.js"></script>

@@ -53,11 +53,10 @@
 	//$xml->addChild("io", count($datesIT));
 	//$xml->addChild("io", count($titles));
 
-
-		extractVolChapters();
-		extractStories();
-		//$xml->addChild("Ciao");
-		writeVolumesXML();
+	//extractStories();
+	extractVolChapters();
+	//$xml->addChild("Ciao");
+	writeVolumesXML();
 	
 	extractNameChapters();
 	extractNumChapters();
@@ -81,7 +80,10 @@
 			$prodotto = $xml->addChild("volume");
 			
 			$prodotto->addChild("title", $titles[$i]);
-			$prodotto->addChild("number", $numvol[$i]);
+			if(is_null($numvol[$i]))
+				$prodotto->addChild("number", 'IN USCITA');
+			else
+				$prodotto->addChild("number", $numvol[$i]);
 			if(count($datesIT[$i]) > 1)
 			{
 				$dates_publication = "";
@@ -96,8 +98,9 @@
 				$prodotto->addChild("date", $datesIT[$i][0]);
 			}
 			
-			//if (count($stories) == count($titles))
-			//	$prodotto->addChild("story", $stories[$i]);
+			
+			$prodotto->addChild("story", extractStory($numvol[$i]));
+
 			
 			//if (count($volChapters) == count($titles))
 			//{
@@ -128,8 +131,6 @@
 		}
 	}
 	
-	////table[@class="wikitable"]//tr[contains(@id, "vol")]/td[contains(@style, "white-space:nowrap")][2]
-
 	function extractDatesIt()
 	{
 		global $datesIT, $xpath;
@@ -152,50 +153,6 @@
 		}
 	}
 
-
-
-	/*function extractDatesIt()
-	{
-		global $number, $datesIT, $xpath, $format_page, $num_manga, $series;
-		
-		if ($format_page == 2)
-			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");	
-		else 
-		{
-			if ($num_manga == 1)
-			{	
-				if ($series == "One Piece" || $series == "Naruto")
-					$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");
-				else
-					$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");
-			}
-			else 
-				$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number."]/td[last()]/text()");
-		}
-		
-		foreach ($query as $node)
-		{
-			if ($node == "" || $node == " " || $node == NULL)
-				continue;
-			
-			$arrays = explode(" ", $node->nodeValue);
-			if (count($arrays) != 3)
-				$datesIT[] = trim($node->nodeValue);
-			else 
-			{
-				if (count($datesIT) > 0)
-				{
-					$user_date = DateTime::createFromFormat('d/m/Y', $datesIT[count($datesIT)-1]);
-					$current = DateTime::createFromFormat('d/m/Y', transformDate(trim($node->nodeValue)));
-					if (stripos($datesIT[count($datesIT)-1], $node->nodeValue) !== false || $current <= $user_date)
-					continue;
-				}
-				
-				$datesIT[] = transformDate(trim($node->nodeValue));
-			}
-		}
-	}*/
-	
 	function extractVolChapters()
 	{
 		global $volChapters, $number, $xpath, $format_page;
@@ -233,23 +190,8 @@
 		
 		$titles_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-"])]');
 
-		$i = 1;
 		foreach($titles_query as $title_query)
-		{	
-			//Se non è stata adottata una doppia numerazione, devo verificare di 
-			//recuperare solo il titolo dei capitoli con data d'uscita italiana
-			if(!$double_numeration)
-			{
-				if($i <= $number)
-				{
-					$titles[] = $title_query->nodeValue;
-					$i++;
-				}
-			}
-			else
-				$titles[] = $title_query->nodeValue;
-		}
-
+			$titles[] = $title_query->nodeValue;
 	}
 
 	function extractNumVol()
@@ -258,6 +200,7 @@
 
 		$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and (./text()="-")])]');
 
+/*PULIZIA TEMPORANEA, DA VERIFICARE CORRETTEZZA 
 		//Se è presente un solo tipo di numerazione
 		if($nums_query->length == $number)
 		{
@@ -295,60 +238,37 @@
 					$numvol[] = $num_query->nodeValue;
 			}
 		}
-	}
-	/*
-	function extractNumvol()
-	{
-		global $numvol, $number, $xpath, $format_page, $num_manga, $series;
-		
-		if ($format_page == 2)
-			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");	
-		else
+*/	
+		//Se è presente una doppia numerazione
+		if($nums_query->length == (2*$numberJ))
 		{
-			if ($num_manga == 1)
-				$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
-			else 
-				$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
-		}
-		
-		if ($query->length != 0)
-		{
-			foreach ($query as $node)
-			{
-				$arrays = explode("-", $node->nodeValue);
-				for ($i = 0; $i < count($arrays); $i++)
+			$double_numeration = true;
+			$num_vol_jp = array();
+			$italian = false;
+			foreach ($nums_query as $num_query) {
+				if(!$italian)
 				{
-					if (count($numvol) > 0)
-					{
-						if (stripos($numvol[count($numvol)-1], $arrays[$i]) !== false)
-							continue;
-					}	
-					$numvol[] = trim($arrays[$i]);
-				}	
+					$num_vol_jp[] = $num_query->nodeValue;
+					$italian = true;
+				}
+				else if($italian)
+				{
+					$numvol[] = $num_query->nodeValue;
+					$italian = false;
+				}
 			}
 		}
 		else
 		{
-			if ($format_page == 2)
-				$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");	
-			else
-			{
-				if ($num_manga == 1)
-				{	
-					if ($series == "One Piece" || $series == "Naruto")
-						$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");
-					else
-						$query = $xpath->query("//table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");
-				}
-				else 
-					$query = $xpath->query("//table[@class='wikitable'][2]//tr[td[1] > 0 and td[1] <= ".$number."]/td[1]");
+			foreach($nums_query as $num_query)
+			{	
+				if($num_query->nodeValue <= $number)
+					$numvol[] = $num_query->nodeValue;
 			}
-			
-			foreach ($query as $node)
-				$numvol[] = trim($node->nodeValue);
 		}
 	}
-	*/
+	
+
 	function extractNameChapters()
 	{
 		global $nameChapters, $numberJ, $xpath, $format_page, $series, $num_manga;
@@ -492,34 +412,17 @@
 		}
 	}
 
-	function extractStories()
+	function extractStory($volume)
 	{
-		global $stories, $number, $xpath, $format_page;
+		global $stories, $xpath, $numvol;
 		
-		if ($format_page == 2)
-			$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");	
-		else 
-			$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number." and td[2]/@rowspan > 0]/td[2]");
 		
-		//Se il volume giapponese corrisponde a quello italiano, ne estraggo la trama
-		if ($query->length == 0)
-		{
-			if ($format_page == 2)
-				$query = $xpath->query("//span[@id = 'Capitoli' or @id = 'Manga']/following::table[@class='wikitable'][1]//tr[td[1] > 0 and td[1] <= ".$number."]/following::tr[2 and contains(string(.), 'Trama')]/td[1]");
-			else
-				$query = $xpath->query("//table[@class='wikitable']//tr[td[1] > 0 and td[1] <= ".$number."]/following::tr[2 and contains(string(.), 'Trama')]/td[1]");
-		
-			if ($query->length != 0 && $query->length == $number)
-			{
-				foreach ($query as $node)
-				{
-					$arrays = explode("Trama", $node->nodeValue);
-					$stories[] = trim($arrays[1]);
-				}
-			}
-		}
+		$query = '//table[@class="wikitable"]//td[(../preceding-sibling::*[2][self::tr][@id = "vol'.$volume.'"]) and contains(./b/text(), "Trama")]/div/p';
+		$stories_query = $xpath->query($query);
+
+		return $stories_query[0]->nodeValue;
 	}
-	
+
 	//funzione ausiliaria per la correzione della data
 	function transformDate($string)
 	{

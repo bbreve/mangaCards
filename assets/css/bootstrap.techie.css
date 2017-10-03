@@ -797,18 +797,23 @@ pre code {
 @media (min-width: 768px) {
   .container {
     width: 750px;
+    height: auto / 50%;
   }
 }
 @media (min-width: 992px) {
   .container {
     width: 970px;
+    
+    height: auto / 50%;
   }
 }
 @media (min-width: 1200px) {
   .container {
     width: 1170px;
+    height: auto / 50%;
   }
 }
+
 .container-fluid {
   margin-right: auto;
   margin-left: auto;
@@ -4387,6 +4392,14 @@ a.list-group-item.active > .badge,
   color: #089183;
   background-color: rgba(238,238,238,0.9);
  }
+.jumbotest{
+  padding: 30px;
+  color: #089183;
+  background-color: rgba(238,238,238,0.9);  
+}
+.jumbotest h1{
+  color:inherit;
+}
 .jumbotron h1,
 .jumbotron .h1 {
   color: inherit;
