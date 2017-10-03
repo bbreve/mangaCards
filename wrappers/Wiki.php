@@ -184,43 +184,65 @@
 		}
 	}
 
-	function extractTitles()
+	
+function extractTitles()
 	{
 		global $titles, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
 		
-		$titles_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-"])]');
+		$titles_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-"])]');
 
+		//$i = 1;
 		foreach($titles_query as $title_query)
-			$titles[] = $title_query->nodeValue;
+		{	
+			//Se non è stata adottata una doppia numerazione, devo verificare di 
+			//recuperare solo il titolo dei capitoli con data d'uscita italiana
+			/*if(!$double_numeration)
+			{
+				if($i <= $number)
+				{
+					$titles[] = $title_query->nodeValue;
+					$i++;
+				}
+			}
+			else*/
+				$titles[] = $title_query->nodeValue;
+		}
+
 	}
 
 	function extractNumVol()
 	{
-		global $titles, $numvol, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
-
-		$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and (./text()="-")])]');
-
-/*PULIZIA TEMPORANEA, DA VERIFICARE CORRETTEZZA 
+		global $titles, $numvol, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration,$numTabelle;
+		$numTabelle=$xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]');
+		
+		for($i=1;$i<=$numTabelle->length;$i++){
+			
+         $doppiaNumerazione=$xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//th[contains(text(),"N")and contains(a,"It")]');
+		$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and (./text()="-")])]');
+      
 		//Se è presente un solo tipo di numerazione
-		if($nums_query->length == $number)
+		if($doppiaNumerazione->length==0)
 		{
 			foreach($nums_query as $num_query)
 			{	
-				$numvol[] = $num_query->nodeValue;
-			}
+				if(stristr($num_query->nodeValue,'('))
+				{
+					$valore=explode("(",$num_query->nodeValue);
+					$num=explode(")",$valore[1]);
+					$numvol[] = $num[0];
+				}
+				else
+					$numvol[] = $num_query->nodeValue;
+				}
 		}
 		//Se invece sono presenti due tipi di numerazione: quella italiana e giapponese
-		else if($nums_query->length == (2*$numberJ))
+		else 
 		{
 			$double_numeration = true;
-			$num_vol_jp = array();
 			$italian = false;
 			foreach ($nums_query as $num_query) {
 				if(!$italian)
-				{
-					$num_vol_jp[] = $num_query->nodeValue;
 					$italian = true;
-				}
 				else if($italian)
 				{
 					$numvol[] = $num_query->nodeValue;
@@ -228,7 +250,8 @@
 				}
 			}
 		}
-		//Se invece non sono riuscito ad estrarre il numero dei volumi, fornisco una numerazione arbitraria;
+	//Se invece non sono riuscito ad estrarre il numero dei volumi, fornisco una numerazione arbitraria;
+	/*
 		else
 		{
 
@@ -237,37 +260,10 @@
 				if($num_query->nodeValue <= $number)
 					$numvol[] = $num_query->nodeValue;
 			}
-		}
-*/	
-		//Se è presente una doppia numerazione
-		if($nums_query->length == (2*$numberJ))
-		{
-			$double_numeration = true;
-			$num_vol_jp = array();
-			$italian = false;
-			foreach ($nums_query as $num_query) {
-				if(!$italian)
-				{
-					$num_vol_jp[] = $num_query->nodeValue;
-					$italian = true;
-				}
-				else if($italian)
-				{
-					$numvol[] = $num_query->nodeValue;
-					$italian = false;
-				}
-			}
-		}
-		else
-		{
-			foreach($nums_query as $num_query)
-			{	
-				if($num_query->nodeValue <= $number)
-					$numvol[] = $num_query->nodeValue;
-			}
+		}*/
+		
 		}
 	}
-	
 
 	function extractNameChapters()
 	{
