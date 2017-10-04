@@ -83,7 +83,7 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
                                 foreach($work_info->work->editors->editor as $editor) 
                                 {
                                   $editors_list .= $editor.", ";
-                                }
+                                } 
                                 $editors_list = rtrim($editors_list, ", ");
                                 echo $editors_list;
                         ?></h5>
@@ -161,15 +161,11 @@ body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid
           $toReturn .= "<h5><b>Trama:</b></h5><p>".$plot."</p>";
         }
 
+
         if(count($chapters_list) > 0)
         {
-          $toReturn .= "<h5 class=\"panel-heading\"><b>Capitoli:</b></h5>";
-          $toReturn .= "<ul>";
-          foreach($chapters_list->chapter as $chapter)
-          {
-            $toReturn .= "<li>".$chapter."</li>";
-          }
-          $toReturn .= "</ul>";
+          $toReturn .= "<h5 ><b>Capitoli:</b></h5>";
+          $toReturn .= "<ul>".$chapters_list."</ul>";
         }
 
         return $toReturn;

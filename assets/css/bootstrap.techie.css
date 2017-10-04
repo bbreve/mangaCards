@@ -5068,11 +5068,12 @@ a.list-group-item-danger.active:focus {
 }
 .panel-default > .panel-heading {
   color: #333333;
-  background-color: #E4FCCF;
+  background-color: #b2ff6e;
   border-color: #eeeeee;
 }
 .panel-default > .panel-heading + .panel-collapse > .panel-body {
   border-top-color: #eeeeee;
+  background-color: #e9ffd5;
 }
 .panel-default > .panel-heading .badge {
   color: #f5f5f5;
