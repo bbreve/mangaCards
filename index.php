@@ -7,7 +7,7 @@
       <title>Manga Cards</title>
       
       <link href='https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900' rel='stylesheet' type='text/css'>
-  	  <link href="assets/css/theme/style.css" rel="stylesheet" type="text/css" media="all" />
+  	  <!--<link href="assets/css/theme/style.css" rel="stylesheet" type="text/css" media="all" />-->
       <link href="assets/css/animate.css" rel="stylesheet" type="text/css" media="all" />
 
       <!--SELECT 2 Instructions -->
@@ -48,55 +48,49 @@
     </head>
 
     <body>
-    <div id="bg" class="bg_Manga"></div>z
+    <div id="bg" class="bg_Manga"></div>
     	<!-- main --> 
-  	<div class="main-agileinfo slider ">
   		<div class="items-group">
-  			<div class="item agileits-w3layouts">
-  				<div class="block text main-agileits"> 
-  					<div class="login-form loginw3-agile"> 
-  						<div class="login-agileits-top jumbotest">
+  						<div class="jumbotron">
   							<div class="agile-row">
-  								<div>
-  									<h1 style="font-weight:bold">Manga<br><br>Cards</h1>
+  								<div> 
+  									<h1 style="text-align:center; font-weight:bold">Manga<br>Cards</h1>
   									<p style="font-weight:bold; text-align:center">Cerca informazioni sui tuoi manga e comics preferiti e confronta i prezzi!</p>
   								</div>
   							</div> 
   							<form id="main" action="info.php" method="post">
   								<div class="row">
-  									  <div class="col-md-4">
-  										<button type="button" id="typeButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Manga <span class="caret"></span></button>
-  										<ul class="dropdown-menu">
-  										  <li><a href="javascript:changeType('Manga');">Manga</a></li>
-  										  <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>
-  										</ul>
-  									  </div><!-- /btn-group -->
-  									   <div class="form-group has-feedback col-md-8" style="margin-bottom: 0px">		
-                              <input id="work_selected" name="work_selected" type="hidden" value=""/>					           		
-                              <select class="form-control" name="select">
-
-                              </select>
-  							            	 <!--<input id="title" name="title" type="text" class="form-control" placeholder="Inserisci il titolo del manga">-->
-  							            	 <span class="hidden fa fa-times form-control-feedback"></span>
-  							       </div> 
+                    <div align="center">
+                      <div class="input-group">
+                        <div class="input-group-btn">
+                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Manga <span class="caret"></span></button>
+<!--NICO-->                   <ul class="dropdown-menu">
+                              <li><a href="javascript:changeType('Manga');">Manga</a></li>
+                              <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>
+                            </ul>
+                        </div> <!-- /btn-group -->   
+                        <input id="work_selected" name="work_selected" type="hidden" value=""/>                       
+                        <select class="form-control" name="select">
+                        </select>
+                            <!--<input id="title" name="title" type="text" class="form-control" placeholder="Inserisci il titolo del manga">-->
+                        <span class="hidden fa fa-times form-control-feedback"></span>
+                      </div>
+                    </div>
                   </div>
-  								  <div class="agile-row">
-  									<div style="text-align: center;">
-  										<a class="btn btn-primary btn-lg btn-search">Cerca</a>
-  									</div>
-  								  </div>
+    							<div class="row">
+    									<div style="text-align: center">
+    										<a class="btn btn-primary btn-lg btn-search">Cerca</a>
+    									</div>
+                  </div>
   							</form>
   							<div class="agile-row">
-  							<footer class="text-center">
-  								<div class="credits">
-  									<p>Progetto realizzato per il corso di Integrazione Dati sul Web</p>
-  								</div>
+  							  <footer class="text-center">
+  							    <div class="credits">
+  									  <p>Progetto realizzato per il corso di Integrazione Dati sul Web</p>
+  								  </div>
   							</footer>
   							</div>
   						</div>
-  					</div>
-  				</div>
-  			</div>	
   		</div>
   	</div>	
       <!-- Main Scripts-->

@@ -103,16 +103,15 @@
 
 			if(!$double_numeration)
 			{	
-				$prodotto->addChild("story", $stories_and_chapters['vol'.$numvol[$i]]['story']);
-				$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters['vol'.$numvol[$i]]['chapters']));		
+				$prodotto->addChild("story", $stories_and_chapters[$numvol[$i]]['story']);
+				$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']));		
 			}
 			else
 			{	
-				$prodotto->addChild("story", $stories_and_chapters['vol'.$num_vol_jp[$i]]['story']);
-				$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters['vol'.$num_vol_jp[$i]]['chapters']));		
+				$prodotto->addChild("story", $stories_and_chapters[$num_vol_jp[$i]]['story']);
+				$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']));		
 			}
 
-			
 			//if (count($volChapters) == count($titles))
 			//{
 		//		$list = $prodotto->addChild("chapters_list");
@@ -233,7 +232,7 @@ function extractTitles()
 
 		foreach($volumes_tr as $volume_tr)
 		{
-			$id = $xpath->query('@id', $volume_tr);
+			$id = $xpath->query('./td[1]/text()', $volume_tr);
 			$chapters = $xpath->query('./following-sibling::tr[1][not(contains(@id, "vol"))]//td/div/ul/li', $volume_tr);
 			$chapters_string = "";
 

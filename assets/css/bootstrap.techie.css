@@ -22,6 +22,44 @@ html {
 body {
   margin: 0;
 }
+.bg_Manga, .bg_Comics {
+  z-index: -99999999;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;  
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  left:0;
+}
+.bg_Manga:before, .bg_Manga:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url(../../assets/img/bg_Manga.png);
+    background-size: 100%;
+    animation: move 200s infinite linear;
+}
+.bg_Comics:before, .bg_Comics:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url(../../assets/img/bg_Fumetto.jpg);
+    background-size: 100%;
+    animation: move 200s infinite linear;
+}
+.bg_Manga:before, .bg_Comics:before {
+    right: 100%;
+}
+@keyframes move {
+    from {transform: translateX(100%);}
+      to {transform: translateX(0%);}
+}
+
 article,
 aside,
 details,
@@ -797,20 +835,17 @@ pre code {
 @media (min-width: 768px) {
   .container {
     width: 750px;
-    height: auto / 50%;
   }
 }
 @media (min-width: 992px) {
   .container {
     width: 970px;
     
-    height: auto / 50%;
   }
 }
 @media (min-width: 1200px) {
   .container {
     width: 1170px;
-    height: auto / 50%;
   }
 }
 
@@ -4388,18 +4423,10 @@ a.list-group-item.active > .badge,
 }
 .jumbotron {
   padding: 30px;
-  margin-bottom: 30px;
   color: #089183;
   background-color: rgba(238,238,238,0.9);
  }
-.jumbotest{
-  padding: 30px;
-  color: #089183;
-  background-color: rgba(238,238,238,0.9);  
-}
-.jumbotest h1{
-  color:inherit;
-}
+
 .jumbotron h1,
 .jumbotron .h1 {
   color: inherit;
@@ -4422,6 +4449,9 @@ a.list-group-item.active > .badge,
   .jumbotron {
     padding-top: 48px;
     padding-bottom: 48px;
+    margin-right: 30%;
+    margin-left: 30%;
+    margin-top:5%;
   }
   .container .jumbotron {
     padding-left: 60px;
