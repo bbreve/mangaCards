@@ -15,7 +15,17 @@
 	/* Createa a new DomDocument object */
 	$dom = new DomDocument;
 	/* Load the HTML */
-	$url = $chapters_link;
+	if ($chapters_link != "https://it.wikipedia.org")
+	{
+		$url = $chapters_link;
+		$format_page = 1;
+	}
+	else 
+	{
+		$url = $work_link;
+		$format_page = 2;
+	}
+
 	$dom->loadHTMLFile($url);
 	/* Create a new XPath object */
 	$xpath = new DomXPath($dom);
@@ -24,10 +34,8 @@
 	
 	$num_manga = 1;
 	
-	if (stripos($url, "Capitoli") !== FALSE)
-		$format_page = 1;
-	else $format_page = 2;
 	
+
 	$number = $num_it;
 	$numberJ = $num_jp;
 	
@@ -75,7 +83,6 @@
 	function writeVolumesXML()
 	{
 		global $datesIT, $titles, $num_vol_jp, $numvol, $stories, $volChapters, $xml, $double_numeration, $stories_and_chapters;
-		
 
 		for ($i = 0; $i < count($titles); $i++)
 		{
@@ -123,8 +130,17 @@
 
 	function extractDatesIt()
 	{
-		global $datesIT, $xpath;
-		$dates_it_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[contains(@style, "white-space:nowrap")][2]');
+		global $datesIT, $xpath, $format_page;
+		
+		if ($format_page == 2)
+		{
+			$dates_it_query = $xpath->query('//span[@id = "Capitoli" or @id = "Manga"]/following::table[@class="wikitable"][1]//tr[contains(@id, "vol")]/td[contains(@style, "white-space:nowrap")][2]');
+		}
+		else 
+		{	
+			$dates_it_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[contains(@style, "white-space:nowrap")][2]');
+		}
+		
 		foreach($dates_it_query as $date_it)
 		{	
 			if ($date_it == "" || $date_it == " " || $date_it == NULL)
@@ -149,8 +165,14 @@ function extractTitles()
 	{
 		global $titles, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
 		
-		$titles_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-"])]');
-
+		if ($format_page == 2)
+		{
+			$titles_query = $xpath->query('//span[@id = "Capitoli" or @id = "Manga"]/following::table[@class="wikitable"][1]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-" or ./text()="—"])]');
+		}
+		else 
+		{
+			$titles_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-" or ./text()="—"])]');
+		}	
 		//$i = 1;
 		foreach($titles_query as $title_query)
 		{	
@@ -158,6 +180,7 @@ function extractTitles()
 				$titles[] = $title_query->nodeValue;
 		}
 
+	
 	}
 
 	function extractNumVol()
@@ -169,10 +192,18 @@ function extractTitles()
 		for($i=1;$i<=$numTabelle->length;$i++)
 		{
 
-	        $doppiaNumerazione=$xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//th[contains(text(),"N")and contains(a,"It")]');
 			
-			$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and (./text()="-")])]');
-	      
+				$doppiaNumerazione=$xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//th[contains(text(),"N")and contains(a,"It")]');
+			
+			if ($format_page != 2)
+			{
+				$nums_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and (./text()="-")])]');
+			}
+			else
+			{
+				$nums_query = $xpath->query('//span[@id = "Capitoli" or @id = "Manga"]/following::table[@class="wikitable"][1]//tr[contains(@id, "vol")]/td[contains(@style, "text-align:center") and not(contains(@style, "white-space:nowrap")) and not(following-sibling::td[contains(@style, "white-space:nowrap") and (./text()="-" or ./text()="—")])]');
+			}
+			
 			//Se è presente un solo tipo di numerazione
 			if($doppiaNumerazione->length==0)
 			{
@@ -225,9 +256,16 @@ function extractTitles()
 
 	function extractStoriesAndChapters()
 	{
-		global $stories_and_chapters, $xpath, $numvol;
+		global $stories_and_chapters, $xpath, $numvol, $format_page;
 
-		$query = '//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]';
+		if ($format_page == 1)
+		{
+			$query = '//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]';
+		}
+		else
+		{
+			$query = '//span[@id = "Capitoli" or @id = "Manga"]/following::table[@class="wikitable"][1]//tr[contains(@id, "vol")]';
+		}		
 		$volumes_tr = $xpath->query($query);
 
 		foreach($volumes_tr as $volume_tr)

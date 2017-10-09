@@ -1,8 +1,6 @@
 <?php
   $title = $_POST['work_selected'];
 
-
-
   ob_start();
   require __DIR__.'\wrappers\WikipediaWrapper.php';
   $page_info = ob_get_clean(); 
@@ -12,6 +10,8 @@
   $num_jp = $work_info->work->volumes_jp;
   $num_it = $work_info->work->volumes_it;
   $chapters_link = $work_info->work->chapters_link;
+  $work_link = $work_info->work->work_link;
+
   ob_start();  
   require __DIR__.'\wrappers\Wiki.php';
   $chapters_info = ob_get_clean(); 

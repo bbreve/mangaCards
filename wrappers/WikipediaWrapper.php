@@ -10,6 +10,7 @@ $dom = new DomDocument;
 
 $dom->loadHTMLFile("https://it.wikipedia.org/wiki/".$title);
 
+
 /* Create a new XPath object */
 
 
@@ -26,7 +27,7 @@ $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_pro
 
  if($numeroManga->length!=0 ){
 
-    $ReturnXml = create_XML($ReturnXml, $xpath);
+    $ReturnXml = create_XML($ReturnXml, $xpath, $title);
 
     
 
@@ -77,7 +78,7 @@ else{
 
 
 
-function create_XML($ReturnXml, $xpath)
+function create_XML($ReturnXml, $xpath, $title)
 
 {
 
@@ -182,7 +183,9 @@ function create_XML($ReturnXml, $xpath)
          
          $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
          $user->addChild('chapters_link', "https://it.wikipedia.org".$chapters_link[0]->nodeValue);
-         
+
+		 $user->addChild('work_link', "https://it.wikipedia.org/wiki/".$title);
+        
     }
 
     return $ReturnXml;
