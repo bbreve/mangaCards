@@ -63,7 +63,7 @@
                     <div align="center">
                       <div class="input-group">
                         <div class="input-group-btn">
-                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Manga <span class="caret"></span></button>
+                          <button type="button" id="typeButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Manga <span class="caret"></span></button>
 <!--NICO-->                   <ul class="dropdown-menu">
                               <li><a href="javascript:changeType('Manga');">Manga</a></li>
                               <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>

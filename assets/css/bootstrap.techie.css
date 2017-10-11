@@ -361,7 +361,14 @@ img {
 .carousel-inner > .item > a > img {
   display: block;
   max-width: 100%;
+  text-align: center;
+  vertical-align: center;
   height: auto;
+  min-height: 310px;
+  line-height: 310px;
+}
+.mini-thumbnail{
+  height: 300px;
 }
 .img-rounded {
   border-radius: 6px;
@@ -3406,7 +3413,6 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   clear: both;
 }
 .tab-content {
-  overflow: auto;
   padding: 20px;
   border-style: solid;
   border-color: #ddd;
@@ -4909,13 +4915,13 @@ a.list-group-item-danger.active:focus {
   font-weight: 300;
 }
 .panel-title > a {
-  color: inherit;
+  color: white;
   outline: none;
   text-decoration: none;
 }
 .panel-title > a:hover,
 .panel-title > a:focus {
-  color: inherit;
+  color: #f9f9f9;
   outline: none;
   text-decoration: none;
 }
@@ -5098,12 +5104,12 @@ a.list-group-item-danger.active:focus {
 }
 .panel-default > .panel-heading {
   color: #333333;
-  background-color: #b2ff6e;
+  background-color: #089183;
   border-color: #eeeeee;
 }
 .panel-default > .panel-heading + .panel-collapse > .panel-body {
   border-top-color: #eeeeee;
-  background-color: #e9ffd5;
+  background-color: #f9f9f9;
 }
 .panel-default > .panel-heading .badge {
   color: #f5f5f5;
