@@ -44,41 +44,15 @@
 	extractStoriesAndChapters(); 
 	extractTitles();
 	extractDatesIt();
-	/*var_dump($titles);
-	echo "<br />";
-	var_dump(count($titles));
-	echo "<br />";
-	var_dump($datesIT);
-	echo "<br />";
-	var_dump(count($datesIT));
-	echo "<br />";
-	var_dump($numvol);
-	echo "<br />";
-	var_dump(count($numvol));
-	echo "<br />";*/
-	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
-	//$xml->addChild("io", count($numvol));
-	//$xml->addChild("io", count($datesIT));
-	//$xml->addChild("io", count($titles));
 
-	//extractStories();
-	
-	
-	//$xml->addChild("Ciao");
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
+
+
 	writeVolumesXML();
 	
-	//extractNameChapters();
-	//extractNumChapters();
-	//var_dump($nameChapters);
-	//var_dump($numChapters);
-	
-	//$xml2->addChild("io", count($numChapters));
-	//$xml2->addChild("io", count($nameChapters));
-	//if (count($nameChapters) == count($numChapters))
-	//	writeChaptersXML();
 	
 	echo $xml->asXML();
-	//echo $xml2->asXML();
+	
 	
 	function writeVolumesXML()
 	{
@@ -118,13 +92,7 @@
 				$prodotto->addChild("story", $stories_and_chapters[$num_vol_jp[$i]]['story']);
 				$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']));		
 			}
-
-			//if (count($volChapters) == count($titles))
-			//{
-		//		$list = $prodotto->addChild("chapters_list");
-		//		foreach ($volChapters[$i] as $node)
-			//		$list->addChild("chapter", trim($node->nodeValue));
-			//}				
+			
 		}
 	}
 
@@ -147,7 +115,7 @@
 				continue;
 
 
-			preg_match_all("#(\d+ )?\w+ \d+#", $date_it->nodeValue, $match);
+			preg_match_all("#(\d+\?? )?\w+ \d+#", $date_it->nodeValue, $match);
 
 			$temp = [];
 			foreach($match[0] as $date_in_volume)
@@ -173,7 +141,6 @@ function extractTitles()
 		{
 			$titles_query = $xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]//tr[contains(@id, "vol")]/td[(./i/b or ./b/i)][not(following-sibling::td[./text()="-" or ./text()="—"])]');
 		}	
-		//$i = 1;
 		foreach($titles_query as $title_query)
 		{	
 			
@@ -209,7 +176,7 @@ function extractTitles()
 			{
 
 				foreach($nums_query as $num_query)
-				{	
+				{		
 					if(stristr($num_query->nodeValue,'('))
 					{
 						$valore=explode("(",$num_query->nodeValue);
@@ -220,7 +187,7 @@ function extractTitles()
 						$numvol[] = $num_query->nodeValue;
 					}
 			}
-			//Se invece sono presenti due tipi di numerazione: quella italiana e giapponese
+			//Se invece sono presenti due tipi di numerazione: quella italiaprepre e giapponese
 			else 
 			{
 				$double_numeration = true;
@@ -238,18 +205,6 @@ function extractTitles()
 					}
 				}
 			}
-
-	//Se invece non sono riuscito ad estrarre il numero dei volumi, fornisco una numerazione arbitraria;
-	/*
-		else
-		{
-
-			foreach($nums_query as $num_query)
-			{	
-				if($num_query->nodeValue <= $number)
-					$numvol[] = $num_query->nodeValue;
-			}
-		}*/
 		
 		}
 	}

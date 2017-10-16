@@ -32,6 +32,15 @@
           line-height: 38px;
         }
       </style>
+	  <style type="text/css">
+		.vertical-center {
+	  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+	  min-height: 100vh; /* These two lines are counted as one :-)       */
+
+	  display: flex;
+	  align-items: center;
+	}
+	</style>
   	
     <!-- =======================================================
         Theme Name: Techie
@@ -48,6 +57,12 @@
     </head>
 
     <body>
+    <div id="overlay">
+      <div class="loading">
+        <h1 style="color:inherit;">Raccolta delle informazioni in corso...</h1>
+        <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
+    </div>
+    </div>
     <div id="bg" class="bg_Manga"></div>
     	<!-- main --> 
   		<div class="items-group">
@@ -101,7 +116,19 @@
       <script src="assets/js/typeahead.min.js"></script>
   	   <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
       <script type="text/javascript">
-       
+        
+        function showOverlay() {
+          $("#overlay").fadeIn(400);
+        }     
+        
+        function hideOverlay() {
+          $("#overlay").fadeOut(400);
+        }
+
+        $(document).ready(function(){
+          hideOverlay();
+        });
+
         $('select').select2(
         {
           language: {
@@ -164,6 +191,8 @@
       	});
 
        $("form#main").submit(function(e){
+
+          showOverlay();    
       		if($("select option:selected").text() != ""){
             text_selected = $("select").select2().find(":selected").html();
         

@@ -1,16 +1,17 @@
 	<?php
+
 	error_reporting(0);
 	class AmazonWrapper{
 		
-		
 		public function AmazonWrapper($query, $precision)
 		{
-			global $query_product, $pages, $xml;
+			global $query_product, $pages, $offers_array;
 			
-			$query_product = $query;
+			$query_product = trim($query);
 			$pages = $precision;
 
-			$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+			$offers_array = array();
+			
 		}
 		
 		
@@ -26,23 +27,24 @@
 		
 		private function save_product($number, $title, $url_to_product, $price, $image)
 		{
-			global $array_products;
+			global $offers_array_products;
 			
-			$array_products[$number[0][0]] = array($title, $url_to_product, $price, $image);
+			$offers_array_products[$number[0][0]] = array($title, $url_to_product, $price, $image);
 		}
 		
 		public function execute()
 		{
-			global $query_product, $pages, $array_products, $xml;
+			global $query_product, $pages, $offers_array, $xml;
 			
 			
-			$array_products = array();
+			$offers_array_products = array();
 			
 			for($i = 1; $i<=$pages; $i++)
 			{
 				$ch = curl_init();
 				
-				curl_setopt($ch, CURLOPT_URL, "https://www.amazon.it/s/ref=nb_sb_ss_i_1_5?url=search-alias%3Dstripbooks&page=$i&field-keywords=".urlencode($query_product)."");
+
+				curl_setopt($ch, CURLOPT_URL, "https://www.amazon.it/s/ref=nb_sb_ss_i_1_5?url=search-alias%3Dstripbooks&page=$i&field-keywords=".urlencode(htmlspecialchars($query_product))."");
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 				curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 				curl_setopt($ch, CURLOPT_POST, true);
@@ -84,16 +86,32 @@
 					//$this->save_product($number[0][0], $title, $url_to_product, $price, $image);
 
 					
-					if(stristr($title, urldecode($query_product)) && $price != "€")
-						$this->appendXML($title, $url_to_product, $price, $image, $author_string);
+					if(stristr($title, urldecode($query_product)) && $price != "€" && count($number[0]) != 0)
+						$this->appendArray($title, $url_to_product, $price, $image, $author_string, $number[0][0]);
 					
 					
 				}
 			}
+			
+			
 
-			return $xml;
+			return $this->createXML();
 			
 				
+		}
+
+		function appendArray($title, $url_to_product, $price, $image, $author, $number)
+		{
+			global $offers_array;
+			$offers_array[] = array(
+				'title' => $title,
+				'price' => $price,
+				'productNumber' => $number,
+				'cover' => $image,
+				'author' => $author,
+				'url_to_product' => $url_to_product
+			); 
+
 		}
 
 		function appendXML($title, $url_to_product, $price, $image, $author)
@@ -108,19 +126,42 @@
 			$prodotto->addChild("cover", $image);
 			$prodotto->addChild("url_to_product", htmlspecialchars($url_to_product));
 		}
+
+		function createXML()
+		{
+			global $offers_array;
+
+
+			usort($offers_array,function($a,$b){
+				return $a['productNumber'] - $b['productNumber'];
+			});
+
+			$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+
+			foreach($offers_array as $offer)
+			{
+				$offer_element = $xml->addChild("offer");
+				$offer_element->addChild("title", htmlspecialchars($offer['title']));
+				$offer_element->addChild("price", $offer['price']);
+				$offer_element->addChild("author", $offer['author']);
+				$offer_element->addChild("cover", $offer['cover']);
+				$offer_element->addChild("url_to_product", htmlspecialchars($offer['url_to_product']));
+			}
+
+			return $xml;
+		}
 		
 	}
 
 	
 	$title = $_POST['title'];
 
-	preg_match('!((\w+ )|(\w+))*!',$title, $title_cleaned);
+
+	preg_match('!(((\w+ )|(\w+))\'?)*!ui',$title, $title_cleaned);
+
 	$title = $title_cleaned[0];
-	$amazon = new AmazonWrapper($title, 2);
-
+	$amazon = new AmazonWrapper($title, 4);
 	$xml = $amazon->execute();
-	
-
 	echo $xml->asXML();
 
 	?>

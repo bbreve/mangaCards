@@ -6,7 +6,6 @@
   $page_info = ob_get_clean(); 
   $work_info = simplexml_load_string($page_info);
   
-  
   $num_jp = $work_info->work->volumes_jp;
   $num_it = $work_info->work->volumes_it;
   $chapters_link = $work_info->work->chapters_link;
@@ -16,7 +15,7 @@
   require __DIR__.'\wrappers\Wiki.php';
   $chapters_info = ob_get_clean(); 
   $chapters_xml = simplexml_load_string($chapters_info);
-  
+
   ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,6 +23,7 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>Manga Cards - Dettaglio</title>
     <link href='https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:700' rel='stylesheet' type='text/css'>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="description" content="Techie Bootstrap 3 skin">
     <meta name="keywords" content="bootstrap 3, skin, flat">
@@ -86,10 +86,13 @@
       </div>
       <div class="tabbable">
         <ul class="nav nav-tabs">
-          <li class="active"><a href="#tab11" data-toggle="tab">Volumi</a></li>
-          <li><a href="#tab12" data-toggle="tab">Offerte</a></li>
+          <?php if(!empty($chapters_xml)){?>
+                  <li class="active"><a href="#tab11" data-toggle="tab">Volumi</a></li>
+          <?php } ?> 
+          <li <?php if(empty($chapters_xml)) echo'class="active"'; ?> ><a href="#tab12" data-toggle="tab">Offerte</a></li>
         </ul>
         <div class="tab-content">
+          <?php if(!empty($chapters_xml)){ ?>
           <div class="tab-pane active" id="tab11">
             <div class="row">
               <div class="col-sm-12">
@@ -120,10 +123,14 @@
               </div>
             </div>
           </div>
-          <div class="tab-pane" id="tab12">
+          <?php } ?>
+          <div <?php if(!empty($chapters_xml)) echo 'class="tab-pane"'; else echo 'class="tab-pane active"'; ?> id="tab12">
             <div class="row">
                 <div class="col-sm-12 container offers">
-
+                    <div class="overlay loading text-center">
+                      <h4 class="loading">Caricamento delle offerte in corso...</h4>
+                      <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
+                    </div>                    
                 </div>
             </div>
           </div>
@@ -149,10 +156,21 @@
           async: true
 
         })
-        .done(function (data){
+        .done(function (data){  
+          hideOverlay();
           parseXML(data);
         });
       });
+
+ 
+        function showOverlay() {
+          $(".overlay").fadeIn(400);
+        }     
+        
+        function hideOverlay() {
+          $(".overlay").fadeOut(400);
+        }
+
 
 
 

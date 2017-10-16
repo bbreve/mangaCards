@@ -55,6 +55,25 @@ body {
 .bg_Manga:before, .bg_Comics:before {
     right: 100%;
 }
+
+#overlay {
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;  
+    position:absolute;
+    top:0;
+    bottom:0;
+    right:0;
+    left:0;
+    background: #FFF;
+    opacity: 0.9;
+    z-index: 99999999999999999 !important;
+}
+.loading {
+    color: #089183;
+}
+
 @keyframes move {
     from {transform: translateX(100%);}
       to {transform: translateX(0%);}
