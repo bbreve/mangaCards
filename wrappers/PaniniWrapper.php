@@ -1,28 +1,31 @@
 <?php
-	include "curl.php";
-	
 	header("Content-type: application/xml");
 
 	//Dichiaro gli array per le informazioni
 	$editions = array();
 	$images = array();
 	$links = array();
-	$names = array();
-	$numvol = array();
+	$titles = array();
+	$volume_numbers = array();
 	$prices = array();
-	$specials = array();
+	$currPrices = array();
+	$volume_infos = array();
 	$pDates = array();
 	
 	//Parametri di ricerca
-	$search = "bleach";
-	$prod = "Comic";
+	$search = "naruto";
+	$prod = "comic";
 	
-	$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=1&q=".urlencode($search);
-	$ch1 = new CurlExecution($url);	//crei l'esecutore dello scraper
+	$ch = curl_init();
+	$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=1&q=".urlencode($search)."";
+	setCurl();
+	$content = curl_exec($ch);
+				
+	$dom = new DomDocument();
+	@$dom->loadHTML($content);
+	$xpath = new DOMXPath($dom);         
+	$res1 = $xpath->query('//div[@class="text-center"]');      
 
-	$data = $ch1->curl($url);          //prepari l'esecutore per il curl 
-	$res1 = $ch1->returnData('//div[@class="text-center"]');      //estrai dati usando un XPATH
-	
 	//Dichiaro l'XML di ritorno
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');			
 	
@@ -39,262 +42,315 @@
 		//Estraggo le informazioni
 		for ($pag = 1; $pag <= $num_pages; $pag++)
 		{
-			$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=".$pag."&q=".urlencode($search);
-			$ch2 = new CurlExecution($url);	//crei l'esecutore dello scraper
-			$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
-			
+			$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=".$pag."&q=".urlencode($search)."";
+			$ch = curl_init();
+			setCurl();
+			$content = curl_exec($ch);
+			$dom = new DomDocument();
+			@$dom->loadHTML($content);
+			$xpath = new DOMXPath($dom); 
 			
 			//Estraggo info della pagina corrente
-			$images = extractImages($images, $ch2);
-			$editions = extractEdition($editions, $ch2);
-			$links = extractLink($links, $ch2);	
-			$names = extractNames($names, $ch2);
-			$numvol = extractNumber($numvol, $ch2);
-			$prices = extractPrices($prices, $ch2);
-			$pDates = extractDates($pDates, $ch2);
-			$specials = extractSpecials($specials, $ch2);
-			
+			extractImage();
+			extractEdition();
+			extractLink();	
+			extractTitle();
+			extractVolNumber();
+			extractOldPrice();
+			extractReleaseDate();
+			extractCurrentPrice();
+			extractVolumeInfo();			
 		}
 		
-		$xml = writeXML($images, $links, $names, $prices, $specials, $pDates, $editions, $numvol, $prod, $search, $xml);
+		writeXML();
 	}
 	
-	//var_dump(count($images)." ".count($links)." ".count($names)." ".count($prices)." ".count($specials)." ".count($pDates)." ".count($editions));
 	echo $xml->asXML();
 	
-	function writeXML($images, $links, $names, $prices, $specials, $pDates, $editions, $numvol, $prod, $search, $xml)
+	function writeXML()
 	{
-			for ($n = 0; $n < count($links); $n++)
-			{
-				//echo $n." ".$names[$n]." ".$search."<br />";
-				if (stripos($names[$n], $search) === false)
-					continue;
-				$prodotto = $xml->addChild("product");
+		global $images, $links, $titles, $volume_numbers, $volume_infos, $editions, $pDates, $prices, $currPrices, $prod, $xml;
+		for ($n = 0; $n < count($titles); $n++)
+		{
+			$prodotto = $xml->addChild("product");
 				
-				$prodotto->addChild("name", $names[$n]);
-				$prodotto->addChild("product_type", $prod);
-				$prodotto->addChild("volume_number", $numvol[$n]);
-				
-				if ($editions[$n] <> "Edizione originale")
-					$prodotto->addChild("edition", $editions[$n]);
-				
-				$prodotto->addChild("old_price", $prices[$n]);
-				$prodotto->addChild("curr_price", $specials[$n]);
-				$prodotto->addChild("date", $pDates[$n]);
-				$prodotto->addChild("image", $images[$n]);
-				$prodotto->addChild("link", $links[$n]);
-			}
+			$prodotto->addChild("title", $titles[$n]);
+			$prodotto->addChild("product_type", $prod);
+			$prodotto->addChild("productNumber", $volume_numbers[$n]);
 			
-			return $xml;
+			if ($editions[$n] <> "Edizione Originale")
+				$prodotto->addChild("edition", $editions[$n]);
+			if ($volume_infos[$n] <> "")
+				$prodotto->addChild("info_volume", $volume_infos[$n]);
+			
+			$prodotto->addChild("old_price", $prices[$n]);
+			$prodotto->addChild("curr_price", $currPrices[$n]);
+			$prodotto->addChild("release_date", $pDates[$n]);
+			$prodotto->addChild("cover", $images[$n]);
+			$prodotto->addChild("url_to_product", $links[$n]);
+		}
+			
+		$arr = array();
+		foreach($xml->product as $product){
+			$arr[] = $product;
+}
+
+		usort($arr,function($a,$b){
+			return $a->productNumber - $b->productNumber;
+		});
+		
+		$xml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+		foreach($arr as $product){
+			$value=$xml->addChild('offer');
+			$value->addChild('title',(string)$product->title);
+			$value->addChild('product_type',(string)$product->product_type);
+			$value->addChild('productNumber',(string)$product->productNumber);
+			if ($product->edition != NULL)
+				$value->addChild('edition',(string)$product->edition);
+			if ($product->info_volume != NULL)
+				$value->addChild('info_volume',(string)$product->info_volume);
+			$value->addChild('price',(string)$product->curr_price);
+			$value->addChild('old_price',(string)$product->old_price);
+			$value->addChild('date',(string)$product->release_date);
+			$value->addChild('cover',(string)$product->cover);
+			$value->addChild('url_to_product',(string)$product->url_to_product);
+		}
 	}
 	
-	function extractImages($images, $ch2)
+	function extractImage()
 	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//a[@class="product-image"]/img/@src');
+			global $images, $search, $xpath;
+			
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');
 			foreach ($res as $curr)
 			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
+				
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
-				else $images[] = trim($curr->nodeValue);
+				
+				$queryResult = $xpath->query('.//a[@class="product-image"]/img/@src', $curr);
+				
+				if ($queryResult->length != 0)
+				{
+					$img = trim($queryResult->item(0)->nodeValue);
+				
+					if ($img == "" || $img == " " || $img == NULL)
+						continue;
+					else 
+						$images[] = $img;
+				}
+				else 
+					$images[] = "";
 			}
-			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//a[@class="product-image"]/img/@src');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $images[] = trim($curr->nodeValue);
-			}
-			
-			return $images;
 	}
 	
-	function extractLink($links, $ch2)
+	function extractLink()
 	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//h3/a/@href');
+			global $links, $search, $xpath;
+			
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');
+			
 			foreach ($res as $curr)
 			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
-				else $links[] = trim($curr->nodeValue);
+				
+				$queryResult = $xpath->query('.//h3/a/@href', $curr);
+				if ($queryResult->length != 0)
+				{
+					$anchor = trim($queryResult->item(0)->nodeValue);
+				
+					if ($anchor == "" || $anchor == " " || $anchor == NULL)
+						continue;
+					else 
+						$links[] = $anchor;
+				}
 			}
-			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//h3/a/@href');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $links[] = trim($curr->nodeValue);
-			}
-			
-			return $links;
 	}
 
-	function extractNames($names, $ch2)
+	function extractTitle()
 	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//h3/a/text()');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $names[] = trim($curr->nodeValue);
-			}
+			global $titles, $search, $xpath;
 			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//h3/a/text()');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $names[] = trim($curr->nodeValue);
-			}
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');
 			
-			return $names;
-	}
-	
-	function extractNumber($numvol, $ch2)
-	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//h3/a/text()');
 			foreach ($res as $curr)
 			{
-				$string = trim($curr->nodeValue);
-				if ($string == "" || $string == " " || $string == NULL)
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
+				
+				if ($string == "" || $string == " " || $string == NULL)
+						continue;
 				else 
+					$titles[] = $string;
+			}
+	}
+	
+	function extractVolNumber()
+	{
+			global $volume_numbers, $search, $xpath;
+			
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');			foreach ($res as $curr)
+			
+			foreach($res as $curr)
+			{
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
+					continue;
+				
+				$arrays = explode(" ", $string);
+				$volume_numbers[] = intval($arrays[count($arrays)-1]);
+			}
+	}
+	
+	function extractOldPrice()
+	{
+			global $prices, $search, $xpath;
+			
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');			foreach ($res as $curr)
+			
+			foreach($res as $curr)
+			{
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
+					continue;
+				
+				$queryResult = $xpath->query('.//p[@class="old-price"]', $curr);
+				if ($queryResult->length != 0)
 				{
-					$arrays = explode(" ", $string);
-					$numvol[] = intval($arrays[count($arrays)-1]);
+					$price = trim($queryResult->item(0)->nodeValue);
+				
+					if ($price == "" || $price == " " || $price == NULL)
+						continue;
+					else 
+						$prices[] = $price;
 				}
 			}
+	}
+	
+	function extractCurrentPrice()
+	{
+			global $currPrices, $search, $xpath;
 			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//h3/a/text()');
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');
 			foreach ($res as $curr)
 			{
-				$string = trim($curr->nodeValue);
-				if ($string == "" || $string == " " || $string == NULL)
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
+				
+				$queryResult = $xpath->query('.//p[@class="special-price"]', $curr);
+				if ($queryResult->length != 0)
+				{
+					$price = trim($queryResult->item(0)->nodeValue);
+				
+					if ($price == "" || $price == " " || $price == NULL)
+						continue;
+					else 
+						$currPrices[] = $price;
+				}
+			}
+	}
+	
+	function extractReleaseDate()
+	{
+			global $pDates, $search, $xpath;
+			
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');
+			foreach ($res as $curr)
+			{
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
+					continue;
+				
+				$queryResult = $xpath->query('.//h4[@class="publication-date"]', $curr);
+				
+				if ($queryResult->length != 0)
+				{
+					$releaseDate = trim($queryResult->item(0)->nodeValue);
+				
+					if ($releaseDate == "" || $releaseDate == " " || $releaseDate == NULL)
+						continue;
+					else 
+						$pDates[] = $releaseDate;
+				}
+			}
+	}
+
+	function extractEdition()
+	{
+			global $editions, $search, $xpath;
+			
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');
+			foreach ($res as $curr)
+			{
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
+					continue;
+				
+				$queryResult = $xpath->query('.//h5[@class="reprint"]', $curr);
+				if ($queryResult->length != 0)
+				{
+					$reprint = trim($queryResult->item(0)->nodeValue);
+				
+					if ($reprint == "" || $reprint == " " || $reprint == NULL)
+						continue;
+					else 
+						$editions[] = $reprint;
+				}
 				else
+					$editions[] = "Edizione Originale";
+			}
+	}
+	
+	function extractVolumeInfo()
+	{
+			global $volume_infos, $search, $xpath;
+			
+			$res = $xpath->query('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]');
+			foreach ($res as $curr)
+			{
+				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
+				$string = trim($string);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
+					continue;
+				
+				$queryResult = $xpath->query('.//small[@class="subtitle lightText" or @class="serie"]', $curr);
+				if ($queryResult->length != 0)
 				{
-					$arrays = explode(" ", $string);
-					$numvol[] = intval($arrays[count($arrays)-1]);
+					$info = trim($queryResult->item(0)->nodeValue);
+				
+					if ($info == "" || $info == " " || $info == NULL)
+						continue;
+					else 
+						$volume_infos[] = $info;
 				}
+				else
+					$volume_infos[] = "";
 			}
-			
-			return $numvol;
 	}
 	
-	function extractPrices($prices, $ch2)
+	function setCurl()
 	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//p[@class="old-price"]');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $prices[] = trim($curr->nodeValue);
-			}
-			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//p[@class="old-price"]');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $prices[] = trim($curr->nodeValue);
-			}
-			 
-			return $prices;
-	}
-	
-	function extractSpecials($specials, $ch2)
-	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//p[@class="special-price"]');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $specials[] = trim($curr->nodeValue);
-			}
-			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//p[@class="special-price"]');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $specials[] = trim($curr->nodeValue);
-			}
-			 
-			return $specials;
-	}
-	
-	function extractDates($pDates, $ch2)
-	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//h4[@class="publication-date"]');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $pDates[] = trim($curr->nodeValue);
-			}
-			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//h4[@class="publication-date"]');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $pDates[] = trim($curr->nodeValue);
-			}
-			 
-			return $pDates;
-	}
-	
-	function extractSeries($series, $ch2)
-	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//a[@class="product-image"]/@title');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $series[] = trim($curr->nodeValue);
-			}
-			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//a[@class="product-image"]/@title');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $pDates[] = trim($curr->nodeValue);
-			}
-			
-			return $series;
-	}
-	
-	function extractEdition($editions, $ch2)
-	{
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello"]//a[@class="product-image"]/@title');
-			foreach ($res as $curr)
-				$editions[] = "Edizione originale";
-			
-			$res = $ch2->returnData('//div[contains(@class,"list-group-item row item") and div/div/div/div/div/button/@title = "Aggiungi al carrello" and contains(div/div/div/div/h5, "ristampa")]//h5[@class="reprint"]');
-			foreach ($res as $curr)
-			{
-				$string = $curr->nodeValue;
-				if ($string == "" || $string == " " || $string == NULL)
-					continue;
-				else $editions[] = trim($curr->nodeValue);
-			}
-			
-			return $editions;
+		global $ch, $url;
+		
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/html'));
 	}
 ?>	
