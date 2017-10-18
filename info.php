@@ -239,6 +239,7 @@
           image = $(this).find('cover').text();
 
           price = $(this).find('price').text();
+		  details=$(this).find('details').text();
           
           author = $(this).find('author').text();
           $('.container.offers').append(
@@ -252,7 +253,11 @@
             +'      <p>di '+author+'</p>'
             +'    </div>'
             +'    <div class="agile-row">'
-            +'      <h2>'+price+'</h2>'
+            +'      <h3>'+price+'</h3>'
+            +'    </div>'
+			+'		<div class="agile-row">'
+            +'     		 <h4>'+'In breve:'+'</h4>'
+			+'                  <p>'+details+'</p>  '
             +'    </div>'
             +'  </div>'
             +'  <div class="col-sm-2">'

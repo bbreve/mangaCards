@@ -55,6 +55,7 @@ foreach($ReturnXml->product as $product){
 		$value->addChild('author',(string)$product->author);
 		$value->addChild('cover',(string)$product->image);
 		$value->addChild('url_to_product',(string)$product->linkproduct);
+		$value->addChild('details',(string)$product->details);
 		
 	}
 
@@ -97,6 +98,7 @@ foreach($ReturnXml->product as $product){
 		$value->addChild('author',(string)$product->author);
 		$value->addChild('cover',(string)$product->image);
 		$value->addChild('url_to_product',(string)$product->linkproduct);
+		$value->addChild('details',(string)$product->details);
 		
 	}
 }
