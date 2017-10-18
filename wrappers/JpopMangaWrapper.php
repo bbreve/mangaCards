@@ -110,8 +110,8 @@ function get_numerics ($str) {
 }
 
 
-$search="tokyo ghoul";
-$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($search)."&submit_search=",$search);
+$title = $_POST['title'];
+$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title)."&submit_search=",$title);
 echo $xml;
 
 ?>

@@ -147,6 +147,7 @@
     <script src="assets/js/typeahead.min.js"></script>
     <script>
       $(document).ready(function(){
+		  var Editors = "<?php echo $editors_list; ?>";
         $.ajax({
           type: "POST",
           data: {
@@ -158,9 +159,27 @@
         })
         .done(function (data){  
           hideOverlay();
-          parseXML(data);
+          parseAmazonXML(data);
         });
-      });
+		
+		if(Editors.search(/J-Pop/i)!==-1){
+				$.ajax({
+				type: "POST",
+				data: {
+					'title': <?php echo '"'.$title.'"'; ?>
+				},
+				url: "wrappers/JpopMangaWrapper.php",
+				async: true
+
+				})
+				.done(function (data){  
+				hideOverlay();
+				parseJPopXML(data);
+				});
+			}
+		});
+	  
+	  
 
  
         function showOverlay() {
@@ -174,7 +193,7 @@
 
 
 
-      function parseXML(data)
+      function parseAmazonXML(data)
       {
         $(data).find('offer').each(function(){
           title = $(this).find('title').text();
@@ -203,7 +222,45 @@
             +'      <img src="https://images-na.ssl-images-amazon.com/images/G/01/SellerCentral/legal/amazon-logo_transparent.png" style="width: 100%"/>'
             +'    </div>'
             +'    <div class="agile-row">'
-            +'      <a href="'+url+'" class="mini-thumbnail"><img style="width:100%" src="http://www.cavouresoterica.it/wp-content/uploads/2016/04/acquista-ora.png"/></a>'
+            +'      <a href="'+url+'" class="mini-thumbnail" target="_blank"><img style="width:100%" src="http://www.cavouresoterica.it/wp-content/uploads/2016/04/acquista-ora.png"/></a>'
+            +'    </div>'
+            +'  </div>'
+            +'</div>'
+            +'<hr>');
+
+        });
+	  }
+		
+		function parseJPopXML(data)
+      {
+        $(data).find('offer').each(function(){
+          title = $(this).find('title').text();
+          url = $(this).find('url_to_product').text();
+          image = $(this).find('cover').text();
+
+          price = $(this).find('price').text();
+          
+          author = $(this).find('author').text();
+          $('.container.offers').append(
+            '<div class="row">'
+            +'  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="'+image+'"/></a></div>'
+            +'  <div class="col-sm-6">'
+            +'    <div class="agile-row">'
+            +'      <h4>'+title+'</h4>'
+            +'    </div>'
+            +'    <div class="agile-row">'
+            +'      <p>di '+author+'</p>'
+            +'    </div>'
+            +'    <div class="agile-row">'
+            +'      <h2>'+price+'</h2>'
+            +'    </div>'
+            +'  </div>'
+            +'  <div class="col-sm-2">'
+            +'    <div class="agile-row">'
+            +'      <img src="http://www.j-pop.it//img/logo-4.jpg?1470504371" style="width: 100%"/>'
+            +'    </div>'
+            +'    <div class="agile-row">'
+            +'      <a href="'+url+'" class="mini-thumbnail" target="_blank"><img style="width:100%" src="http://www.cavouresoterica.it/wp-content/uploads/2016/04/acquista-ora.png"/></a>'
             +'    </div>'
             +'  </div>'
             +'</div>'
