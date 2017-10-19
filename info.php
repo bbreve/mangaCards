@@ -241,18 +241,16 @@
           if($(data).find('anime').length > 1)
           {
             $('.tab-content').append('<h3 style="padding-left:15px">Elenco episodi</h3><div class="tab-pane" id="tab13"><div class="row"><div class="col-sm-12 anime"></div></div></div>');
-           
-            //Questa è la creazione dell'elenco delle versioni dell'anime mostrato sulla destra
-            $('.tabbable.tabs-right').append('<div class="col-sm-3"><h3 style="margin-top:0px;">Versioni televisive</h3><ul class="nav nav-anime anime-list"></ul></div>');
 
 
             //Questa è la creazione del pannello che mostrerà l'elenco degli episodi
             $('.anime').append('<div class="tabbable tabs-right"><div class="col-sm-9"><div class="tab-content" style="border-color:#089183"></div></div></div>');
             
+            //Questa è la creazione dell'elenco delle versioni dell'anime mostrato sulla destra
+            $('.tabbable.tabs-right').append('<div class="col-sm-3"><h3 style="margin-top:0px;">Versioni televisive</h3><ul class="nav nav-anime anime-list"></ul></div>');
 
           
-            //Questa variabile tiene traccia delle versioni diverse dall'anime viene incrementato quando si passa da una versione dell'anime ad un'altra
-
+            //Questa variabile tiene traccia delle versioni diverse dall'anime viene incrementato quando si passa da una versione dell'anime ad un'altra            
             series=1;
             //Scorro tutti gli anime
             $(data).find('anime').each(function(){            
