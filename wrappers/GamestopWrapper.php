@@ -2,6 +2,8 @@
 
 	header("Content-type: application/xml");
 	
+	global $ch, $url;
+
 	//Platform 10 PC
 	//Platform 27 PS4
 	//Platform 18 PSVITA
@@ -30,11 +32,12 @@
 	//XBOX ONE
 	$ch = curl_init();
 	$url = "https://www.gamestop.it/SearchResult/QuickSearch?q=".urlencode($search)."&platform=28";
-	setCurl();
-	$content = curl_exec($ch);			
+
 	$dom = new DomDocument();
-	@$dom->loadHTML($content);
-	$xpath = new DOMXPath($dom);         
+	$dom->loadHTMLFile($url);
+	/* Create a new XPath object */
+	$xpath = new DomXPath($dom);
+	      
 
 	extractImage();
 	extractLink();	
