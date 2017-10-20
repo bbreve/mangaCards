@@ -55,6 +55,7 @@ foreach($ReturnXml->product as $product){
 		$value->addChild('author',(string)$product->author);
 		$value->addChild('cover',(string)$product->image);
 		$value->addChild('url_to_product',(string)$product->linkproduct);
+		$value->addChild('details',(string)$product->details);
 		
 	}
 
@@ -97,6 +98,7 @@ foreach($ReturnXml->product as $product){
 		$value->addChild('author',(string)$product->author);
 		$value->addChild('cover',(string)$product->image);
 		$value->addChild('url_to_product',(string)$product->linkproduct);
+		$value->addChild('details',(string)$product->details);
 		
 	}
 }
@@ -110,8 +112,8 @@ function get_numerics ($str) {
 }
 
 
-$search="tokyo ghoul";
-$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($search)."&submit_search=",$search);
+$title = $_POST['title'];
+$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title)."&submit_search=",$title);
 echo $xml;
 
 ?>

@@ -16,15 +16,15 @@
 	$oavs = array();
 	
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_anime_products></list_anime_products>');
-
 	libxml_use_internal_errors(true);
 	
-	$url = "https://it.wikipedia.org/wiki/One Piece";
+	$series = $_POST['series'];
+	
+	$url = "https://it.wikipedia.org/wiki/".$series;
 	$dom = new DomDocument;
 	$dom->loadHTMLFile($url);
 	$xpath = new DomXPath($dom);
 	
-	$series = "One Piece";
 	
 	$queryAnime = $xpath->query('//span[contains(@id, "Anime") or contains(@id, "anime")]/following::table[contains(@class, "noprint")]//i//a[contains(@href, "Episodi")]/@href');
 

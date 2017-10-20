@@ -23,7 +23,7 @@
       <link href="assets/css/bootstrap.min.css" rel="stylesheet">
       <link href="assets/css/bootstrap.techie.css" rel="stylesheet">
 
-      <style>
+      <style type="text/css">
         .select2-container .select2-selection--single{
           height:40px;
         }
@@ -57,11 +57,13 @@
     </head>
 
     <body>
-    <div id="overlay">
-      <div class="loading">
-        <h1 style="color:inherit;">Raccolta delle informazioni in corso...</h1>
-        <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
-    </div>
+    <div id="overlay" class="vertical-center">
+        <div style="text-align: center">
+          <div class="loading">
+            <h1 style="color:inherit; margin:auto; text-align: center">Raccolta delle informazioni in corso...</h1>
+            <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
+          </div>
+        </div>
     </div>
     <div id="bg" class="bg_Manga"></div>
     	<!-- main --> 

@@ -2,8 +2,13 @@
 
 	header("Content-type: application/xml");
 	
+<<<<<<< HEAD
 	global $xpath;
 	
+=======
+	global $ch, $url;
+
+>>>>>>> f629c32b126a7674fd7ee2d01f9e115e7da72992
 	//Platform 10 PC
 	//Platform 27 PS4
 	//Platform 18 PSVITA
@@ -33,9 +38,18 @@
 
 	//XBOX ONE
 	$url = "https://www.gamestop.it/SearchResult/QuickSearch?q=".urlencode($search)."&platform=28";
+<<<<<<< HEAD
 	$dom = new DomDocument;
 	$dom->loadHTMLFile($url);
 	$xpath = new DomXPath($dom);
+=======
+
+	$dom = new DomDocument();
+	$dom->loadHTMLFile($url);
+	/* Create a new XPath object */
+	$xpath = new DomXPath($dom);
+	      
+>>>>>>> f629c32b126a7674fd7ee2d01f9e115e7da72992
 
 	extractImage();
 	extractLink();	
