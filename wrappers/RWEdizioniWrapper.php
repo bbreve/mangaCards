@@ -1,19 +1,23 @@
 <?php 
-	include "curl.php";
-	
 	header("Content-type: application/xml");
 
 	//Dichiaro gli array per le informazioni
 	$images = array();
 	$links = array();
-	$names = array();
+	$titles = array();
 	$prices = array();
-	$availables = array();
+	$innerChapters = array();
+	$descriptions = array();
 	$pDates = array();
 	$authors = array();
 	$imprints = array();
 	$collections = array();
 	$series = array();
+	
+	libxml_use_internal_errors(true);
+	
+	//Dichiaro l'XML di ritorno
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
 	
 	//Parametri di ricerca
 	$search = "flash";
@@ -21,188 +25,64 @@
 
 	//Chiamata prima pagina
 	$url = "http://www.rwedizioni.it/search/".urlencode($search);
-	$ch2 = new CurlExecution($url);	//crei l'esecutore dello scraper
-	$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
+	$dom = new DomDocument;
+	$dom->loadHTMLFile($url);
+	$xpath = new DomXPath($dom);
 	
 	//Estraggo info della prima pagina
-	$images = extractImages($images, $ch2);
-	$links = extractLink($links, $ch2);	
-	$names = extractNames($names, $ch2);
-	$prices = extractPrices($prices, $ch2);
-	$pDates = extractDates($pDates, $ch2);
-	$authors = extractAuthors($authors, $ch2);
-	$imprints = extractImprints($imprints, $ch2);
-	$collections = extractCollection($collections, $ch2);
-	$series = extractSeries($series, $ch2);
+	extractLink();	
+	extractTitle();
+	extractPrice();
+	extractDate();
+	extractAuthors();
+	extractImprint();
+	extractCollection();
+	extractSeries();
+	extractInPage();
 	
 	//Cerco se ci sono pagine successive ed estraggo
 	while(1)
 	{	
 		//Verifico se esiste una nuova pagina
-		$ch1 = new CurlExecution($url);	//crei l'esecutore dello scraper
-		$data = $ch1->curl($url);          //prepari l'esecutore per il curl 
-		$res1 = $ch1->returnData('//a[contains(string(.), "Articoli più vecchi")]');      //estrai dati usando un XPATH
+		$dom->loadHTMLFile($url);
+		$xpath = new DomXPath($dom);
+		$res1 = $xpath->query('//a[contains(string(.), "Articoli più vecchi")]');
 		
 		if ($res1->length == 0)
           break;
 	  
 	    $pag += 1;
 		$url = "http://www.rwedizioni.it/search/".urlencode($search)."/page/".$pag."/";
-		$ch2 = new CurlExecution($url);	//crei l'esecutore dello scraper
-		$data = $ch2->curl($url);          //prepari l'esecutore per il curl 
+		$dom->loadHTMLFile($url);
+		$xpath = new DomXPath($dom);
 		
 		//Estraggo info della pagina corrente	
-		$images = extractImages($images, $ch2);
-		$links = extractLink($links, $ch2);	
-		$names = extractNames($names, $ch2);
-		$prices = extractPrices($prices, $ch2);
-		$pDates = extractDates($pDates, $ch2);
-		$authors = extractAuthors($authors, $ch2);
-		$imprints = extractImprints($imprints, $ch2);
-		$collections = extractCollection($collections, $ch2);
-		$series = extractSeries($series, $ch2);
+		extractLink();	
+		extractTitle();
+		extractPrice();
+		extractDate();
+		extractAuthors();
+		extractImprint();
+		extractCollection();
+		extractSeries();
+		extractInPage();
 	}
 	
-	//Dichiaro l'XML di ritorno
-	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
-	$xml = writeXML($images, $links, $names, $prices, $availables, $pDates, $authors, $imprints, $collections, $series, $xml);
+	//var_dump(count($images)." ".count($descriptions)." ".count($innerChapters)." ".count($authors)." ".count($titles)." ".count($pDates)." ".count($links)." ".count($prices)." ".count($imprints)." ".count($series)." ".count($collections));
+	writeXML();
 	echo $xml->asXML();
 	
-	function extractImages($images, $ch2)
+		
+	function writeXML()
 	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]//img/@src');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$images[] = "";
-			 else $images[] = trim($curr->nodeValue);
-			}
-			
-			return $images;
-	}
-	
-	function extractLink($links, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[2]//a/@href');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$links[] = "";
-			 else $links[] = trim($curr->nodeValue);
-			}
-			
-			return $links;
-	}
-
-	function extractNames($names, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[2]');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$names[] = "";
-			 else $names[] = trim($curr->nodeValue);
-			}
-			
-			return $names;
-	}
-	
-	function extractPrices($prices, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[3]');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$prices[] = "";
-			 else $prices[] = trim($curr->nodeValue);
-			}
-			 
-			return $prices;
-	}
-	
-	function extractDates($pDates, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[5]');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$pDates[] = "";
-			 else $pDates[] = transformDate(trim($curr->nodeValue));
-			}
-			 
-			return $pDates;
-	}
-	
-	function extractAuthors($authors, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[6]');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$aauthors[] = "";
-			 else $authors[] = trim($curr->nodeValue);
-			}
-			
-			return $authors;
-	}
-	
-	function extractImprints($imprints, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[7]');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$imprints[] = "";
-			 else $imprints[] = trim($curr->nodeValue);
-			}
-			
-			return $imprints;
-	}
-	
-	function extractCollection($collections, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[8]');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$collections[] = "";
-			 else $collections[] = trim($curr->nodeValue);
-			}
-			
-			return $collections;
-	}
-	
-	function extractSeries($series, $ch2)
-	{
-			$res = $ch2->returnData('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]/td[9]');
-			foreach ($res as $curr)
-			{
-			 $string = $curr->nodeValue;
-			 if ($string == "" || $string == " " || $string == NULL)
-				$series[] = "";
-			 else $series[] = trim($curr->nodeValue);
-			}
-			
-			return $series;
-	}
-	
-	function writeXML($images, $links, $names, $prices, $availables, $pDates, $authors, $imprints, $collections, $series, $xml)
-	{
+			global $images, $links, $titles, $prices, $descriptions, $innerChapters, $pDates, $authors, $imprints, $collections, $series, $xml;
 			for ($n = 0; $n < count($links); $n++)
 			{
 				$prodotto = $xml->addChild("product");
 				
-				$prodotto->addChild("name", $names[$n]);
-				$prodotto->addChild("product_type", "Comic");
-				$prodotto->addChild("editorial_series", $series[$n]);
+				$prodotto->addChild("title", $titles[$n]);
+				if ($series[$n] <> "")
+					$prodotto->addChild("editorial_series", $series[$n]);
 			
 				if ($collections[$n] <> "")
 					$prodotto->addChild("collection", $collections[$n]);
@@ -210,19 +90,262 @@
 				if ($imprints[$n] <> "")
 					$prodotto->addChild("imprint", $imprints[$n]);
 		
-				if ($authors[$n] <> "")
-					$prodotto->addChild("authors", $authors[$n]);
-			
-				$prodotto->addChild("price", $prices[$n]);
+				if (count($authors[$n]) > 0)
+				{
+					$creators = $prodotto->addChild("authors");
+					for ($i = 0; $i < count($authors[$n]); $i++)
+						$creators->addChild("author", $authors[$n][$i]);
+				}
+		
+				if ($prices[$n] <> "")
+					$prodotto->addChild("price", $prices[$n]);
 				
 				if ($pDates[$n] <> "")
-					$prodotto->addChild("date", $pDates[$n]);
+					$prodotto->addChild("release_date", $pDates[$n]);
 				
-				$prodotto->addChild("image", $images[$n]);
-				$prodotto->addChild("link", $links[$n]);
+				if ($innerChapters[$n] <> "")
+					$prodotto->addChild("containedChapters", $innerChapters[$n]);
+		
+				if ($descriptions[$n] <> "")	
+					$prodotto->addChild("description", $descriptions[$n]);
+				
+				if ($images[$n] <> "")
+					$prodotto->addChild("image", $images[$n]);
+				$prodotto->addChild("prod_link", $links[$n]);
 			}
 			
-			return $xml;
+			$arr = array();
+			foreach($xml->product as $prod)
+				$arr[] = $prod;
+				
+			usort($arr, function($a, $b){
+				return strcmp($a->name, $b->name);
+			});
+			
+			$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+			foreach($arr as $product)
+			{
+				$value = $xml->addChild('offer');
+				$value->addChild('title',(string)$product->title);
+				
+				if (((string) $product->series) != NULL)
+					$value->addChild('ed_series',(string)$product->series);
+				if (((string) $product->collection) != NULL)
+					$value->addChild('collection',(string)$product->collection);
+				if (((string) $product->imprint) != NULL)
+					$value->addChild('imprint',(string)$product->imprint);
+				
+				if ($product->authors != NULL)
+				{
+					$creators = $product->authors;
+					$other = $value->addChild("authors");
+					foreach($creators->author as $aut)
+					{
+						$other->addChild("author", (string) $aut);	
+					}					
+				}
+				
+				if (((string) $product->price) != NULL)
+					$value->addChild('price',(string)$product->price);
+				
+				if (((string) $product->release_date) != NULL)
+					$value->addChild('release_date',(string)$product->release_date);
+				
+				if (((string) $product->containedChapters) != NULL)
+					$value->addChild('containedChapters',(string)$product->containedChapters);	
+				
+				if (((string) $product->description) != NULL)
+					$value->addChild('description',(string)$product->description);	
+				
+				if (((string) $product->image) != NULL)
+					$value->addChild('cover',(string)$product->image);
+				$value->addChild('url_to_product',(string)$product->prod_link);
+			}
+	}
+	
+	function extractInPage()
+	{
+			global $images, $innerChapters, $descriptions, $xpath;
+			$dom1 = new DomDocument;
+				
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$link = $xpath->query('.//td[2]//a/@href', $curr);
+				$dom1->loadHTMLFile($link->item(0)->nodeValue);
+				$innerXPath = new DomXPath($dom1);
+				
+				$img = $innerXPath->query('//div[@id="content"]//a[@itemprop="image"]//img/@src');
+				if ($img->length != 0)
+				{
+					$string = trim($img->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$images[] = "";
+					else 
+						$images[] = $string;
+				}
+				
+				$chapters = $innerXPath->query('//div[@id="content"]//span[contains(@class, "albi")]');
+				if ($chapters->length != 0)
+				{
+					$string = trim($chapters->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$innerChapters[] = "";
+					else 
+						$innerChapters[] = $string;
+				}
+				else
+					$innerChapters[] = "";
+				
+				$descr = $innerXPath->query('//div[@id="tab-description"]//p');
+				if ($descr->length != 0)
+				{
+					$string = trim($descr->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$descriptions[] = "";
+					else 
+						$descriptions[] = $string;
+				}
+				else
+					$descriptions[] = "";
+			}
+	}
+	
+	function extractLink()
+	{
+			global $links, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			
+			foreach ($res as $curr)
+			{
+				$link = $xpath->query('.//td[2]//a/@href', $curr);
+				$string = trim($link->item(0)->nodeValue);
+				if ($string == "" || $string == " " || $string == NULL)
+					$links[] = "";
+				else 
+					$links[] = $string;
+			}
+	}
+
+	function extractTitle()
+	{
+			global $titles, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if ($string == "" || $string == " " || $string == NULL)
+					$titles[] = "";
+				else 
+					$titles[] = $string;
+			}
+	}
+	
+	function extractPrice()
+	{
+			global $prices, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$pr = $xpath->query('.//td[3]', $curr);
+				if ($pr->length != 0)
+				{
+					$string = trim($pr->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$prices[] = "";
+					else 
+						$prices[] = $string;
+				}
+			}
+	}
+	
+	function extractDate()
+	{
+			global $pDates, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$day = $xpath->query('.//td[5]', $curr);
+				if ($day->length != 0)
+				{
+					$string = transformDate(trim($day->item(0)->nodeValue));
+					if ($string == "" || $string == " " || $string == NULL)
+						$pDates[] = "";
+					else 
+						$pDates[] = $string;
+				}
+			}
+	}
+	
+	function extractAuthors()
+	{
+			global $authors, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$creator = $xpath->query('.//td[6]', $curr);
+				if ($creator->length != 0)
+				{
+					$string = trim($creator->item(0)->nodeValue);
+					$list = array();
+					$authors[] = explode(",", $string);
+				}
+			}
+	}
+	
+	function extractImprint()
+	{
+			global $imprints, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$impr = $xpath->query('.//td[7]', $curr);
+				if ($impr->length != 0)
+				{
+					$string = trim($impr->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$imprints[] = "";
+					else 
+						$imprints[] = $string;
+				}
+			}
+	}
+	
+	function extractCollection()
+	{
+			global $collections, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$coll = $xpath->query('.//td[8]', $curr);
+				if ($coll->length != 0)
+				{
+					$string = trim($coll->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$collections[] = "";
+					else 
+						$collections[] = $string;
+				}
+			}
+	}
+	
+	function extractSeries()
+	{
+			global $series, $xpath;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			foreach ($res as $curr)
+			{
+				$ser = $xpath->query('.//td[9]', $curr);
+				if ($ser->length != 0)
+				{
+					$string = trim($ser->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$series[] = "";
+					else 
+						$series[] = $string;
+				}
+			}
 	}
 	
 	//funzione ausiliaria per la correzione della data

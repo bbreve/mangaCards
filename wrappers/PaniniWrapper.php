@@ -16,19 +16,16 @@
 	$search = "naruto";
 	$prod = "comic";
 	
-	$ch = curl_init();
-	$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=1&q=".urlencode($search)."";
-	setCurl();
-	$content = curl_exec($ch);
-				
+	libxml_use_internal_errors(true);
+	
+	$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=1&q=".urlencode($search)."";		
 	$dom = new DomDocument();
-	@$dom->loadHTML($content);
+	$dom->loadHTMLFile($url);
 	$xpath = new DOMXPath($dom);         
 	$res1 = $xpath->query('//div[@class="text-center"]');      
 
 	//Dichiaro l'XML di ritorno
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');			
-	
 	if ($res1->length != 0)
 	{
 		//Ottengo il numero di pagine della ricerca
@@ -43,11 +40,8 @@
 		for ($pag = 1; $pag <= $num_pages; $pag++)
 		{
 			$url = "http://comics.panini.it/store/pub_ita_it/catalogsearch/result/index/?p=".$pag."&q=".urlencode($search)."";
-			$ch = curl_init();
-			setCurl();
-			$content = curl_exec($ch);
 			$dom = new DomDocument();
-			@$dom->loadHTML($content);
+			$dom->loadHTMLFile($url);
 			$xpath = new DOMXPath($dom); 
 			
 			//Estraggo info della pagina corrente
@@ -89,7 +83,6 @@
 			$prodotto->addChild("cover", $images[$n]);
 			$prodotto->addChild("url_to_product", $links[$n]);
 		}
-			
 		$arr = array();
 		foreach($xml->product as $product){
 			$arr[] = $product;
@@ -101,17 +94,19 @@
 		
 		$xml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
 		foreach($arr as $product){
-			$value=$xml->addChild('offer');
+			$value = $xml->addChild('offer');
 			$value->addChild('title',(string)$product->title);
 			$value->addChild('product_type',(string)$product->product_type);
 			$value->addChild('productNumber',(string)$product->productNumber);
-			if ($product->edition != NULL)
+			
+			if (((string) $product->edition) != NULL)
 				$value->addChild('edition',(string)$product->edition);
-			if ($product->info_volume != NULL)
+			if (((string) $product->info_volume) != NULL)
 				$value->addChild('info_volume',(string)$product->info_volume);
+			
 			$value->addChild('price',(string)$product->curr_price);
 			$value->addChild('old_price',(string)$product->old_price);
-			$value->addChild('date',(string)$product->release_date);
+			$value->addChild('release_date',(string)$product->release_date);
 			$value->addChild('cover',(string)$product->cover);
 			$value->addChild('url_to_product',(string)$product->url_to_product);
 		}
@@ -339,18 +334,5 @@
 				else
 					$volume_infos[] = "";
 			}
-	}
-	
-	function setCurl()
-	{
-		global $ch, $url;
-		
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/html'));
 	}
 ?>	
