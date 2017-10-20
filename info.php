@@ -145,6 +145,13 @@
           </div>
           
         </div>
+		<div class="tab-pane" id="tab13" >
+		  <div class "row">
+		    <div class="tab-anime" >
+					</div>
+				</div>
+			</div>
+		
       </div>
     </div>
     <footer class="text-center">
@@ -219,7 +226,7 @@
       {
 		   
 		   $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab14" ><img class="animated bounceInUp" height=80" width="200"  src="assets/img/amazonLogo2.jpg" /></a>');
-		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab14" class="panel-collapse collapse"><div class="panel-body amazon"></div></div></div>');
+		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab14" class="panel-collapse collapse"><div class="tab-content amazon"></div></div></div>');
         $(data).find('offer').each(function(){
           title = $(this).find('title').text();
           url = $(this).find('url_to_product').text();
@@ -263,7 +270,7 @@
 	  function parseJPopXML(data)
       {
 		  $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab15" ><img class="animated bounceInUp" height=170" width="200"  src="assets/img/JPopLogo.png" /></a>');
-		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab15" class="panel-collapse collapse"><div class="panel-body JPop"></div></div></div>');
+		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab15" class="panel-collapse collapse"><div class="tab-content JPop"></div></div></div>');
         $(data).find('offer').each(function(){
           title = $(this).find('title').text();
           url = $(this).find('url_to_product').text();
@@ -317,11 +324,11 @@
           //Se l'anime comprende più versioni mostro affianco una lista delle versioni, cliccando sulla lista cambia il contenuto dell'elenco episodi
           if($(data).find('anime').length > 1)
           {
-            $('.tab-content').append('<h3 style="padding-left:15px">Elenco episodi</h3><div class="tab-pane" id="tab13"><div class="row"><div class="col-sm-12 anime"></div></div></div>');
+            $('.tab-anime').append('<h3 style="padding-left:15px">Elenco episodi</h3><div class="tab-pane" ><div class="row"><div class="col-sm-12 anime"></div></div></div>');
 
 
             //Questa è la creazione del pannello che mostrerà l'elenco degli episodi
-            $('.anime').append('<div class="tabbable tabs-right"><div class="col-sm-9"><div class="tab-content" style="border-color:#089183"></div></div></div>');
+            $('.anime').append('<div class="tabbable tabs-right"><div class="col-sm-9"><div class="tab-content contentAnime" style="border-color:#089183"></div></div></div>');
             
             //Questa è la creazione dell'elenco delle versioni dell'anime mostrato sulla destra
             $('.tabbable.tabs-right').append('<div class="col-sm-3"><h3 style="margin-top:0px;">Versioni televisive</h3><ul class="nav nav-anime anime-list"></ul></div>');
@@ -339,14 +346,14 @@
               if(series == 1)
               {
                 //Inizializzo il blocco dell'anime che mostrerà la lista degli episodi
-                $('.tab-content').append('<div class="tab-pane active" id="tab2'+series+'"><div class="panel-group anime-content'+series+'" id="accordion-panel'+series+'"></div></div>');
+                $('.contentAnime').append('<div class="tab-pane active" id="tab2'+series+'"><div class="panel-group anime-content'+series+'" id="accordion-panel'+series+'"></div></div>');
                 //Aggiungo alla lista delle versioni dell'anime la versione corrente
                 $('.anime-list').append('<li class="active"><a href="#tab2'+series+'" data-toggle="tab">'+title+'</a></li>');
               }
               else
               {
                 //Inizializzo il blocco dell'anime che mostrerà la lista degli episodi
-                $('.tab-content').append('<div class="tab-pane" id="tab2'+series+'"><div class="panel-group anime-content'+series+'" id="accordion-panel'+series+'"></div></div>');
+                $('.contentAnime').append('<div class="tab-pane" id="tab2'+series+'"><div class="panel-group anime-content'+series+'" id="accordion-panel'+series+'"></div></div>');
                 //Aggiungo alla lista delle versioni dell'anime la versione corrente
                 $('.anime-list').append('<li><a href="#tab2'+series+'" data-toggle="tab">'+title+'</a></li>');
               }
@@ -373,7 +380,7 @@
           //Se invece esiste una sola vesione dell'anime visualizzo l'elenco episodi come se mostro l'elenco dei volumi
           else
           {
-            $('.tab-content').append('<h3>Elenco episodi</h3><div class="tab-pane" id="tab13"><div class="row"><div class="col-sm-12 anime"></div></div></div>');
+            $('.tab-anime').append('<h3>Elenco episodi</h3><div class="tab-pane" ><div class="row"><div class="col-sm-12 anime"></div></div></div>');
             //Inizializzo il blocco dell'anime che mostrerà la lista degli episodi
             $('.anime').append('<div class="panel-group anime-content" id="accordion-panelAnime"></div>');  
 
