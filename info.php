@@ -331,7 +331,7 @@
 	  
 	  function parsePaniniXML(data)
       {
-		  $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height=80" width="200"  src="assets/img/paninicomics.gif" /></a>');
+		  $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/paninicomics.gif" /></a>');
 		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab16" class="panel-collapse collapse"><div class="tab-content Panini"></div></div></div>');
         $(data).find('offer').each(function(){
           title = $(this).find('title').text();

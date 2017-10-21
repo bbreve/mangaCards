@@ -16,6 +16,8 @@
 	
 	//Parametri di ricerca
 	$title = $_POST['title'];
+	preg_match('!(((\w+ )|(\w+))\'?)*!ui',$title, $title_cleaned);// usato per problemi causati dai due punti nel titolo del manga es- Ken il guerriero: Le origini del mito.
+	$title = $title_cleaned[0];
 	$search = $title;
 	$prod = "manga";
 	
