@@ -15,7 +15,8 @@
 	$descriptions = array();
 	
 	//Parametri di ricerca
-	$search = "Naruto";
+	$title = $_POST['title'];
+	$search = $title;
 	$prod = "manga";
 	
 	//Dichiaro l'XML di ritorno
