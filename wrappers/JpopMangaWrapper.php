@@ -1,6 +1,6 @@
 <?php
 include 'FunctionsJpop.php';
-//header("Content-type: text/xml");
+header("Content-type: text/xml");
 function creaPagina($url,$search){
 
 $numUltimapagina=RitornaButtonPagine($url);
@@ -112,8 +112,10 @@ function get_numerics ($str) {
 }
 
 
-$title = $_POST['title'];
-$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title)."&submit_search=",$title);
+$titles = $_POST['title'];
+$title=explode("-", $titles);
+
+$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title[0])."&submit_search=",$title[0]);
 echo $xml;
 
 ?>

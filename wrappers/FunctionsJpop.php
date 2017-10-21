@@ -109,7 +109,7 @@ $link = $xpath->query("//div[@class='box-product-item']//div[@class='name']/a/@h
 	 $dom = new DomDocument;
 	 $dom->loadHTMLFile($node->nodeValue);
 	 $xpath = new DomXPath($dom);
-	 $inBreve = $xpath->query("//div[@class='short-description']/div[@class='std']/p");//rissunto della storia del prodotto
+	 $inBreve = $xpath->query("//div[@class='short-description']/div[@class='std']//text()");//rissunto della storia del prodotto
 	 $disp = $xpath->query("//div[@class='addtocont']/p[@id='availability_statut']/span[@id='availability_value']/strong");//disponibilità del prodotto
 	 $autore = $xpath->query("//ul[@id='idTab2']/li[1]/text()");
 	 $disponibilità[]=$disp[0]->nodeValue;

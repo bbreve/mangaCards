@@ -1,6 +1,7 @@
 <?php
   $title = $_POST['work_selected'];
   
+  
   ob_start();
   require __DIR__.'\wrappers\WikipediaWrapper.php';
   $page_info = ob_get_clean(); 
@@ -179,7 +180,7 @@
           parseAmazonXML(data);
         });
 		
-		if(Editors.search(/J-Pop/i)!==-1){
+		if(Editors.search(/J-Pop/i)!==-1 || Editors.search(/JPop/i)!==-1){
 				$.ajax({
 				type: "POST",
 				data: {
