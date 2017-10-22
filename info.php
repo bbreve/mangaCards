@@ -44,6 +44,25 @@
       body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid #ddd;padding:30px;margin-top:50px}.row>[class*=col-]{margin-bottom:40px}.navbar-container{position:relative;min-height:100px}.navbar.navbar-fixed-bottom,.navbar.navbar-fixed-top{position:absolute;top:50px;z-index:0}.navbar.navbar-fixed-bottom .container,.navbar.navbar-fixed-top .container{max-width:90%}.btn-group{margin-bottom:10px}.form-inline input[type=password],.form-inline input[type=text],.form-inline select{width:180px}.input-group{margin-bottom:10px}.pagination{margin-top:0}.navbar-inverse{margin:110px 0}
       .panel-default > .panel-heading {
       }
+	  
+		#scroll-to-top a {
+			cursor: pointer;
+			display: block;
+			background:#a0f8a2;
+			position: fixed;
+			left: 94%;
+			bottom: 10px;
+			border-radius: 10px 10px 10px 10px;
+			box-shadow: inset 2px 0 3px rgba(0, 0, 0, 0.2);
+		}
+
+		#scroll-to-top {
+			padding: 0px;
+			left: 50%;
+			bottom: 10px;
+			z-index: 1105;
+}
+
     </style>
   </head>
   <body>
@@ -157,7 +176,9 @@
     </div>
     <footer class="text-center">
       <p>&copy; Manga Cards</p>
+	  <div id="scroll-to-top" style="display: block;"><a><img  height="50" width="50"  src="assets/img/IconTop.png" /></a></div>
     </footer>
+	
     <!-- Main Scripts-->
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
@@ -236,7 +257,11 @@
           $(".overlay").fadeOut(400);
         }
 
-
+$('#scroll-to-top').click(function(){
+        $("html, body").animate({ scrollTop: 0 }, 500);
+        
+        return false;
+    });
 
 
       function parseAmazonXML(data)
