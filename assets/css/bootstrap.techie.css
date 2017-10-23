@@ -3448,6 +3448,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   border-style: solid;
   border-color: #ddd;
   border-width: 0 1px 1px 1px;
+  overflow: hidden;
 }
 .tabs-below > .nav-tabs,
 .tabs-right > .nav-tabs,
