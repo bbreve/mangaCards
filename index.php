@@ -51,19 +51,17 @@
 
       <!-- Docs Custom styles -->
       <style>
-    body,html{overflow-x:hidden}body{padding:0px 20px 0}footer{border-top:1px solid #ddd;padding:30px;margin-top:50px}.row>[class*=col-]{margin-bottom:40px}.navbar-container{position:relative;min-height:100px}.navbar.navbar-fixed-bottom,.navbar.navbar-fixed-top{position:absolute;top:50px;z-index:0}.navbar.navbar-fixed-bottom .container,.navbar.navbar-fixed-top .container{max-width:90%}.btn-group{margin-bottom:10px}.form-inline input[type=password],.form-inline input[type=text],.form-inline select{width:180px}.input-group{margin-bottom:10px}.pagination{margin-top:0}.navbar-inverse{margin:110px 0}
+    body,html{overflow:hidden}body{padding:0px 20px 0}footer{border-top:1px solid #ddd;padding:30px;margin-top:50px}.row>[class*=col-]{margin-bottom:40px}.navbar-container{position:relative;min-height:100px}.navbar.navbar-fixed-bottom,.navbar.navbar-fixed-top{position:absolute;top:50px;z-index:0}.navbar.navbar-fixed-bottom .container,.navbar.navbar-fixed-top .container{max-width:90%}.btn-group{margin-bottom:10px}.form-inline input[type=password],.form-inline input[type=text],.form-inline select{width:180px}.input-group{margin-bottom:10px}.pagination{margin-top:0}.navbar-inverse{margin:110px 0}
       </style>
       
     </head>
 
-    <body>
-    <div id="overlay" class="vertical-center">
-        <div style="text-align: center">
-          <div class="loading">
-            <h1 style="color:inherit; margin:auto; text-align: center">Raccolta delle informazioni in corso...</h1>
-            <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
-          </div>
-        </div>
+  <body>
+    <div class="overlay">
+      <div class="loading vertical-center">
+        <i style="margin:auto" class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
+      </div>
+      </div>
     </div>
     <div id="bg" class="bg_Manga"></div>
     	<!-- main --> 
@@ -120,11 +118,11 @@
       <script type="text/javascript">
         
         function showOverlay() {
-          $("#overlay").fadeIn(400);
+          $(".overlay").fadeIn(400);
         }     
         
         function hideOverlay() {
-          $("#overlay").fadeOut(400);
+          $(".overlay").fadeOut(400);
         }
 
         $(document).ready(function(){

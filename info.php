@@ -33,35 +33,12 @@
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/bootstrap.techie.css" rel="stylesheet">
     <link href="assets/css/animate.css" rel="stylesheet">
-    <!-- =======================================================
-      Theme Name: Techie
-      Theme URL: https://bootstrapmade.com/techie-free-skin-bootstrap-3/
-      Author: BootstrapMade
-      Author URL: https://bootstrapmade.com
-      ======================================================= -->
-    <!-- Docs Custom styles -->
     <style>
       body,html{overflow-x:hidden}body{padding:60px 20px 0}footer{border-top:1px solid #ddd;padding:30px;margin-top:50px}.row>[class*=col-]{margin-bottom:40px}.navbar-container{position:relative;min-height:100px}.navbar.navbar-fixed-bottom,.navbar.navbar-fixed-top{position:absolute;top:50px;z-index:0}.navbar.navbar-fixed-bottom .container,.navbar.navbar-fixed-top .container{max-width:90%}.btn-group{margin-bottom:10px}.form-inline input[type=password],.form-inline input[type=text],.form-inline select{width:180px}.input-group{margin-bottom:10px}.pagination{margin-top:0}.navbar-inverse{margin:110px 0}
       .panel-default > .panel-heading {
       }
 	  
-		#scroll-to-top a {
-			cursor: pointer;
-			display: block;
-			background:#a0f8a2;
-			position: fixed;
-			left: 94%;
-			bottom: 10px;
-			border-radius: 10px 10px 10px 10px;
-			box-shadow: inset 2px 0 3px rgba(0, 0, 0, 0.2);
-		}
-
-		#scroll-to-top {
-			padding: 0px;
-			left: 50%;
-			bottom: 10px;
-			z-index: 1105;
-}
+		
 
     </style>
   </head>
@@ -148,22 +125,20 @@
           <div <?php if(!empty($chapters_xml)) echo 'class="tab-pane"'; else echo 'class="tab-pane active"'; ?> id="tab12">
             <div class="row">
                 <div class="col-sm-12 container offers">
-				<div class="row">
-					<h3>Negozi</h3>
+				<div class="container row">
+					<h2>Negozi</h2>
 					<div class="overlay loading text-center">
 					  <h4 class="loading">Caricamento delle offerte in corso...</h4>
 					  <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
 					</div>                    
 				</div>
-				<div class="row container-shops">
+				<div class="row container container-shops">
 					
 				</div>
 				<div class="panel-group container-products-shops" id="products-shops">
-					<hr>
 				</div>
             </div>
           </div>
-          
         </div>
 		<div class="tab-pane" id="tab13" >
 		  <div class "row">
@@ -176,7 +151,7 @@
     </div>
     <footer class="text-center">
       <p>&copy; Manga Cards</p>
-	  <div id="scroll-to-top" style="display: block;"><a><img  height="50" width="50"  src="assets/img/IconTop.png" /></a></div>
+	  <div id="scroll-to-top" style="display: none; "><a><img  height="50" width="50"  src="assets/img/IconTop.png" /></a></div>
     </footer>
 	
     <!-- Main Scripts-->
@@ -257,18 +232,27 @@
           $(".overlay").fadeOut(400);
         }
 
-$('#scroll-to-top').click(function(){
+      $('#scroll-to-top').click(function(){
         $("html, body").animate({ scrollTop: 0 }, 500);
         
         return false;
-    });
+      });
+
+      $(document).scroll(function() {
+        var y = $(this).scrollTop();
+        if (y > 1200) {
+          $('#scroll-to-top').fadeIn();
+        } else {
+          $('#scroll-to-top').fadeOut();
+        }
+      });
 
 
       function parseAmazonXML(data)
       {
 		   
-		   $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab14" ><img class="animated bounceInUp" height=80" width="200"  src="assets/img/amazonLogo2.jpg" /></a>');
-		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab14" class="panel-collapse collapse"><div class="tab-content amazon"></div></div></div>');
+		   $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab14" ><img class="animated bounceInUp" height=70" width="160"  src="assets/img/amazonLogo2.jpg" /></a>');
+		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab14" class="panel-collapse collapse"><div class="tab-content amazon top-container-offers"></div></div></div>');
         $(data).find('offer').each(function(){
           title = $(this).find('title').text();
           url = $(this).find('url_to_product').text();
@@ -311,8 +295,8 @@ $('#scroll-to-top').click(function(){
 	  
 	  function parseJPopXML(data)
       {
-		  $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab15" ><img class="animated bounceInUp" height=170" width="200"  src="assets/img/JPopLogo.png" /></a>');
-		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab15" class="panel-collapse collapse"><div class="tab-content JPop"></div></div></div>');
+		  $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab15" ><img class="animated bounceInUp" height=70" width="150"  src="assets/img/JPopLogo.png" /></a>');
+		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab15" class="panel-collapse collapse"><div class="tab-content JPop top-container-offers"></div></div></div>');
         $(data).find('offer').each(function(){
           title = $(this).find('title').text();
           url = $(this).find('url_to_product').text();
@@ -357,7 +341,7 @@ $('#scroll-to-top').click(function(){
 	  function parsePaniniXML(data)
       {
 		  $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/paninicomics.gif" /></a>');
-		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab16" class="panel-collapse collapse"><div class="tab-content Panini"></div></div></div>');
+		   $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab16" class="panel-collapse collapse"><div class="tab-content Panini top-container-offers"></div></div></div>');
         $(data).find('offer').each(function(){
           title = $(this).find('title').text();
           url = $(this).find('url_to_product').text();

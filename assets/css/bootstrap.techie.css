@@ -56,7 +56,7 @@ body {
     right: 100%;
 }
 
-#overlay {
+.overlay {
     background-size: cover;
     -webkit-background-size: cover;
     -moz-background-size: cover;
@@ -72,6 +72,14 @@ body {
 }
 .loading {
     color: #089183;
+}
+
+.container-shops{
+  margin-bottom:20px !important;
+}
+
+.top-container-offers{
+  border-top-width: 1px !important;
 }
 
 @keyframes move {
@@ -571,6 +579,7 @@ p b {
   .lead {
     font-size: 21px;
   }
+
 }
 small,
 .small {
@@ -3447,7 +3456,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   padding: 20px;
   border-style: solid;
   border-color: #ddd;
-  border-width: 0 1px 1px 1px;
+  border-width: 0px 1px 1px 1px;
   overflow: hidden;
 }
 .tabs-below > .nav-tabs,
@@ -4500,6 +4509,49 @@ a.list-group-item.active > .badge,
     font-size: 63px;
   }
 }
+
+@media all and (max-width: 1080px){
+
+  #scroll-to-top a {
+      cursor: pointer;
+      display: block;
+      background: #dedede;
+      position: fixed;
+      left: 85%;
+      bottom: 10px;
+      border-radius: 10px 10px 10px 10px;
+      box-shadow: inset 2px 0 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #scroll-to-top {
+      padding: 0px;
+      left: 50%;
+      bottom: 10px;
+      z-index: 1105;
+    }
+}
+
+@media all and (min-width: 1090px){
+
+  #scroll-to-top a {
+      cursor: pointer;
+      display: block;
+      background: #dedede;
+      position: fixed;
+      left: 94%;
+      bottom: 10px;
+      border-radius: 10px 10px 10px 10px;
+      box-shadow: inset 2px 0 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #scroll-to-top {
+      padding: 0px;
+      left: 50%;
+      bottom: 10px;
+      z-index: 1105;
+    }
+}
+
 .thumbnail {
   display: block;
   margin-bottom: 23px;
