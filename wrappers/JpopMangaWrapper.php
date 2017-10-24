@@ -11,22 +11,19 @@ if($numUltimapagina !=0){
 for($i=1;$i<=$numUltimapagina;$i++){
 	$newUrl=$url;
 	$newUrl=$newUrl."=&p=".$i;
-	$immagini=array();
-	$immagini=RitornaImmagini($newUrl);
-	$prezzi=array();
-	$prezzi=ritornaPrezzi($newUrl);
+	
 	$PaginaDettaglio=array();
-	$PaginaDettaglio=ritornaLinkPagina($newUrl);
-for($l=0;$l<count($immagini); $l++){
+	$PaginaDettaglio=ritornaLinkPagina($newUrl,$search);
+for($l=0;$l<count($PaginaDettaglio['Titoli']); $l++){
 	$numeroTitolo=get_numerics($PaginaDettaglio['Titoli'][$l]);
 	if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false and count($numeroTitolo)!=0){
 		$user=$ReturnXml->addChild('product');
 		
     $user->addChild('name', trim($PaginaDettaglio['Titoli'][$l]));
 	$user->addChild('productNumber',intval($numeroTitolo[0]) );
-	$user->addChild('price', trim($prezzi[$l]));
+	$user->addChild('price', trim($PaginaDettaglio['Prezzi'][$l]));
 	$user->addChild('author', trim($PaginaDettaglio['Autori'][$l]));
-	$user->addChild('image', trim($immagini[$l]));
+	$user->addChild('image', trim($PaginaDettaglio['Immagini'][$l]));
 	$user->addChild('linkproduct', trim($PaginaDettaglio['Links'][$l]));
 	$user->addChild('details', trim($PaginaDettaglio['Riassunto'][$l]));
 	
@@ -61,21 +58,18 @@ foreach($ReturnXml->product as $product){
 
 }else{
 	
-	$immagini=array();
-	$immagini=RitornaImmagini($url);
-	$prezzi=array();
-	$prezzi=ritornaPrezzi($url);
+	
 	$PaginaDettaglio=array();
 	$PaginaDettaglio=ritornaLinkPagina($url);
-for($l=0;$l<count($immagini); $l++){
+for($l=0;$l<count($PaginaDettaglio['Titoli']); $l++){
 	$numeroTitolo=get_numerics($PaginaDettaglio['Titoli'][$l]);
    if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false and count($numeroTitolo)!=0){
 	   $user=$ReturnXml->addChild('product');
 	$user->addChild('name', trim($PaginaDettaglio['Titoli'][$l]));
 	$user->addChild('productNumber',intval($numeroTitolo[0]));
-	$user->addChild('price', trim($prezzi[$l]));
+	$user->addChild('price', trim($PaginaDettaglio['Prezzi'][$l]));
 	$user->addChild('author', trim($PaginaDettaglio['Autori'][$l]));
-	$user->addChild('image', trim($immagini[$l]));
+	$user->addChild('image', trim($PaginaDettaglio['Immagini'][$l]));
 	$user->addChild('linkproduct', trim($PaginaDettaglio['Links'][$l]));
 	$user->addChild('details', trim($PaginaDettaglio['Riassunto'][$l]));
 	   
@@ -113,7 +107,10 @@ function get_numerics ($str) {
 
 
 $titles = $_POST['title'];
+
 $title=explode("-", $titles);
+//$URL="http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title[0])."&submit_search=";
+
 
 $xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title[0])."&submit_search=",$title[0]);
 echo $xml;
