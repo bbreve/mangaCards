@@ -395,7 +395,8 @@ img {
   line-height: 310px;
 }
 .mini-thumbnail{
-  height: 300px;
+  height: auto;
+  width: 100%;
 }
 .img-rounded {
   border-radius: 6px;

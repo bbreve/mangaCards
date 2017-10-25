@@ -25,8 +25,9 @@
     <title>Manga Cards - Dettaglio</title>
     <link href='https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:700' rel='stylesheet' type='text/css'>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Techie Bootstrap 3 skin">
+    
     <meta name="keywords" content="bootstrap 3, skin, flat">
     <meta name="author" content="bootstraptaste">
     <!-- Bootstrap css -->
