@@ -55,16 +55,18 @@
           <div class="agile-row">
             <h1><?php echo $work_info->work->name?></h1>
           </div>
-          <div class="agile-row">
-            <h5>Creato da: <?php  $authors_list = "";
+		  <?php   if(count($work_info->work->authors->author)!=0){
+          echo'<div class="agile-row">';
+            echo'<h5>Creato da:';  $authors_list = "";
               foreach($work_info->work->authors->author as $author) 
               {
                 $authors_list .= $author.", ";
               }
               $authors_list = rtrim($authors_list, ", ");
               echo $authors_list;
-              ?></h5>
-          </div>
+              echo'</h5>';
+		  echo'</div>'; }?>
+		  
           <div class="agile-row">
             <h5>Editore: <?php  $editors_list = "";
               foreach($work_info->work->editors->editor as $editor) 
@@ -75,12 +77,15 @@
               echo $editors_list;
               ?></h5>
           </div>
-          <div class="agile-row">
-            <h5>Volumi giapponesi: <?php echo $num_jp; ?></h5>
-          </div>
-          <div class="agile-row">
-            <h5>Volumi italiani: <?php echo $num_it; ?></h5>
-          </div>
+		  <?php if(count($num_jp)!=0){
+         echo '<div class="agile-row">';  
+            echo'<h5>Volumi giapponesi:';echo $num_jp;'</h5>';
+		  echo' </div>';}?>
+		 
+           <?php if(count($num_it)!=0){
+         echo '<div class="agile-row">';  
+            echo'<h5>Volumi italiani:';echo $num_it;'</h5>';
+		  echo' </div>';}?>
         </div>
       </div>
       <div class="tabbable">

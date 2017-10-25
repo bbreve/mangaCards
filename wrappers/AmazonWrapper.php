@@ -65,6 +65,7 @@
 				
 				foreach($products_rows as $product_row)
 				{
+					
 					//print_r($product_row->textContent);
 					$title = $xmlPageXPath -> query('.//h2', $product_row)->item(0)->textContent;
 					
@@ -86,8 +87,13 @@
 					//$this->save_product($number[0][0], $title, $url_to_product, $price, $image);
 
 					
-					if(stristr($title, urldecode($query_product)) && $price != "€" && count($number[0]) != 0)
-						$this->appendArray($title, $url_to_product, $price, $image, $author_string, $number[0][0]);
+					if(stristr($title, urldecode($query_product)) && $price != "€" )
+						//Si fa ciò per fare in modo che i prodotti che non hanno un numero nel titolo, vangano posti alla fine della lista di prodotti ordinata.
+						  if(count($number[0]) == 0){
+								$this->appendArray($title, $url_to_product, $price, $image, $author_string, 30000);
+						  }else{
+								$this->appendArray($title, $url_to_product, $price, $image, $author_string, $number[0][0]);
+								}
 					
 					
 				}
@@ -160,7 +166,7 @@
 	preg_match('!(((\w+ )|(\w+))\'?)*!ui',$title, $title_cleaned);
 
 	$title = $title_cleaned[0];
-	$amazon = new AmazonWrapper($title, 4);
+	$amazon = new AmazonWrapper($title, 6);
 	$xml = $amazon->execute();
 	echo $xml->asXML();
 

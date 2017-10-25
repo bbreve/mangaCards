@@ -1,6 +1,6 @@
 <?php
-	//$term = $_GET['q'];
-	$term = "justice";
+	$term = $_GET['q'];
+	//$term = "justice";
 	libxml_use_internal_errors(true);
 	$json=[];
 	
@@ -45,7 +45,7 @@
 		foreach($sottocategorie as $curr)
 		{
 			$anchor = $xpath->query('./@href', $curr);
-			extraction("https://it.wikipedia.org".trim($anchor->item(0)->nodeValue));
+			//extraction("https://it.wikipedia.org".trim($anchor->item(0)->nodeValue));
 		}
 	}
 ?>

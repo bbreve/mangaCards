@@ -128,7 +128,10 @@
         $(document).ready(function(){
           hideOverlay();
         });
-
+ 
+ 
+        function MangaSelect(){
+		
         $('select').select2(
         {
           language: {
@@ -162,6 +165,47 @@
             },
           }
         });
+		
+		   }
+		   
+		   MangaSelect();
+		   
+		   function FumettoSelect(){
+			   $('select').select2(
+        {
+          language: {
+            noResults: function(){
+              return "Nessun risultato trovato";
+            },
+            searching: function () {
+              return 'Ricerca in corso...';
+            },
+            inputTooShort: function (args) {
+              var remainingChars = args.minimum - args.input.length;
+
+              var message = 'Inserire altri ' + remainingChars + ' per avviare la ricerca';
+
+              return message;
+            },
+            errorLoading: function () {
+              return 'Ricerca in corso...';
+            },
+
+          },
+          minimumInputLength: 3,
+          ajax: {
+            dataType: "json",
+            delay: 250,
+            url: "comicsvalues.php",
+            results: function (data) {
+              return {
+                results: data
+              };
+            },
+          }
+        });
+			   
+		   }
 
       	var type_work = "Manga";
         function changeType(type)
@@ -172,11 +216,13 @@
           {
             //$('#title').attr("placeholder", "Inserisci il titolo della serie");
             $('#bg').removeClass("bg_Manga").addClass("bg_Comics");
+			FumettoSelect();
           }
           else
           {
             //$('#title').attr("placeholder", "Inserisci il titolo del manga");
             $('#bg').removeClass("bg_Comics").addClass("bg_Manga");
+			MangaSelect();
           }
 
         }

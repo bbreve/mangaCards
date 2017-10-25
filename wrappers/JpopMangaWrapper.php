@@ -16,11 +16,16 @@ for($i=1;$i<=$numUltimapagina;$i++){
 	$PaginaDettaglio=ritornaLinkPagina($newUrl,$search);
 for($l=0;$l<count($PaginaDettaglio['Titoli']); $l++){
 	$numeroTitolo=get_numerics($PaginaDettaglio['Titoli'][$l]);
-	if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false and count($numeroTitolo)!=0){
+	if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false ){
 		$user=$ReturnXml->addChild('product');
-		
+		$numeroTitle;
+		if( count($numeroTitolo)!=0){
+			$numeroTitle=$numeroTitolo[0];
+		}else{
+			$numeroTitle=30000;
+		}
     $user->addChild('name', trim($PaginaDettaglio['Titoli'][$l]));
-	$user->addChild('productNumber',intval($numeroTitolo[0]) );
+	$user->addChild('productNumber',intval($numeroTitle) );
 	$user->addChild('price', trim($PaginaDettaglio['Prezzi'][$l]));
 	$user->addChild('author', trim($PaginaDettaglio['Autori'][$l]));
 	$user->addChild('image', trim($PaginaDettaglio['Immagini'][$l]));
@@ -63,10 +68,16 @@ foreach($ReturnXml->product as $product){
 	$PaginaDettaglio=ritornaLinkPagina($url);
 for($l=0;$l<count($PaginaDettaglio['Titoli']); $l++){
 	$numeroTitolo=get_numerics($PaginaDettaglio['Titoli'][$l]);
-   if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false and count($numeroTitolo)!=0){
+   if(stripos($PaginaDettaglio['Titoli'][$l],$search)!==false and stristr($PaginaDettaglio['Disponibilita'][$l],"non è più Disponibile")==false){
+	   $numeroTitle;
+		if( count($numeroTitolo)!=0){
+			$numeroTitle=$numeroTitolo[0];
+		}else{
+			$numeroTitle=30000;
+		}
 	   $user=$ReturnXml->addChild('product');
 	$user->addChild('name', trim($PaginaDettaglio['Titoli'][$l]));
-	$user->addChild('productNumber',intval($numeroTitolo[0]));
+	$user->addChild('productNumber',intval($numeroTitle));
 	$user->addChild('price', trim($PaginaDettaglio['Prezzi'][$l]));
 	$user->addChild('author', trim($PaginaDettaglio['Autori'][$l]));
 	$user->addChild('image', trim($PaginaDettaglio['Immagini'][$l]));
