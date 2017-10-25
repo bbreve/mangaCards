@@ -343,7 +343,7 @@
 				
 				$string = trim($res->item(0)->nodeValue);
 				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-					continue;
+					return;
 				
 				$res = $xpath->query('//a[contains(@class, "prodImg")]/img/@src');
 				if ($res->length != 0)
@@ -390,7 +390,7 @@
 				
 				$string = trim($res->item(0)->nodeValue);
 				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-					continue;
+					return;
 				
 				$links[] = htmlspecialchars($url);
 			}
@@ -420,8 +420,8 @@
 				{
 					$string = trim($res->item(0)->nodeValue);
 					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-						continue;
-					else 
+						return;
+					else
 						$titles[] = $string;	
 				}
 			}
@@ -476,7 +476,7 @@
 				
 				$string = trim($res->item(0)->nodeValue);
 				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-					continue;
+					return;
 				
 				$res = $xpath->query('//div[@class="pricetext"]//span[@itemprop="price"]');
 				if ($res->length != 0)
@@ -539,7 +539,7 @@
 				
 				$string = trim($res->item(0)->nodeValue);
 				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-					continue;
+					return;
 				
 				$res = $xpath->query('//div[@class="prodDet"]//span[contains(@class, "platLogo")]');
 				if ($res->length != 0)
@@ -591,7 +591,7 @@
 				
 				$string = trim($res->item(0)->nodeValue);
 				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-					continue;
+					return;
 				
 				$res = $xpath->query('//div[@class="prodDet"]//strong[@itemprop="brand"]');
 				if ($res->length != 0)
@@ -650,7 +650,7 @@
 				
 				$string = trim($res->item(0)->nodeValue);
 				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-					continue;
+					return;
 
 				$pegi[] = "N/A";	
 			}
@@ -692,7 +692,7 @@
 				
 				$string = trim($res->item(0)->nodeValue);
 				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
-					continue;
+					return;
 
 				$res = $xpath->query('//div[@class="addedDetInfo"]//p/label[contains(text(), "Rilascio")]/following-sibling::span[1]/text()');	
 				if ($res->length != 0)
