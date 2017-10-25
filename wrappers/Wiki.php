@@ -3,6 +3,7 @@
 //	header("Content-type: application/xml");
 	
 	$datesIT = array();
+	$datesJPN = array();
 	$numvol = array();
 	$num_vol_jp = array();
 	$volChapters = array();
@@ -31,10 +32,6 @@
 	$xpath = new DomXPath($dom);
 	
 	$series = $title;
-	
-	$num_manga = 1;
-	
-	
 
 	$number = $num_it;
 	$numberJ = $num_jp;
@@ -43,20 +40,99 @@
 	extractNumvol();
 	extractStoriesAndChapters(); 
 	extractTitles();
+	extractDatesJPN();
 	extractDatesIt();
 
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
-
-
 	writeVolumesXML();
 	
-	
+	//Caso di estrazione per tabelle formattatate differentemente da quelle regolari
+	//Vedi es. Tokyo Ghoul
+	if ($xml->count() == 0)
+	{
+		$datesJPN = array();
+		$datesIT = array();
+		$numvol = array();
+		$stories_and_chapters = array();
+		$titles = array();
+		
+		$dom = new DomDocument;
+		$dom->loadHTMLFile($url);
+		$xpath = new DomXPath($dom);
+		$volumes = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]');
+		$pointer = -1;
+		foreach($volumes as $vol)
+		{
+			//Verifico la numerazione ed aggiunto il numero del volume
+			$num = $xpath->query('.//td[1]', $vol);
+			if ($num->item(0)->nodeValue < $pointer)
+				continue;
+			else
+			{
+				$pointer = $num->item(0)->nodeValue;
+				$numvol[] = $num->item(0)->nodeValue;
+			}
+			
+			//Aggiungo nomi fittizi per i volumi
+			$titles[] = "Volume ".$pointer;
+			
+			//Estraggo le date ITA
+			$it = $xpath->query('.//td[contains(@style, "text-align:center;white-space:nowrap")][3]', $vol);
+			if ($it->length != 0)
+			{
+				preg_match_all("#(\d+\?? )?\w+ \d+#", $it->item(0)->nodeValue, $match);
+
+				$temp = [];
+				foreach($match[0] as $date_in_volume)
+				{
+					$temp[] = transformDate(trim($date_in_volume));
+				}
+				
+				$datesIT[] = $temp;
+			}
+			
+			//Estraggo le date JPN
+			$jpn = $xpath->query('.//td[contains(@style, "text-align:center;white-space:nowrap")][1]', $vol);
+			if ($jpn->length != 0)
+			{
+				preg_match_all("#(\d+\?? )?\w+ \d+#", $jpn->item(0)->nodeValue, $match);
+
+				$temp = [];
+				foreach($match[0] as $date_in_volume)
+				{
+					$temp[] = transformDate(trim($date_in_volume));
+				}
+				
+				$datesJPN[] = $temp;
+			}
+			
+			//Estraggo capitoli e trame
+			$chapters = $xpath->query('./following-sibling::tr[1][not(contains(@id, "vol"))]//td/div/ul/li', $vol);
+			$chapters_string = "";
+
+			foreach($chapters as $chapter)
+				$chapters_string .= '<li>'.$chapter->textContent.'</li>';
+
+			$res_story = $xpath->query('./following-sibling::tr[2][not(contains(@id, "vol"))]/td/div/p', $vol);
+			
+			if ($res_story->length == 0)
+				$story = "";
+			else
+				$story = trim($res_story->item(0)->nodeValue);
+			$stories_and_chapters[$pointer] = array(
+				'chapters' => $chapters_string,
+				'story' => $story
+			);
+		}
+
+		writeVolumesXML();
+	}
+
 	echo $xml->asXML();
-	
 	
 	function writeVolumesXML()
 	{
-		global $datesIT, $titles, $num_vol_jp, $numvol, $stories, $volChapters, $xml, $double_numeration, $stories_and_chapters;
+		global $datesIT, $datesJPN, $titles, $num_vol_jp, $numvol, $stories, $volChapters, $xml, $double_numeration, $stories_and_chapters;
 
 		for ($i = 0; $i < count($titles); $i++)
 		{
@@ -74,25 +150,76 @@
 				{
 					$dates_publication .= $date."-";
 				}
-				$prodotto->addChild("date", $dates_publication);	
+				$prodotto->addChild("dateIT", $dates_publication);	
 			}	
 			else
 			{
-				$prodotto->addChild("date", $datesIT[$i][0]);
+				$prodotto->addChild("dateIT", $datesIT[$i][0]);
+			}
+			
+			if(count($datesJPN[$i]) > 1)
+			{
+				$dates_publication = "";
+				foreach($datesJPN[$i] as $date)
+				{
+					$dates_publication .= $date."-";
+				}
+				$prodotto->addChild("dateJPN", $dates_publication);	
+			}	
+			else
+			{
+				$prodotto->addChild("dateJPN", $datesJPN[$i][0]);
 			}
 			
 
 			if(!$double_numeration)
 			{	
-				$prodotto->addChild("story", $stories_and_chapters[$numvol[$i]]['story']);
-				$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']));		
+				if ($stories_and_chapters[$numvol[$i]]['story'] <> "")
+					$prodotto->addChild("story", $stories_and_chapters[$numvol[$i]]['story']);
+				
+				if (htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']) <> "")
+					$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']));		
 			}
 			else
 			{	
-				$prodotto->addChild("story", $stories_and_chapters[$num_vol_jp[$i]]['story']);
-				$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']));		
+				if ($stories_and_chapters[$num_vol_jp[$i]]['story'] <> "")
+					$prodotto->addChild("story", $stories_and_chapters[$num_vol_jp[$i]]['story']);
+				
+				if (htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']) <> "")
+					$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']));		
 			}
 			
+		}
+	}
+	
+	function extractDatesJPN()
+	{
+		global $datesJPN, $xpath, $format_page;
+		
+		if ($format_page == 2)
+		{
+			$dates_jp_query = $xpath->query('//span[@id = "Capitoli" or @id = "Manga"]/following::table[@class="wikitable"][1]//tr[contains(@id, "vol")]/td[contains(@style, "white-space:nowrap")][1]');
+		}
+		else 
+		{	
+			$dates_jp_query = $xpath->query('//table[@class="wikitable"]//tr[contains(@id, "vol")]/td[contains(@style, "white-space:nowrap")][1]');
+		}
+		
+		foreach($dates_jp_query as $date_jp)
+		{	
+			if ($date_jp == "" || $date_jp == " " || $date_jp == NULL)
+				continue;
+
+
+			preg_match_all("#(\d+\?? )?\w+ \d+#", $date_jp->nodeValue, $match);
+
+			$temp = [];
+			foreach($match[0] as $date_in_volume)
+			{
+				$temp[] = transformDate(trim($date_in_volume));
+				
+			}
+			$datesJPN[] = $temp;
 		}
 	}
 
@@ -129,9 +256,9 @@
 
 
 	
-function extractTitles()
+	function extractTitles()
 	{
-		global $titles, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration;
+		global $titles, $number, $numberJ, $xpath, $format_page, $series, $double_numeration;
 		
 		if ($format_page == 2)
 		{
@@ -143,24 +270,19 @@ function extractTitles()
 		}	
 		foreach($titles_query as $title_query)
 		{	
-			
 				$titles[] = $title_query->nodeValue;
 		}
-
-	
 	}
 
 	function extractNumVol()
 	{
-		global $titles, $numvol, $num_vol_jp, $number, $numberJ, $xpath, $format_page, $series, $num_manga, $double_numeration,$numTabelle;
+		global $titles, $numvol, $num_vol_jp, $number, $numberJ, $xpath, $format_page, $series, $double_numeration, $numTabelle;
 		$numTabelle=$xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]');
 
 		
 		for($i=1;$i<=$numTabelle->length;$i++)
 		{
-
-			
-				$doppiaNumerazione=$xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//th[contains(text(),"N")and contains(a,"It")]');
+			$doppiaNumerazione=$xpath->query('//table[@class="wikitable" and not(preceding-sibling::h2/span[(contains(@id, "speciali"))])]['.$i.']//th[contains(text(),"N")and contains(a,"It")]');
 			
 			if ($format_page != 2)
 			{
@@ -229,16 +351,23 @@ function extractTitles()
 			$chapters = $xpath->query('./following-sibling::tr[1][not(contains(@id, "vol"))]//td/div/ul/li', $volume_tr);
 			$chapters_string = "";
 
-			foreach($chapters as $chapter)
-				$chapters_string .= '<li>'.$chapter->textContent.'</li>';
-
-			$story = $xpath->query('./following-sibling::tr[2][not(contains(@id, "vol"))]/td/div/p', $volume_tr);
+			if ($chapters->length != 0)
+			{
+				foreach($chapters as $chapter)
+					$chapters_string .= '<li>'.$chapter->textContent.'</li>';
+			}
+			
+			$res_story = $xpath->query('./following-sibling::tr[2][not(contains(@id, "vol"))]/td/div/p', $volume_tr);
+			if ($res_story->length == 0)
+				$story == "";
+			else
+				$story = $res_story->item(0)->textContent;
+			
 			$stories_and_chapters[$id->item(0)->textContent] = array(
 				'chapters' => $chapters_string,
-				'story' => $story->item(0)->textContent
+				'story' => $story
 			);
 		}
-
 	}
 
 

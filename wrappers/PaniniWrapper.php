@@ -19,7 +19,6 @@
 	preg_match('!(((\w+ )|(\w+))\'?)*!ui',$title, $title_cleaned);// usato per problemi causati dai due punti nel titolo del manga es- Ken il guerriero: Le origini del mito.
 	$title = $title_cleaned[0];
 	$search = $title;
-	$prod = "manga";
 	
 	//Dichiaro l'XML di ritorno
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');		
@@ -124,13 +123,12 @@
 	
 	function writeXML()
 	{
-		global $images, $links, $titles, $volume_numbers, $volume_infos, $editions, $pDates, $prices, $currPrices, $authors, $descriptions, $prod, $xml;
+		global $images, $links, $titles, $volume_numbers, $volume_infos, $editions, $pDates, $prices, $currPrices, $authors, $descriptions, $xml;
 		for ($n = 0; $n < count($titles); $n++)
 		{
 			$prodotto = $xml->addChild("product");
 				
 			$prodotto->addChild("title", $titles[$n]);
-			$prodotto->addChild("product_type", $prod);
 			$prodotto->addChild("productNumber", $volume_numbers[$n]);
 			
 			if ($authors[$n] <> "")
