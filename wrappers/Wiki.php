@@ -80,7 +80,8 @@
 			$it = $xpath->query('.//td[contains(@style, "text-align:center;white-space:nowrap")][3]', $vol);
 			if ($it->length != 0)
 			{
-				preg_match_all("#(\d+\?? )?\w+ \d+#", $it->item(0)->nodeValue, $match);
+				$day = str_replace("&ordm;", " ", htmlentities($it->item(0)->nodeValue));
+				preg_match_all("#(\d+ +)?\w+ \d+#", $day, $match);
 
 				$temp = [];
 				foreach($match[0] as $date_in_volume)
@@ -241,8 +242,8 @@
 			if ($date_it == "" || $date_it == " " || $date_it == NULL)
 				continue;
 
-
-			preg_match_all("#(\d+\?? )?\w+ \d+#", $date_it->nodeValue, $match);
+			$day = str_replace("&ordm;", " ", htmlentities($date_it->nodeValue));
+			preg_match_all("#(\d+ +)?\w+ \d+#", $day, $match);
 
 			$temp = [];
 			foreach($match[0] as $date_in_volume)
@@ -254,8 +255,6 @@
 		}
 	}
 
-
-	
 	function extractTitles()
 	{
 		global $titles, $number, $numberJ, $xpath, $format_page, $series, $double_numeration;
@@ -370,45 +369,49 @@
 		}
 	}
 
-
 	//funzione ausiliaria per la correzione della data
 	function transformDate($string)
 	{
-			if ($string == "" || $string == " " || $string == NULL)
-				return "";
-			else {
-				$current_date = explode(" ", $string);
-				if (count($current_date) != 3)
-					return $string;
-					
-				switch($current_date[0])
-				{
-					case "1" : $current_date[0] = "01"; break;
-					case "1º": $current_date[0] = "01"; break;
-					case "2" : $current_date[0] = "02"; break;
-					case "3" : $current_date[0] = "03"; break;
-					case "4" : $current_date[0] = "04"; break;
-					case "5" : $current_date[0] = "05"; break;
-					case "6" : $current_date[0] = "06"; break;
-					case "7" : $current_date[0] = "07"; break;
-					case "8" : $current_date[0] = "08"; break;
-					case "9" : $current_date[0] = "09"; break;
-				}
+		if ($string == "" || $string == " " || $string == NULL)
+			return "";
+		else {
+			$current_date = explode(" ", $string);
 				
-				switch($current_date[1])
-				{
-					case "gennaio" : return $current_date[0]."/01/".$current_date[2]; break;
-					case "febbraio" : return $current_date[0]."/02/".$current_date[2]; break;
-					case "marzo" : return $current_date[0]."/03/".$current_date[2]; break;
-					case "aprile" : return $current_date[0]."/04/".$current_date[2]; break;
-					case "maggio" : return $current_date[0]."/05/".$current_date[2]; break;
-					case "giugno" : return $current_date[0]."/06/".$current_date[2]; break;
-					case "luglio" : return $current_date[0]."/07/".$current_date[2]; break;
-					case "agosto" : return $current_date[0]."/08/".$current_date[2]; break;
-					case "settembre" : return $current_date[0]."/09/".$current_date[2]; break;
-					case "ottobre" : return $current_date[0]."/10/".$current_date[2]; break;
-					case "novembre" : return $current_date[0]."/11/".$current_date[2]; break;
-					case "dicembre" : return $current_date[0]."/12/".$current_date[2]; break;
-				}
+			if (count($current_date) < 3)
+				return $string;
+			else if (count($current_date) == 4)
+			{
+				$current_date[1] = $current_date[2];
+				$current_date[2] = $current_date[3];
 			}
+					
+			switch($current_date[0])
+			{
+				case "1" : $current_date[0] = "01"; break;
+				case "2" : $current_date[0] = "02"; break;
+				case "3" : $current_date[0] = "03"; break;
+				case "4" : $current_date[0] = "04"; break;
+				case "5" : $current_date[0] = "05"; break;
+				case "6" : $current_date[0] = "06"; break;
+				case "7" : $current_date[0] = "07"; break;
+				case "8" : $current_date[0] = "08"; break;
+				case "9" : $current_date[0] = "09"; break;
+			}
+				
+			switch($current_date[1])
+			{
+				case "gennaio" : return $current_date[0]."/01/".$current_date[2]; break;
+				case "febbraio" : return $current_date[0]."/02/".$current_date[2]; break;
+				case "marzo" : return $current_date[0]."/03/".$current_date[2]; break;
+				case "aprile" : return $current_date[0]."/04/".$current_date[2]; break;
+				case "maggio" : return $current_date[0]."/05/".$current_date[2]; break;
+				case "giugno" : return $current_date[0]."/06/".$current_date[2]; break;
+				case "luglio" : return $current_date[0]."/07/".$current_date[2]; break;
+				case "agosto" : return $current_date[0]."/08/".$current_date[2]; break;
+				case "settembre" : return $current_date[0]."/09/".$current_date[2]; break;
+				case "ottobre" : return $current_date[0]."/10/".$current_date[2]; break;
+				case "novembre" : return $current_date[0]."/11/".$current_date[2]; break;
+				case "dicembre" : return $current_date[0]."/12/".$current_date[2]; break;
+			}
+		}
 	}
