@@ -172,6 +172,17 @@
 				</div>
 			</div>
 		
+					
+		<div class="tab-pane" id="tab50" >
+		  <div class "row">
+		    <div class="tab-games-icon" >
+					</div>
+			<div class="tab-games-offers">
+					<hr>
+					</div>
+				</div>
+			</div>
+		
       </div>
     </div>
     <footer class="text-center">
