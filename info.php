@@ -12,6 +12,8 @@
   $chapters_link = $work_info->work->chapters_link;
   $work_link = $work_info->work->work_link;
   
+  $pag_name = $work_info->work->name;
+  
   ob_start();  
   require __DIR__.'\wrappers\Wiki.php';
   $chapters_info = ob_get_clean(); 
@@ -54,7 +56,7 @@
         </div>
         <div class="col-lg-5 col-sm-5">
           <div class="agile-row">
-            <h1><?php echo $work_info->work->name?></h1>
+            <h1><?php echo $pag_name?></h1>
           </div>
 		  <?php   if(count($work_info->work->authors->author)!=0){
           echo'<div class="agile-row">';
@@ -207,6 +209,38 @@
         parseJPopXML(data);
         });
       }
+	  
+	 if(Editors.search(/DC Comics/i) !== -1){
+        $.ajax({
+        type: "POST",
+        data: {
+          'title': <?php echo '"'.$pag_name.'"'; ?>
+        },
+        url: "wrappers/RWEdizioniWrapper.php",
+        async: true
+
+        })
+        .done(function (data){  
+        hideOverlay();
+        parseRWXML(data);
+        });
+      }
+	  
+	  if (Editors.search(/Marvel/i) !== -1){
+		$.ajax({
+        type: "POST",
+        data: {
+          'title': <?php echo '"'.$pag_name.'"'; ?>
+        },
+        url: "wrappers/PaniniWrapper.php",
+        async: true
+
+        })
+        .done(function (data){  
+        hideOverlay();
+        parsePaniniXML(data);
+        }); 
+	  }
       
     if(Editors.search(/Panini/i)!==-1 || Editors.search(/Planet Manga/i) !== -1){
         $.ajax({
@@ -223,11 +257,15 @@
         parsePaniniXML(data);
         });
       }
-
+	
+	var search_params = <?php echo '"'.$title.'"'; ?>;
+	if (Editors.search(/Marvel/i)!==-1 || Editors.search(/DC Comics/i) !== -1)
+		search_params = <?php echo '"'.$pag_name.'"'; ?>
+	
     $.ajax({
           type: "POST",
           data: {
-            'series': <?php echo '"'.$title.'"'; ?>
+            'series': search_params
           },
           url: "wrappers/GamestopWrapper.php",
           async: true
@@ -364,6 +402,88 @@ $('#scroll-to-top').click(function(){
             +'</div>'
             +'<hr>');
 
+        });
+    }
+	
+	function parseRWXML(data)
+      {
+      $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/RW-EDIZIONI-LOGO.jpg" /></a>');
+       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab16" class="panel-collapse collapse"><div class="tab-content RW top-container-offers"></div></div></div>');
+        //document.write($(data).find('offer').length);
+		$(data).find('offer').each(function(){
+          title = $(this).find('title').text();
+          url = $(this).find('url_to_product').text();
+          image = $(this).find('cover').text();
+
+          price = $(this).find('price').text();
+		  rDate =$(this).find('release_date').text();
+      
+		  contained =$(this).find('containedChapters').text();
+      
+		  volume_authors = $(this).find('authors').text();
+      
+          description = $(this).find('description').text();
+
+		  editorial = $(this).find('ed_series').text();
+          collection = $(this).find('collection').text();
+          imprint = $(this).find('imprint').text();
+		 // document.write($(this).find('description').text());
+          s = '<div class="row">'
+            +'  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="'+image+'"/></a></div>'
+            +'  <div class="col-sm-6">'
+            +'    <div class="agile-row">'
+            +'      <h4>'+title+'</h4>'
+            +'    </div>'
+            +'    <div class="agile-row">'
+            +'      <p>'+volume_authors+'</p>'
+            +'    </div>';
+     
+		 if (contained != "" && contained != null)
+         {
+			s += '<div class="agile-row"><p>'+contained+'</p></div>';
+         }
+         if (imprint != "" && imprint != null)
+         {
+			s += '<div class="agile-row"><p>Linea: '+imprint+'</p></div>';
+         }
+		 if (collection != "" && collection != null)
+         {
+			s += '<div class="agile-row"><p>Collana :'+collection+'</p></div>';
+         }
+		 if (editorial != "" && editorial != null)
+         {
+			s += '<div class="agile-row"><p>Serie: '+editorial+'</p></div>';
+         }
+		 
+      
+      s += '    <div class="agile-row">'
+      +'      <h5><del>'+old+'</del><h5>'
+	  +'		</div>';
+	  
+		if (rDate != "" && rDate != null)
+         {
+			s += '<div class="agile-row">'
+			+'     <h4>'+rDate+'</h4>  '
+			+'    </div>'
+         }
+      
+      s +=		'    <div class="agile-row">'
+            +'         <h4>'+'Descrizione:'+'</h4>'
+      +'                  <p>'+description+'</p>  '
+            +'    </div>'
+            +'  </div>'
+            +'  <div class="col-sm-2">'
+            +'    <div class="agile-row">'
+            +'      <img src="assets/img/lion-comics-logo-rw-620x350_Fotor_Fotor.jpg" style="width: 100%"/>'
+            +'    </div>'
+            +'    <div class="agile-row">'
+            +'      <a href="'+url+'" class="mini-thumbnail" target="_blank"><img style="width:100%" src="http://www.cavouresoterica.it/wp-content/uploads/2016/04/acquista-ora.png"/></a>'
+            +'    </div>'
+            +'  </div>'
+            +'</div>'
+            +'<hr>';
+      
+      $('.RW').append(s); 
         });
     }
     

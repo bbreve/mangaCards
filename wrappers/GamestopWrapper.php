@@ -27,8 +27,12 @@
 	//Parametri di ricerca
 	$pag = 1;
 	$search = $_POST['series'];
-
-			$arr = explode("-", $search);
+	
+			if (stripos($search, ":") !== FALSE) 
+				$arr = explode(":", $search);
+			else
+				$arr = explode("-", $search);
+			
 			for ($i = 0; $i < count($arr); $i++)
 			{
 				$search = trim($arr[$i]);

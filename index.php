@@ -81,7 +81,7 @@
                           <button type="button" id="typeButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Manga <span class="caret"></span></button>
 <!--NICO-->                   <ul class="dropdown-menu">
                               <li><a href="javascript:changeType('Manga');">Manga</a></li>
-                              <li><a href="javascript:changeType('Fumetto');">Fumetto</a></li>
+                              <li><a href="javascript:changeType('Comic');">Comic</a></li>
                             </ul>
                         </div> <!-- /btn-group -->   
                         <input id="work_selected" name="work_selected" type="hidden" value=""/>                       
@@ -212,7 +212,7 @@
         {
         	type_work=type;
           $("#typeButton").html(type + " <span class=\"caret\">");
-          if(type == "Fumetto")
+          if(type == "Comic")
           {
             //$('#title').attr("placeholder", "Inserisci il titolo della serie");
             $('#bg').removeClass("bg_Manga").addClass("bg_Comics");

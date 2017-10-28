@@ -20,7 +20,8 @@
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
 	
 	//Parametri di ricerca
-	$search = "flash";
+	$title = $_POST['title'];
+	$search = str_replace(":", "", $title);	
 	$pag = 1;
 
 	//Chiamata prima pagina
@@ -34,7 +35,6 @@
 	extractTitle();
 	extractPrice();
 	extractDate();
-	extractAuthors();
 	extractImprint();
 	extractCollection();
 	extractSeries();
@@ -61,14 +61,17 @@
 		extractTitle();
 		extractPrice();
 		extractDate();
-		extractAuthors();
 		extractImprint();
 		extractCollection();
 		extractSeries();
 		extractInPage();
 	}
 	
-	//var_dump(count($images)." ".count($descriptions)." ".count($innerChapters)." ".count($authors)." ".count($titles)." ".count($pDates)." ".count($links)." ".count($prices)." ".count($imprints)." ".count($series)." ".count($collections));
+	/*
+	var_dump(count($images)." ".count($descriptions)." ".count($innerChapters)." ".count($authors)." ".count($titles)." ".count($pDates)." ".count($links)." ".count($prices)." ".count($imprints)." ".count($series)." ".count($collections));
+	die();
+	*/
+	
 	writeXML();
 	echo $xml->asXML();
 	
@@ -90,12 +93,8 @@
 				if ($imprints[$n] <> "")
 					$prodotto->addChild("imprint", $imprints[$n]);
 		
-				if (count($authors[$n]) > 0)
-				{
-					$creators = $prodotto->addChild("authors");
-					for ($i = 0; $i < count($authors[$n]); $i++)
-						$creators->addChild("author", $authors[$n][$i]);
-				}
+				if ($authors[$n] <> "")
+					$prodotto->addChild("authors", $authors[$n]);
 		
 				if ($prices[$n] <> "")
 					$prodotto->addChild("price", $prices[$n]);
@@ -128,22 +127,15 @@
 				$value = $xml->addChild('offer');
 				$value->addChild('title',(string)$product->title);
 				
-				if (((string) $product->series) != NULL)
-					$value->addChild('ed_series',(string)$product->series);
+				if (((string) $product->editorial_series) != NULL)
+					$value->addChild('ed_series',(string)$product->editorial_series);
 				if (((string) $product->collection) != NULL)
 					$value->addChild('collection',(string)$product->collection);
 				if (((string) $product->imprint) != NULL)
 					$value->addChild('imprint',(string)$product->imprint);
 				
-				if ($product->authors != NULL)
-				{
-					$creators = $product->authors;
-					$other = $value->addChild("authors");
-					foreach($creators->author as $aut)
-					{
-						$other->addChild("author", (string) $aut);	
-					}					
-				}
+				if (((string) $product->authors) != NULL)
+					$value->addChild('authors',(string)$product->authors);
 				
 				if (((string) $product->price) != NULL)
 					$value->addChild('price',(string)$product->price);
@@ -165,17 +157,22 @@
 	
 	function extractInPage()
 	{
-			global $images, $innerChapters, $descriptions, $xpath;
+			global $images, $innerChapters, $descriptions, $authors, $search, $title, $xpath;
 			$dom1 = new DomDocument;
 				
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			foreach ($res as $curr)
 			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				$link = $xpath->query('.//td[2]//a/@href', $curr);
 				$dom1->loadHTMLFile($link->item(0)->nodeValue);
 				$innerXPath = new DomXPath($dom1);
 				
-				$img = $innerXPath->query('//div[@id="content"]//a[@itemprop="image"]//img/@src');
+				$img = $innerXPath->query('//div[@id="content"]//div[@class="images"]//img/@src');
 				if ($img->length != 0)
 				{
 					$string = trim($img->item(0)->nodeValue);
@@ -184,6 +181,20 @@
 					else 
 						$images[] = $string;
 				}
+				else
+					$images[] = "";
+				
+				$aut = $innerXPath->query('//div[@id="content"]//span[contains(@class, "autori")]');
+				if ($aut->length != 0)
+				{
+					$string = trim($aut->item(0)->nodeValue);
+					if ($string == "" || $string == " " || $string == NULL)
+						$authors[] = "";
+					else 
+						$authors[] = $string;
+				}
+				else
+					$authors[] = "";
 				
 				$chapters = $innerXPath->query('//div[@id="content"]//span[contains(@class, "albi")]');
 				if ($chapters->length != 0)
@@ -213,11 +224,16 @@
 	
 	function extractLink()
 	{
-			global $links, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			global $links, $xpath, $title, $search;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			
 			foreach ($res as $curr)
 			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				$link = $xpath->query('.//td[2]//a/@href', $curr);
 				$string = trim($link->item(0)->nodeValue);
 				if ($string == "" || $string == " " || $string == NULL)
@@ -229,12 +245,15 @@
 
 	function extractTitle()
 	{
-			global $titles, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			global $titles, $xpath, $title, $search;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			foreach ($res as $curr)
 			{
 				$name = $xpath->query('.//td[2]//a', $curr);
 				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				if ($string == "" || $string == " " || $string == NULL)
 					$titles[] = "";
 				else 
@@ -244,10 +263,15 @@
 	
 	function extractPrice()
 	{
-			global $prices, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			global $prices, $xpath, $title, $search;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			foreach ($res as $curr)
 			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				$pr = $xpath->query('.//td[3]', $curr);
 				if ($pr->length != 0)
 				{
@@ -262,10 +286,15 @@
 	
 	function extractDate()
 	{
-			global $pDates, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			global $pDates, $xpath, $title, $search;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			foreach ($res as $curr)
 			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				$day = $xpath->query('.//td[5]', $curr);
 				if ($day->length != 0)
 				{
@@ -278,28 +307,17 @@
 			}
 	}
 	
-	function extractAuthors()
-	{
-			global $authors, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
-			foreach ($res as $curr)
-			{
-				$creator = $xpath->query('.//td[6]', $curr);
-				if ($creator->length != 0)
-				{
-					$string = trim($creator->item(0)->nodeValue);
-					$list = array();
-					$authors[] = explode(",", $string);
-				}
-			}
-	}
-	
 	function extractImprint()
 	{
-			global $imprints, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			global $imprints, $xpath, $title, $search;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			foreach ($res as $curr)
 			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				$impr = $xpath->query('.//td[7]', $curr);
 				if ($impr->length != 0)
 				{
@@ -314,10 +332,15 @@
 	
 	function extractCollection()
 	{
-			global $collections, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			global $collections, $xpath, $title, $search;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			foreach ($res as $curr)
 			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				$coll = $xpath->query('.//td[8]', $curr);
 				if ($coll->length != 0)
 				{
@@ -332,10 +355,15 @@
 	
 	function extractSeries()
 	{
-			global $series, $xpath;
-			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and contains(td/img/@src, "jpg")]');
+			global $series, $xpath, $title, $search;
+			$res = $xpath->query('//tbody/tr[contains(td[4], "Disponibile") and not(contains(td[4], "Non")) and count(td/img) > 0]');
 			foreach ($res as $curr)
 			{
+				$name = $xpath->query('.//td[2]//a', $curr);
+				$string = trim($name->item(0)->nodeValue);
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE && stripos($string, $title) === FALSE && stripos($title, $string) === FALSE)
+					continue;
+				
 				$ser = $xpath->query('.//td[9]', $curr);
 				if ($ser->length != 0)
 				{
