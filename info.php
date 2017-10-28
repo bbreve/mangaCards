@@ -407,8 +407,8 @@ $('#scroll-to-top').click(function(){
 	
 	function parseRWXML(data)
       {
-      $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/RW-EDIZIONI-LOGO.jpg" /></a>');
-       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab16" class="panel-collapse collapse"><div class="tab-content RW top-container-offers"></div></div></div>');
+      $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab17" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/RW-EDIZIONI-LOGO.jpg" /></a>');
+       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab17" class="panel-collapse collapse"><div class="tab-content RW top-container-offers"></div></div></div>');
         //document.write($(data).find('offer').length);
 		$(data).find('offer').each(function(){
           title = $(this).find('title').text();
@@ -429,7 +429,7 @@ $('#scroll-to-top').click(function(){
           imprint = $(this).find('imprint').text();
 		 // document.write($(this).find('description').text());
           s = '<div class="row">'
-            +'  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="'+image+'"/></a></div>'
+            +'  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img style="width:100%" src="'+image+'"/></a></div>'
             +'  <div class="col-sm-6">'
             +'    <div class="agile-row">'
             +'      <h4>'+title+'</h4>'
@@ -457,7 +457,7 @@ $('#scroll-to-top').click(function(){
 		 
       
       s += '    <div class="agile-row">'
-      +'      <h5><del>'+old+'</del><h5>'
+      +'      <h5>'+price+'<h5>'
 	  +'		</div>';
 	  
 		if (rDate != "" && rDate != null)

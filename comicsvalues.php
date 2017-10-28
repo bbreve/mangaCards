@@ -1,4 +1,5 @@
 <?php
+//include 'comicsFileGenerator.php';
 	$term = $_GET['q'];
 	//$term = "sandman";
 	libxml_use_internal_errors(true);

@@ -34,10 +34,13 @@ $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_pro
 }
 
 else{
+	     $autori=array();
                if($xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td")->length==0){
 
-                   $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
-
+                   $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th/text()");
+				   if($nomeProdotto->length==0)
+                     $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
+					   
                }else{
 
                    $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td");
@@ -45,12 +48,34 @@ else{
                }
 
              $editore=$xpath->query("//table[@class='sinottico'][1]//tr[th[.='Editore']]/td//text()");
+			 $autori_Comics=$xpath->query("//table[@class='sinottico'][1]//tr[th[contains(.,'Autor') and not(contains(.,'it'))]]/td");
+			 $testi_Comics=$xpath->query("//table[@class='sinottico'][1]//tr[th[contains(.,'Testi') and not(contains(.,'it'))]]/td");
+			 $disegni_Comics=$xpath->query("//table[@class='sinottico'][1]//tr[th[contains(.,'Disegni') and not(contains(.,'it'))]]/td");
+			 
+			 if($autori_Comics->length!=0){
+				 foreach($autori_Comics as $aut){
+					 $autori[]=trim($aut->nodeValue);
+				 }
+			 }
+			 
+			 if($testi_Comics->length!=0){
+				 foreach($testi_Comics as $aut){
+					 $autori[]=trim($aut->nodeValue);
+				 }
+			 }
+			 
+			 if($disegni_Comics->length!=0){
+				 foreach($disegni_Comics as $aut){
+					 $autori[]=trim($aut->nodeValue);
+				 }
+			 }
 
              // $editoreIt=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Editore') and th[contains(span,'it')]]/td//text()");
              $immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
 
               $user=$ReturnXml->addChild('work');
               $editors=$user->addChild('editors');
+			  $authors=$user->addChild('authors');
 
                $user->addChild('name', trim($nomeProdotto[0]->nodeValue));
 
@@ -59,6 +84,11 @@ else{
                $editors->addChild('editor', trim($node->nodeValue));
 
                }
+			   
+			   foreach($autori as $auths){
+				   $authors->addChild('author', trim($auths));
+			   }
+			   
                $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
 
                /* foreach ($editoreIt as $node){ 
