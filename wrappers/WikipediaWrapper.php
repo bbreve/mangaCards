@@ -52,23 +52,7 @@ else{
 			 $testi_Comics=$xpath->query("//table[@class='sinottico'][1]//tr[th[contains(.,'Testi') and not(contains(.,'it'))]]/td");
 			 $disegni_Comics=$xpath->query("//table[@class='sinottico'][1]//tr[th[contains(.,'Disegni') and not(contains(.,'it'))]]/td");
 			 
-			 if($autori_Comics->length!=0){
-				 foreach($autori_Comics as $aut){
-					 $autori[]=trim($aut->nodeValue);
-				 }
-			 }
 			 
-			 if($testi_Comics->length!=0){
-				 foreach($testi_Comics as $aut){
-					 $autori[]=trim($aut->nodeValue);
-				 }
-			 }
-			 
-			 if($disegni_Comics->length!=0){
-				 foreach($disegni_Comics as $aut){
-					 $autori[]=trim($aut->nodeValue);
-				 }
-			 }
 
              // $editoreIt=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Editore') and th[contains(span,'it')]]/td//text()");
              $immagine=$xpath->query("//table[@class='sinottico'][1]/descendant::div[@class='floatnone']/a[@class='image']/img/@src");
@@ -81,15 +65,26 @@ else{
 
                foreach ($editore as $node){ 
 
-               $editors->addChild('editor', trim($node->nodeValue));
+               $editors->addChild('editor', trim(str_replace(array("-",","), "",$node->nodeValue)));
 
                }
 			   
-			   foreach($autori as $auths){
-				   $authors->addChild('author', trim($auths));
-			   }
+			   
+				 foreach($autori_Comics as $aut){
+					 $authors->addChild('author', trim(str_replace(array("-",","), "",$aut->nodeValue)));
+				 }
+			 
+				 foreach($testi_Comics as $aut){
+					 $authors->addChild('testi', trim(str_replace(array("-",","), "",$aut->nodeValue)));
+				 }
+			 
+				 foreach($disegni_Comics as $aut){
+					 $authors->addChild('disegni', trim(str_replace(array("-",","), "",$aut->nodeValue)));
+				 }
+			 
 			   
                $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
+			   $user->addChild('Type_element',"Comic");
 
                /* foreach ($editoreIt as $node){ 
 
@@ -157,40 +152,21 @@ function create_XML($ReturnXml, $xpath, $title)
         $authors=$user->addChild('authors');
 
      foreach ($nomeProdotto as $node){
-
-       //echo "<p>Manga: ".trim($node->nodeValue)."</p>";
-
        $user->addChild('name', trim($node->nodeValue));
-
      }
 
 
 
      foreach ($autore as $node){
-
-       //echo "<p>Autore: ".trim($node->nodeValue)."</p>";
-
        $authors->addChild('author', trim($node->nodeValue));
-
      }
 
      
 
      foreach ($editoriIt as $node){  
-
-        if( (stristr($node->nodeValue,', ')==false) and (stristr($node->nodeValue,' - ')==false))
-
-         //echo "<p>Editore: ".trim($node->nodeValue)."</p>";
-
-         $editors->addChild('editor', trim($node->nodeValue));
-
-       
-
+         $editors->addChild('editor', trim(str_replace(array("-",","), "",$node->nodeValue)));
      }
 
-     
-
-      // echo "<p>Volumi it. : ".trim($numVolumiItalia[0]->nodeValue)."</p>";
 	  
      if(stristr(trim($numVolumiJp[0]->nodeValue),'unico')==true)
 		 $numVolumiJp[0]->nodeValue='1';
@@ -213,6 +189,7 @@ function create_XML($ReturnXml, $xpath, $title)
          
          $user->addChild('link_image',"https:".trim($immagine[0]->nodeValue));
          $user->addChild('chapters_link', "https://it.wikipedia.org".$chapters_link[0]->nodeValue);
+		 $user->addChild('Type_element',"Manga");
 
 		 $user->addChild('work_link', "https://it.wikipedia.org/wiki/".$title);
         
