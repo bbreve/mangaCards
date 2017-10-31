@@ -61,17 +61,45 @@
           <div class="agile-row">
             <h1><?php echo $pag_name?></h1>
           </div>
-		  <?php   if(count($work_info->work->authors->author)!=0){
-          echo'<div class="agile-row">';
-            echo'<h5>Creato da:';  $authors_list = "";
-              foreach($work_info->work->authors->author as $author) 
-              {
-                $authors_list .= $author.", ";
-              }
-              $authors_list = rtrim($authors_list, ", ");
-              echo $authors_list;
-              echo'</h5>';
-		  echo'</div>'; }?>
+		  <?php  if(count($work_info->work->authors->author)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h5>Autore/i: ';  $authors_list = "";
+							  foreach($work_info->work->authors->author as $author) 
+							  {
+								  if($author!="")
+								$authors_list .= $author.", ";
+							  }
+							  $authors_list = rtrim($authors_list, ", ");
+							  echo $authors_list;
+					  echo'</h5>';
+				  echo'</div>'; }
+		  
+				  if(count($work_info->work->authors->testi)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h5>Testi: ';  $testi_list = "";
+						  foreach($work_info->work->authors->testi as $author) 
+						  {
+							  if($author!="")
+							$testi_list .= $author.", ";
+						  }
+						  $testi_list = rtrim($testi_list, ", ");
+						  echo $testi_list;
+						  echo'</h5>';
+				  echo'</div>'; }
+				  
+				  if(count($work_info->work->authors->disegni)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h5>Disegni: ';  $disegni_list = "";
+						  foreach($work_info->work->authors->disegni as $author) 
+						  {
+							  if($author!="")
+							$disegni_list .= $author.", ";
+						  }
+						  $disegni_list = rtrim($disegni_list, ", ");
+						  echo $disegni_list;
+						  echo'</h5>';
+					echo'</div>'; }
+					?>
 		  
           <div class="agile-row">
             <h5>Editore: <?php  $editors_list = "";
