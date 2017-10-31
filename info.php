@@ -12,7 +12,7 @@
   $chapters_link = $work_info->work->chapters_link;
   $work_link = $work_info->work->work_link;
   
-  $pag_name = $work_info->work->name;
+  $pag_name = str_replace(array("\n","\r")," ",$work_info->work->name);
   
   ob_start();  
   require __DIR__.'\wrappers\Wiki.php';
@@ -61,7 +61,15 @@
           <div class="agile-row">
             <h1><?php echo $pag_name?></h1>
           </div>
-		  <?php  if(count($work_info->work->authors->author)!=0){
+		  <?php  
+		      if(count($work_info->work->original_name)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h4>Nome originale: ';  
+							  echo $work_info->work->original_name;
+					  echo'</h4>';
+				  echo'</div>'; }
+		  
+				if(count($work_info->work->authors->author)!=0){
 				  echo'<div class="agile-row">';
 					echo'<h5>Autore/i: ';  $authors_list = "";
 							  foreach($work_info->work->authors->author as $author) 
@@ -105,6 +113,7 @@
             <h5>Editore: <?php  $editors_list = "";
               foreach($work_info->work->editors->editor as $editor) 
               {
+				  if($editor!="")
                 $editors_list .= $editor.", ";
               } 
               $editors_list = rtrim($editors_list, ", ");
