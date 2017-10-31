@@ -163,9 +163,11 @@
 	$title = $_POST['title'];
 
 
-	preg_match('!(((\w+ )|(\w+))\'?)*!ui',$title, $title_cleaned);
-
+	preg_match('!(((\w+ )|(\w+)|( \w+))(\'?)(:?))*!ui',$title, $title_cleaned);
 	$title = $title_cleaned[0];
+
+
+	$title = str_replace(":", "", $title);	
 	$amazon = new AmazonWrapper($title, 6);
 	$xml = $amazon->execute();
 	echo $xml->asXML();
