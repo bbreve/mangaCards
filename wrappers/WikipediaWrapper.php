@@ -35,17 +35,15 @@ $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_pro
 
 else{
 	     $autori=array();
-               if($xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td")->length==0){
+              
+				   $nomeOriginale=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td");
+			   
 
                    $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th/text()");
 				   if($nomeProdotto->length==0)
                      $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[@class='sinottico_testata']/th");
 					   
-               }else{
-
-                   $nomeProdotto=$xpath->query("//table[@class='sinottico'][1]//tr[contains(th,'Nome') and th[contains(span,'orig')]]/td");
-
-               }
+               
 
              $editore=$xpath->query("//table[@class='sinottico'][1]//tr[th[.='Editore']]/td//text()");
 			 $autori_Comics=$xpath->query("//table[@class='sinottico'][1]//tr[th[contains(.,'Autor') and not(contains(.,'it'))]]/td");
@@ -62,6 +60,10 @@ else{
 			  $authors=$user->addChild('authors');
 
                $user->addChild('name', trim($nomeProdotto[0]->nodeValue));
+			   
+			   if($nomeOriginale->length!=0){
+				   $user->addChild('original_name', trim($nomeOriginale[0]->nodeValue));
+			   }
 
                foreach ($editore as $node){ 
 

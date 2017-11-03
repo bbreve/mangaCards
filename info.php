@@ -12,7 +12,7 @@
   $chapters_link = $work_info->work->chapters_link;
   $work_link = $work_info->work->work_link;
   
-  $pag_name = $work_info->work->name;
+  $pag_name = str_replace(array("\n","\r")," ",$work_info->work->name);
   
   ob_start();  
   require __DIR__.'\wrappers\Wiki.php';
@@ -61,22 +61,59 @@
           <div class="agile-row">
             <h1><?php echo $pag_name?></h1>
           </div>
-		  <?php   if(count($work_info->work->authors->author)!=0){
-          echo'<div class="agile-row">';
-            echo'<h5>Creato da:';  $authors_list = "";
-              foreach($work_info->work->authors->author as $author) 
-              {
-                $authors_list .= $author.", ";
-              }
-              $authors_list = rtrim($authors_list, ", ");
-              echo $authors_list;
-              echo'</h5>';
-		  echo'</div>'; }?>
+		  <?php  
+		      if(count($work_info->work->original_name)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h4>Nome originale: ';  
+							  echo $work_info->work->original_name;
+					  echo'</h4>';
+				  echo'</div>'; }
+		  
+				if(count($work_info->work->authors->author)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h5>Autore/i: ';  $authors_list = "";
+							  foreach($work_info->work->authors->author as $author) 
+							  {
+								  if($author!="")
+								$authors_list .= $author.", ";
+							  }
+							  $authors_list = rtrim($authors_list, ", ");
+							  echo $authors_list;
+					  echo'</h5>';
+				  echo'</div>'; }
+		  
+				  if(count($work_info->work->authors->testi)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h5>Testi: ';  $testi_list = "";
+						  foreach($work_info->work->authors->testi as $author) 
+						  {
+							  if($author!="")
+							$testi_list .= $author.", ";
+						  }
+						  $testi_list = rtrim($testi_list, ", ");
+						  echo $testi_list;
+						  echo'</h5>';
+				  echo'</div>'; }
+				  
+				  if(count($work_info->work->authors->disegni)!=0){
+				  echo'<div class="agile-row">';
+					echo'<h5>Disegni: ';  $disegni_list = "";
+						  foreach($work_info->work->authors->disegni as $author) 
+						  {
+							  if($author!="")
+							$disegni_list .= $author.", ";
+						  }
+						  $disegni_list = rtrim($disegni_list, ", ");
+						  echo $disegni_list;
+						  echo'</h5>';
+					echo'</div>'; }
+					?>
 		  
           <div class="agile-row">
             <h5>Editore: <?php  $editors_list = "";
               foreach($work_info->work->editors->editor as $editor) 
               {
+				  if($editor!="")
                 $editors_list .= $editor.", ";
               } 
               $editors_list = rtrim($editors_list, ", ");
