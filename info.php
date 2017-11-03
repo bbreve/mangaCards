@@ -47,7 +47,7 @@
     </style>
   </head>
   <body>    
-    <div class="container test">
+    <div class="container main">
       <div class="progress animated pulse">
         <div class="progress-bar" style="width: 1%"><span>Caricamento</span></div>
       </div>
@@ -241,8 +241,18 @@
           });
       }
 
+      function executeProgress()
+      {
+        maxPercentage = $('.container.main').width();
+        currentPercentage = $('.progress-bar').width();
+        amount = Math.random() * 2;
+        newPercentage = currentPercentage + ((maxPercentage * amount) / 100);
+        $('.progress-bar').css('width', newPercentage);
+        setTimeout(executeProgress, 3000)
+      }
       function paniniAjax(title)
       {
+        setTimeout(executeProgress, 3000);
         return $.ajax(
           {
             type: "POST",
@@ -352,7 +362,7 @@
       
       $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq).done(function(a1, a2, a3, a4){
         $('.progress-bar').css('width', '100%');
-        $('.progress.animated').fadeOut();
+        $('.progress.animated').fadeOut(500);
 
       });
 
@@ -394,7 +404,7 @@
 
      function parseAmazonXML(data)
      {
-      maxPercentage = $('.container.test').width();
+      maxPercentage = $('.container.main').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 10) / 100);
       $('.progress-bar').css('width', newPercentage);
@@ -445,7 +455,7 @@
      function parseJPopXML(data)
      {
 
-      maxPercentage = $('.container.test').width();
+      maxPercentage = $('.container.main').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
@@ -497,7 +507,7 @@
      function parseRWXML(data)
      {
 
-      maxPercentage = $('.container.test').width();
+      maxPercentage = $('.container.main').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
@@ -586,7 +596,7 @@
      function parsePaniniXML(data)
      {
 
-      maxPercentage = $('.container.test').width();
+      maxPercentage = $('.container.main').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
@@ -660,7 +670,7 @@
      function parseGamestopXML(data)
      {
 
-      maxPercentage = $('.container.test').width();
+      maxPercentage = $('.container.main').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
@@ -736,7 +746,7 @@
      function parseAnimeXML(data)
      {
 
-      maxPercentage = $('.container.test').width();
+      maxPercentage = $('.container.main').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 10) / 100);
       $('.progress-bar').css('width', newPercentage);
