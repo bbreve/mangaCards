@@ -197,11 +197,11 @@
            </div>
         </div>
         <div class="tab-pane" id="tab50" >
+          <h2>Negozi</h2>
           <div class="row">
             <div class="tab-games-icon" >
             </div>
             <div class="tab-games-offers">
-              <hr>
             </div>
           </div>
         </div>
@@ -235,6 +235,26 @@
         {
           hideOverlay();
           parseAmazonXML(data);
+        });
+      }
+
+      function amazonGamesAjax(search_params)
+      {
+        return $.ajax(
+        {
+          type: "POST",
+          data:
+          {
+            'title': search_params,
+          },
+          url: "wrappers/AmazonGamesWrapper.php",
+          async: true
+
+        })
+        .done(function(data)
+        {
+          hideOverlay();
+          parseAmazonGamesXML(data);
         });
       }
 
@@ -395,6 +415,8 @@
 
       gamestopReq = gamestopAjax(search_params);
 
+      amazonGamesReq = amazonGamesAjax(search_params);
+
       animeReq = animeAjax();
       
       $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq).done(function(a1, a2, a3, a4){
@@ -443,11 +465,62 @@
      {
       maxPercentage = $('.container.main').width();
       currentPercentage = $('.progress-bar').width();
-      newPercentage = currentPercentage + ((maxPercentage * 10) / 100);
+      newPercentage = currentPercentage + ((maxPercentage * 5) / 100);
       $('.progress-bar').css('width', newPercentage);
 
       $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab14" ><img class="animated bounceInUp" height=70" width="160"  src="assets/img/amazonLogo2.jpg" /></a>');
       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab14" class="panel-collapse collapse"><div class="tab-content amazon top-container-offers"></div></div></div>');
+      $(data).find('offer').each(function()
+      {
+        title = $(this).find('title').text();
+        url = $(this).find('url_to_product').text();
+        image = $(this).find('cover').text();
+
+        price = $(this).find('price').text();
+
+        author = $(this).find('author').text();
+
+
+
+        $('.amazon').append(
+          '<div class="row">' +
+          '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="' + image + '"/></a></div>' +
+          '  <div class="col-sm-6">' +
+          '    <div class="agile-row">' +
+          '      <h4>' + title + '</h4>' +
+          '    </div>' +
+          '    <div class="agile-row">' +
+          '      <p>di ' + author + '</p>' +
+          '    </div>' +
+          '    <div class="agile-row">' +
+          '      <h2>' + price + '</h2>' +
+          '    </div>' +
+          '  </div>' +
+          '  <div class="col-sm-2">' +
+          '    <div class="agile-row">' +
+          '      <img src="https://images-na.ssl-images-amazon.com/images/G/01/SellerCentral/legal/amazon-logo_transparent.png" style="width: 100%"/>' +
+          '    </div>' +
+          '    <div class="agile-row">' +
+          '      <a href="' + url + '" class="mini-thumbnail" target="_blank"><img style="width:100%" src="http://www.cavouresoterica.it/wp-content/uploads/2016/04/acquista-ora.png" /></a>' +
+          '    </div>' +
+          '  </div>' +
+          '</div>' +
+          '<hr>');
+
+      });
+
+     }
+
+     function parseAmazonGamesXML(data)
+     {
+      maxPercentage = $('.container.main').width();
+      currentPercentage = $('.progress-bar').width();
+      newPercentage = currentPercentage + ((maxPercentage * 5) / 100);
+      $('.progress-bar').css('width', newPercentage);
+
+
+      $('.tab-games-icon').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab52" ><img class="animated bounceInUp" height=70" width="160"  src="assets/img/amazonLogo2.jpg" /></a>');
+      $('.tab-games-offers').append('<div class="panel panel-default" style="border:hidden"><div id="tab52" class="panel-collapse collapse"><div class="tab-content amazon top-container-offers"></div></div></div>');
       $(data).find('offer').each(function()
       {
         title = $(this).find('title').text();
@@ -718,7 +791,7 @@
         $('.tab-products').append('<li class="animated bounceInUp"><a href="#tab50" data-toggle="tab">Videogiochi</a></li>');
 
         $('.tab-games-icon').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab51" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/gamestop.jpg" /></a>');
-        $('.tab-games-offers').append('<div class="panel panel-default" style="border:hidden"><div id="tab51" class="panel-collapse collapse"><div class="tab-content Gamestop"></div></div></div>');
+        $('.tab-games-offers').append('<div class="panel panel-default" style="border:hidden"><div id="tab51" class="panel-collapse collapse"><div class="tab-content Gamestop top-container-offers"></div></div></div>');
 
         $(data).find('offer').each(function()
         {
