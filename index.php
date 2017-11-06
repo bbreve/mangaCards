@@ -34,6 +34,7 @@
       </style>
 	  <style type="text/css">
 		.vertical-center {
+      text-align: center;
 	  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
 	  min-height: 100vh; /* These two lines are counted as one :-)       */
 

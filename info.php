@@ -176,10 +176,10 @@
                 <div class="col-sm-12 container offers">
         <div class="container row">
           <h2>Negozi</h2>
-          <div class="overlay loading text-center">
-            <h4 class="loading">Caricamento delle offerte in corso...</h4>
-            <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
-          </div>                    
+                <div class="overlay loading text-center">
+                  <h4 class="loading">Caricamento delle offerte in corso...</h4>
+                  <i class="fa fa-cog fa-spin fa-3x fa-refresh"></i>
+                </div>                    
         </div>
         <div class="row container container-shops">
           
@@ -191,19 +191,25 @@
           
         </div>
         <div class="tab-pane" id="tab13" >
-          <div class "row">
-            <div class="tab-anime" >
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="tab-anime" >
+              </div>
             </div>
            </div>
         </div>
         <div class="tab-pane" id="tab50" >
-          <h2>Negozi</h2>
           <div class="row">
-            <div class="tab-games-icon" >
+            <div class="col-sm-12 container offers">
+              <div class="container row">
+                <h2>Negozi</h2>
+              </div>
+              <div class="row container container-games">
+                
+              </div>
+              <div class="panel-group container-products-games" id="products-games">
+              </div>
             </div>
-            <div class="tab-games-offers">
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -419,10 +425,11 @@
 
       animeReq = animeAjax();
       
-      $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq).done(function(a1, a2, a3, a4){
+      $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq, amazonGamesReq).done(function(a1, a2, a3, a4){
         $('.progress-bar').css('width', '100%');
         $('.progress.animated').fadeOut(500);
 
+          $('.animated.bounceInUp').removeClass('animated bounceInUp');
       });
 
       });
@@ -519,8 +526,8 @@
       $('.progress-bar').css('width', newPercentage);
 
 
-      $('.tab-games-icon').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab52" ><img class="animated bounceInUp" height=70" width="160"  src="assets/img/amazonLogo2.jpg" /></a>');
-      $('.tab-games-offers').append('<div class="panel panel-default" style="border:hidden"><div id="tab52" class="panel-collapse collapse"><div class="tab-content amazon top-container-offers"></div></div></div>');
+      $('.container-games').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-games" href="#tab52" ><img class="animated bounceInUp" height=70" width="160"  src="assets/img/amazonLogo2.jpg" /></a>');
+      $('.container-products-games').append('<div class="panel panel-default" style="border:hidden"><div id="tab52" class="panel-collapse collapse"><div class="tab-content amazon-games top-container-offers"></div></div></div>');
       $(data).find('offer').each(function()
       {
         title = $(this).find('title').text();
@@ -533,7 +540,7 @@
 
 
 
-        $('.amazon').append(
+        $('.amazon-games').append(
           '<div class="row">' +
           '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="' + image + '"/></a></div>' +
           '  <div class="col-sm-6">' +
@@ -790,8 +797,8 @@
         //Creo la tab con la dicitura "Videogiochi" che comparirà a caricamento ultimato
         $('.tab-products').append('<li class="animated bounceInUp"><a href="#tab50" data-toggle="tab">Videogiochi</a></li>');
 
-        $('.tab-games-icon').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab51" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/gamestop.jpg" /></a>');
-        $('.tab-games-offers').append('<div class="panel panel-default" style="border:hidden"><div id="tab51" class="panel-collapse collapse"><div class="tab-content Gamestop top-container-offers"></div></div></div>');
+        $('.container-games').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-games" href="#tab51" ><img class="animated bounceInUp" height="50" width="180"  src="https://www.gamestop.com/gs/logos/files/GameStopLogo_BlackRed.png" /></a>');
+        $('.container-products-games').append('<div class="panel panel-default" style="border:hidden"><div id="tab51" class="panel-collapse collapse"><div class="tab-content Gamestop top-container-offers"></div></div></div>');
 
         $(data).find('offer').each(function()
         {
@@ -809,7 +816,7 @@
           pegi = $(this).find('pegi').text();
 
           s = '<div class="row">' +
-            '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img style="max-width:260px" src="' + image + '"/></a></div>' +
+            '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img style="max-width:200px" src="' + image + '"/></a></div>' +
             '  <div class="col-sm-6">' +
             '    <div class="agile-row">' +
             '      <h4>' + title + '</h4>' +
