@@ -1,6 +1,10 @@
 	<?php
+<<<<<<< HEAD
 	//header("Content-type: application/xml");
 			
+=======
+
+>>>>>>> c0e5f80dcc3d3ef9f516357c7182fd78455ff340
 	error_reporting(0);
 	class AmazonWrapper{
 		
@@ -53,6 +57,7 @@
 				foreach($products_rows as $product_row)
 				{
 					$disp = $xmlPageXPath -> query('.//span[text="Non disponibile"]', $product_row);
+<<<<<<< HEAD
 					$plat = $xmlPageXPath -> query('.//a[contains(@class, "a-link-normal")]/h3[not(contains(text(), "sconosciuta")) and not(contains(text(), "sistema"))]', $product_row);
 					if ($disp->length != 0 && $plat->length == 0)
 						continue;
@@ -143,6 +148,63 @@
 					$this->appendArray($title, $node, $price, $image, $producer, $platform, $number[0][0]);
 				}
 			}
+=======
+					if ($disp->length != 0)
+						continue;
+					
+					//print_r($product_row->textContent);
+					$title = $xmlPageXPath -> query('.//h2', $product_row)->item(0)->textContent;
+					$authors = $xmlPageXPath -> query('.//div/span[contains(text(), "di")]/following-sibling::span//text()', $product_row);
+					
+					$author_string = "";
+					foreach($authors as $author)
+					{
+						$author_string .= $author->textContent;
+					}
+					
+					$checking = checkProduct($title, $author_string);
+					if (!$checking)
+					{
+						continue;
+					}	
+					
+					$plat = $xmlPageXPath -> query('.//a[contains(@class, "a-link-normal")]/h3', $product_row)->item(0)->textContent;
+					$url_to_product = $xmlPageXPath -> query('.//a[contains(@class, "s-access-detail-page")]/@href', $product_row)->item(0)->textContent;
+					
+					$price = $xmlPageXPath -> query('.//span[contains(@class, "s-price")]', $product_row)->item(0)->textContent;
+					$price = substr($price, 4)."€";
+					$image = $xmlPageXPath -> query('.//img/@src', $product_row)->item(0)->textContent;
+					
+					$authors = $xmlPageXPath -> query('.//div/span[contains(text(), "di")]/following-sibling::span//text()', $product_row);
+					
+					$author_string = "";
+					foreach($authors as $author)
+					{
+						$author_string .= $author->textContent;
+					}
+
+					preg_match_all('!\d+!', $title, $number);
+					//$this->save_product($number[0][0], $title, $url_to_product, $price, $image);
+
+					
+					if(stristr($title, urldecode($query_product)) && $price != "€" )
+						//Si fa ciò per fare in modo che i prodotti che non hanno un numero nel titolo, vangano posti alla fine della lista di prodotti ordinata.
+						  if(count($number[0]) == 0){
+								$this->appendArray($title, $url_to_product, $price, $image, $author_string, $plat, 30000);
+						  }else{
+								$this->appendArray($title, $url_to_product, $price, $image, $author_string, $plat, $number[0][0]);
+								}
+					
+					
+				}
+			}
+			
+			
+
+			return $this->createXML();
+			
+				
+>>>>>>> c0e5f80dcc3d3ef9f516357c7182fd78455ff340
 		}
 
 		function appendArray($title, $url_to_product, $price, $image, $author, $plat, $number)
@@ -189,12 +251,16 @@
 		
 	}
 
+<<<<<<< HEAD
 	$original = $title;
+=======
+>>>>>>> c0e5f80dcc3d3ef9f516357c7182fd78455ff340
 	$title = $_POST['title'];
 	$type_search = $_POST['type'];
 	$origin_name = $_POST['origin'];
 	$authors = $_POST['authors'];
 
+<<<<<<< HEAD
 /*
 	$title = "Dragon Ball";
 	$type_search = "manga";
@@ -202,6 +268,8 @@
 	$authors = "";
 */
 
+=======
+>>>>>>> c0e5f80dcc3d3ef9f516357c7182fd78455ff340
 	//Trasforma caratteri speciali in particolari manga/comic
 	$title = transform($title);
 	
@@ -234,7 +302,10 @@
 		}
 	}
 	
+<<<<<<< HEAD
 	
+=======
+>>>>>>> c0e5f80dcc3d3ef9f516357c7182fd78455ff340
 	echo $xml->asXML();
 	
 	function transform($string)

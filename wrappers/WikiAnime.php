@@ -379,10 +379,10 @@
 
 			//Si assume che per la descrizione della trama e le referenze di adattamento ci siano valori con pi? di due parole
 			if ($references[$numep[$i].$anime[$count-1]] != "" && count(explode(" ", $references[$numep[$i].$anime[$count-1]])) > 2)
-				$prodotto->addChild("reference", htmlspecialchars($references[$numep[$i].$anime[$count-1]]));
+				$prodotto->addChild("reference", $references[$numep[$i].$anime[$count-1]]);
 			
 			if ($stories[$numep[$i].$anime[$count-1]] != "" && count(explode(" ", $stories[$numep[$i].$anime[$count-1]])) > 2)
-				$prodotto->addChild("story", htmlspecialchars($stories[$numep[$i].$anime[$count-1]]));
+				$prodotto->addChild("story", $stories[$numep[$i].$anime[$count-1]]);
 		}
 		
 		//Si reinizializzano le variabili per una nuova successiva aggiunta
