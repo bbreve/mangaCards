@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Creato il: Nov 06, 2017 alle 12:42
--- Versione del server: 10.1.13-MariaDB
--- Versione PHP: 5.6.23
+-- Creato il: Nov 07, 2017 alle 15:13
+-- Versione del server: 10.1.16-MariaDB
+-- Versione PHP: 7.0.9
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -34,7 +34,8 @@ CREATE TABLE `amazon` (
   `Autore` varchar(255) DEFAULT NULL,
   `Piattaforma` varchar(255) DEFAULT NULL,
   `Immagine` varchar(255) DEFAULT NULL,
-  `LinkAcquisto` varchar(255) DEFAULT NULL
+  `LinkAcquisto` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -50,7 +51,8 @@ CREATE TABLE `comics` (
   `Testi` varchar(255) DEFAULT NULL,
   `Disegni` varchar(255) DEFAULT NULL,
   `Editore` varchar(255) DEFAULT NULL,
-  `Immagine` varchar(255) DEFAULT NULL
+  `Immagine` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -65,7 +67,8 @@ CREATE TABLE `episodi_anime` (
   `NomeEpisodio` varchar(255) NOT NULL,
   `DataJPN` varchar(255) DEFAULT NULL,
   `DataITA` varchar(255) DEFAULT NULL,
-  `Trama` varchar(255) DEFAULT NULL
+  `Trama` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -78,7 +81,8 @@ CREATE TABLE `extra_anime` (
   `Nome` varchar(255) NOT NULL,
   `NomeAnime` varchar(255) NOT NULL,
   `Tipo` varchar(255) NOT NULL,
-  `DataUscita` varchar(255) DEFAULT NULL
+  `DataUscita` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -97,7 +101,8 @@ CREATE TABLE `gamestop` (
   `DataUscita` varchar(255) DEFAULT NULL,
   `PEGI` varchar(255) DEFAULT NULL,
   `Immagine` varchar(255) DEFAULT NULL,
-  `LinkAcquisto` varchar(255) DEFAULT NULL
+  `LinkAcquisto` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -113,7 +118,8 @@ CREATE TABLE `jpop` (
   `Autore` varchar(255) DEFAULT NULL,
   `Dettagli` varchar(255) DEFAULT NULL,
   `Immagine` varchar(255) DEFAULT NULL,
-  `LinkAcquisto` varchar(255) DEFAULT NULL
+  `LinkAcquisto` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -129,7 +135,8 @@ CREATE TABLE `manga` (
   `EditoreITA` varchar(255) NOT NULL,
   `NumVolJPN` varchar(255) NOT NULL,
   `NumVolITA` varchar(255) DEFAULT NULL,
-  `Immagine` varchar(255) DEFAULT NULL
+  `Immagine` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -151,7 +158,8 @@ CREATE TABLE `panini` (
   `DataUscita` varchar(255) NOT NULL,
   `Immagine` varchar(255) DEFAULT NULL,
   `LinkAcquisto` varchar(255) DEFAULT NULL,
-  `NumeroVolume` varchar(255) DEFAULT NULL
+  `NumeroVolume` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -172,7 +180,8 @@ CREATE TABLE `rwedizioni` (
   `Contenuti` varchar(255) DEFAULT NULL,
   `Descrizione` varchar(255) DEFAULT NULL,
   `Immagine` varchar(255) DEFAULT NULL,
-  `LinkAcquisto` varchar(255) DEFAULT NULL
+  `LinkAcquisto` varchar(255) DEFAULT NULL,
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -189,7 +198,7 @@ CREATE TABLE `volumi_manga` (
   `DataITA` varchar(255) DEFAULT NULL,
   `Trama` varchar(255) DEFAULT NULL,
   `ListaCapitoli` varchar(255) DEFAULT NULL,
-  `Speciale` tinyint(1) NOT NULL
+  `Creation_Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
