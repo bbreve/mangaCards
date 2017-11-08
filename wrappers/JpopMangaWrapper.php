@@ -1,11 +1,19 @@
 <?php
 include 'FunctionsJpop.php';
 header("Content-type: text/xml");
-function creaPagina($url,$search){
+function creaPagina($url,$search,$serie){
 
 $numUltimapagina=RitornaButtonPagine($url);
 $ReturnXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
 header("Content-type: text/xml");
+
+	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+						$conn->set_charset("utf8");
+
 if($numUltimapagina !=0){
 
 for($i=1;$i<=$numUltimapagina;$i++){
@@ -50,6 +58,7 @@ foreach($ReturnXml->product as $product){
 	});
 	
 	$RXml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+	
 	foreach($arr as $product){
 		$value=$RXml->addChild('offer');
 		$value->addChild('title',(string)$product->name);
@@ -59,8 +68,26 @@ foreach($ReturnXml->product as $product){
 		$value->addChild('url_to_product',(string)$product->linkproduct);
 		$value->addChild('details',(string)$product->details);
 		
+		$nomeManga=htmlspecialchars((string)$product->name);
+		$PrezzoManga=htmlspecialchars((string)$product->price);
+		$autoreManga=htmlspecialchars((string)$product->author);
+		$immagineManga=htmlspecialchars((string)$product->image);
+		$linkProdotto=htmlspecialchars((string)$product->linkproduct);
+		$dettaglioManga=htmlspecialchars((string)$product->details);
+		
+		$toinsert = 'INSERT INTO jpop
+							(NomeOfferta, Serie, Prezzo, Autore, Dettagli, Immagine, LinkAcquisto)
+							VALUES
+							("'.$nomeManga.'", "'.$serie.'", "'.$PrezzoManga.'", "'.$autoreManga.'", "'.$dettaglioManga.'", "'.$immagineManga.'", "'.$linkProdotto.'")';
+							
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
+		
 	}
-
 }else{
 	
 	
@@ -105,8 +132,28 @@ foreach($ReturnXml->product as $product){
 		$value->addChild('url_to_product',(string)$product->linkproduct);
 		$value->addChild('details',(string)$product->details);
 		
+		$nomeManga=htmlspecialchars((string)$product->name);
+		$PrezzoManga=htmlspecialchars((string)$product->price);
+		$autoreManga=htmlspecialchars((string)$product->author);
+		$immagineManga=htmlspecialchars((string)$product->image);
+		$linkProdotto=htmlspecialchars((string)$product->linkproduct);
+		$dettaglioManga=htmlspecialchars((string)$product->details);
+		
+		$toinsert = 'INSERT INTO jpop
+							(NomeOfferta, Serie, Prezzo, Autore, Dettagli, Immagine, LinkAcquisto)
+							VALUES
+							("'.$nomeManga.'", "'.$serie.'", "'.$PrezzoManga.'", "'.$autoreManga.'", "'.$dettaglioManga.'", "'.$immagineManga.'", "'.$linkProdotto.'")';
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
+		
+		
 	}
 }
+ $conn->close();
  return $RXml->asXML();   
 	 
 }
@@ -123,7 +170,7 @@ $title=explode("-", $titles);
 //$URL="http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title[0])."&submit_search=";
 
 
-$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title[0])."&submit_search=",$title[0]);
+$xml =creaPagina("http://www.j-pop.it/cerca?controller=search&orderby=position&orderway=desc&search_query=".urlencode($title[0])."&submit_search=",$title[0],$titles);
 echo $xml;
 
 ?>
