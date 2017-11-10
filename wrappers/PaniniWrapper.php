@@ -16,9 +16,9 @@
 	
 	//Parametri di ricerca
 	$title = $_POST['title'];
-	$search = transform($title);
-	$type = $_POST['type'];
-	$origin_name = $_POST['origin'];
+	preg_match('!(((\w+ )|(\w+))\'?)*!ui',$title, $title_cleaned);// usato per problemi causati dai due punti nel titolo del manga es- Ken il guerriero: Le origini del mito.
+	$title = $title_cleaned[0];
+	$search = $title;
 	
 	//Dichiaro l'XML di ritorno
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');		
@@ -30,7 +30,7 @@
 	$dom->loadHTMLFile($url);
 	$xpath = new DOMXPath($dom);         
 	$res1 = $xpath->query('//div[@class="text-center"]');      
-	
+		
 	if ($res1->length != 0)
 	{
 		//Ottengo il numero di pagine della ricerca
@@ -158,7 +158,6 @@
 			return $a->productNumber - $b->productNumber;
 		});
 		
-		
 		$xml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
 		foreach($arr as $product){
 			$value = $xml->addChild('offer');
@@ -194,7 +193,7 @@
 				
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//a[@class="product-image"]/img/@src', $curr);
@@ -223,7 +222,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//h3/a/@href', $curr);
@@ -249,7 +248,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//h3/a/@href', $curr);
@@ -292,7 +291,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				if ($string == "" || $string == " " || $string == NULL)
@@ -312,7 +311,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$arrays = explode(" ", $string);
@@ -330,7 +329,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//p[@class="old-price"]', $curr);
@@ -355,7 +354,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//p[@class="special-price"]', $curr);
@@ -380,7 +379,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//h4[@class="publication-date"]', $curr);
@@ -406,7 +405,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//h5[@class="reprint"]', $curr);
@@ -433,7 +432,7 @@
 			{
 				$string = $xpath->query('.//h3/a/text()', $curr)->item(0)->nodeValue;
 				$string = trim($string);
-				if (checkProduct($string) == FALSE)
+				if (stripos($string, $search) === FALSE && stripos($search, $string) === FALSE)
 					continue;
 				
 				$queryResult = $xpath->query('.//small[@class="subtitle lightText" or @class="serie"]', $curr);
@@ -449,29 +448,5 @@
 				else
 					$volume_infos[] = "";
 			}
-	}
-	
-	function transform($string)
-	{
-		if (stripos($string, "×") !== FALSE)
-			$string = str_replace("×", "x", $string);
-
-		return $string;
-	}
-	
-	function checkProduct($string)
-	{
-		global $title, $type, $origin_name, $search;
-
-		if (stripos($string, $title) !== FALSE || stripos($title, $string) !== FALSE)
-			return TRUE;
-		
-		if (stripos($string, $search) !== FALSE || stripos($search, $string) !== FALSE)
-			return TRUE;
-		
-		if (stripos($string, $origin_name) !== FALSE || stripos($origin_name, $string) !== FALSE)
-			return TRUE;
-		
-		return FALSE;
 	}
 ?>	

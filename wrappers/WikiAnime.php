@@ -26,7 +26,7 @@
 	$xpath = new DomXPath($dom);
 	
 	
-	$queryAnime = $xpath->query('//span[contains(@id, "Anime") or contains(@id, "anime")]/following::table[contains(@class, "noprint")]//i//a[contains(@href, "Episodi") and not(contains(@href, "OAV"))]/@href');
+	$queryAnime = $xpath->query('//span[contains(@id, "Anime") or contains(@id, "anime")]/following::table[contains(@class, "noprint")]//i//a[contains(@href, "Episodi")]/@href');
 
 	//Controllo su eventuali molteplici pagine di anime
 	if ($queryAnime->length > 0)
@@ -64,7 +64,6 @@
 				extractDatesIt();
 				extractDatesJPN();	
 			}
-			//Esistono saghe
 			else
 			{
 				foreach($queryResult as $qR)
@@ -349,34 +348,34 @@
 			if (intval($numep[$i]) == $start)
 			{
 				$a = $xml->addChild("anime");
-				$a->addChild("title", change($anime[$count++]));
+				$a->addChild("title", $anime[$count++]);
 				$episodes = $a->addChild("episodes");	
 			}
 			
 			$prodotto = $episodes->addChild("episode");
 			
-			$prodotto->addChild("title", $titles[$i]);
+			$prodotto->addChild("title", htmlspecialchars($titles[$i]));
 			if(is_null($numep[$i]))
 				$prodotto->addChild("number", 'IN USCITA');
 			else
-				$prodotto->addChild("number", $numep[$i]);
+				$prodotto->addChild("number", htmlspecialchars($numep[$i]));
 			
-			if(count($datesJPN) > $i)
+			if(count($datesJPN) != 0)
 			{
-				$prodotto->addChild("dateJPN", $datesJPN[$i]);	
+				$prodotto->addChild("dateJPN", htmlspecialchars($datesJPN[$i]));	
 			}	
 			else
 			{
 				$prodotto->addChild("dateJPN", "N.D.");
 			}
 			
-			if (count($datesIT) > $i)
+			if (count($datesIT) != 0)
 			{
-				$prodotto->addChild("dateIT", $datesIT[$i]);
+				$prodotto->addChild("dateIT", htmlspecialchars($datesIT[$i]));
 			}
 			else
 				$prodotto->addChild("dateIT", "N.D.");
-
+			
 			//Si assume che per la descrizione della trama e le referenze di adattamento ci siano valori con pi? di due parole
 			if ($references[$numep[$i].$anime[$count-1]] != "" && count(explode(" ", $references[$numep[$i].$anime[$count-1]])) > 2)
 				$prodotto->addChild("reference", htmlspecialchars($references[$numep[$i].$anime[$count-1]]));
@@ -413,7 +412,7 @@
 		
 		foreach($eps as $ep)
 		{
-			$dates_it_query = $xpath->query('./td[contains(@style, "white-space:nowrap")][2]', $ep);
+			$dates_it_query = $xpath->query('./td[contains(@style, "white-space:nowrap")][2]/text()', $ep);
 
 			if ($dates_it_query->length == 0)
 			{
@@ -434,13 +433,10 @@
 				$string = "";
 				foreach ($match[0] as $word)
 					$string .= $word." ";	
-					
-				$transformedDate = transformDate(trim($string));	
 
-				if ($transformedDate == "")
-					$datesIT[] = "N.D.";
-				else
-					$datesIT[] = $transformedDate;
+				$transformedDate = transformDate(trim($string));
+				
+				$datesIT[] = $transformedDate;
 			}
 		}
 				
@@ -459,7 +455,7 @@
 				$eps = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]', $query_season->item(0));
 				foreach($eps as $ep)
 				{			
-					$dates_it_query = $xpath->query('./td[contains(@style, "white-space:nowrap")][2]', $ep);
+					$dates_it_query = $xpath->query('./td[contains(@style, "white-space:nowrap")][2]/text()', $ep);
 			
 					if ($dates_it_query->length == 0)
 					{
@@ -479,10 +475,7 @@
 							$string .= $word." ";	
 
 						$transformedDate = transformDate(trim($string));
-						if ($transformedDate == "")
-							$datesIT[] = "N.D.";
-						else
-							$datesIT[] = $transformedDate;
+						$datesIT[] = $transformedDate;
 					}
 				}
 
@@ -515,13 +508,9 @@
 			$string = "";
 			foreach ($match[0] as $word)
 				$string .= $word." ";	
-				
-			$transformedDate = transformDate(trim($string));
 
-			if ($transformedDate == "")
-				$datesJPN[] = "N.D.";
-			else
-				$datesJPN[] = $transformedDate;
+			$transformedDate = transformDate(trim($string));
+			$datesJPN[] = $transformedDate;
 		}
 		
 		//Case per l'estrazione in pagine di stagioni successive
@@ -536,7 +525,7 @@
 				if ($query_season->length == 0)
 					break;
 				
-				$dates_jpn_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[contains(@style, "white-space:nowrap")][1]', $query_season->item(0));
+				$dates_jpn_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[contains(@style, "white-space:nowrap")][1]/text()', $query_season->item(0));
 				foreach($dates_jpn_query as $date_jpn)
 				{			
 					if ($date_jpn == "" || $date_jpn == " " || $date_jpn == NULL)
@@ -547,13 +536,9 @@
 					$string = "";
 					foreach ($match[0] as $word)
 						$string .= $word." ";	
-						
-					$transformedDate = transformDate(trim($string));
 
-					if ($transformedDate == "")
-						$datesJPN[] = "N.D.";
-					else
-						$datesJPN[] = $transformedDate;
+					$transformedDate = transformDate(trim($string));
+					$datesJPN[] = $transformedDate;
 				}
 
 				$counter += 1;
@@ -629,8 +614,9 @@
 			{	
 					if(stristr($num_query->nodeValue,'('))
 					{
-						$value = explode("(", $num_query->nodeValue);
-						$numep[] = trim($value[0]);
+						$valore=explode("(",$num_query->nodeValue);
+						$num=explode(")",$valore[1]);
+						$numep[] = $num[0];
 					}
 					else
 					{
@@ -654,15 +640,18 @@
 						$nums_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[1]', $query_season->item(0));
 					else
 						$nums_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[2]', $query_season->item(0));
-					
-					if (stripos($num_query->nodeValue,'(') !== FALSE)
-					{
-						$value = explode("(", $num_query->nodeValue);
-						$numep[] = trim($num[0]);
-					}
-					else
-					{
-						$numep[] = $num_query->nodeValue;
+					foreach($nums_query as $num_query)
+					{	
+						if(stristr($num_query->nodeValue,'('))
+						{
+							$valore=explode("(",$num_query->nodeValue);
+							$num=explode(")",$valore[1]);
+							$numep[] = $num[0];
+						}
+						else
+						{
+							$numep[] = $num_query->nodeValue;
+						}
 					}
 					
 					$counter += 1;
@@ -691,28 +680,11 @@
 			$id = $xpath->query('./td[1]/text()', $ep_tr);
 			$idTot = $xpath->query('./td[2]/text()', $ep_tr);
 			
-			if(stristr($id->item(0)->nodeValue,'('))
-			{
-				$value = explode("(", $id->item(0)->nodeValue);
-				$idToWrite = trim($value[0]);
-			}
-			else
-			{
-				$idToWrite = $id->item(0)->nodeValue;
-			}
+			$idToWrite = $id->item(0)->nodeValue;
 			if ($numTot->length > 0)
 			{
-				if(stristr($id->item(0)->nodeValue,'('))
-				{
-					$value = explode("(", $idTot->item(0)->nodeValue);
-					$idToWrite = trim($value[0]);
-				}
-				else
-				{
 					$idToWrite = $idTot->item(0)->nodeValue;
-				}
 			}
-			
 			$story = $xpath->query('./following-sibling::tr/td[@colspan = 7 and not(contains(@style, "text-align"))]', $ep_tr);
 			if ($story->length != 0)
 			{
@@ -952,24 +924,3 @@
 				}
 			}
 	}
-	
-	function change($string)
-	{
-		if (stripos($string, "%C2%BD") !== FALSE)
-			$string = str_replace("%C2%BD", "½", $string);
-		
-		if (stripos($string, "%C3%97") !== FALSE)
-			$string = str_replace("%C3%97", "×", $string);
-		
-		if (stripos($string, "%CE%A9") !== FALSE)
-			$string = str_replace("%CE%A9", "Ω", $string);
-		
-		if (stripos($string, "%C5%8D") !== FALSE)
-			$string = str_replace("%C5%8D", "ō", $string);
-		
-		if (stripos($string, "%2B") !== FALSE)
-			$string = str_replace("%2B", "+", $string);
-		
-		return $string;
-	}
-?>

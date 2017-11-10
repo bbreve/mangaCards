@@ -26,35 +26,12 @@
 	
 	//Parametri di ricerca
 	$pag = 1;
-	$title = $_POST['title'];
-	$origin = $_POST['origin'];
-	$type = $_POST['type'];
-	$en_name = $_POST['english'];
+	$search = $_POST['series'];
 	
-	$searchTitle = transform($title);
-	if (stripos($searchTitle, ":") !== FALSE)
-	{
-		$searchTitle = explode(":", $searchTitle)[0];	
-	}
-	
-	//Cerco per i manga nel titolo italiano (modificato) e quello inglese
-	if ($type == "manga")
-		$search_names = array($searchTitle, $en_name);
-	//Faccio lo stesso per i comic
-	else
-		$search_names = array($searchTitle, $origin); 
-	
-	//Variabile di uscita dal ciclo
-	$value = TRUE;
-	
-	//Per ogni titolo da provare
-	for ($counter = 0; $counter < count($search_names); $counter++)
-	{
-			//Si splitta sui caratteri particolari di ricerca
-			if (stripos($search_names[$counter], ":") !== FALSE) 
-				$arr = explode(":", $search_names[$counter]);
+			if (stripos($search, ":") !== FALSE) 
+				$arr = explode(":", $search);
 			else
-				$arr = explode("-", $search_names[$counter]);
+				$arr = explode("-", $search);
 			
 			for ($i = 0; $i < count($arr); $i++)
 			{
@@ -258,15 +235,8 @@
 				writeXML();
 				
 				if ($xml->count() > 0)
-				{
-					$value = FALSE;
 					break;
-				}
 			}
-			
-			if ($value == FALSE)
-				break;
-	}
 	
 	echo $xml->asXML();
 	
@@ -347,7 +317,7 @@
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 				
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 				
 					$link = $xpath->query('.//div[@class="singleProdInfo"]//h3/a/@href', $curr);
@@ -376,7 +346,7 @@
 					return;
 				
 				$string = trim($res->item(0)->nodeValue);
-				if (checkProduct($string) == FALSE)
+				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 					return;
 				
 				$res = $xpath->query('//a[contains(@class, "prodImg")]/img/@src');
@@ -404,7 +374,7 @@
 				{
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 				
 					$anchor = $xpath->query('.//h3/a/@href', $curr);
@@ -423,7 +393,7 @@
 					return;
 				
 				$string = trim($res->item(0)->nodeValue);
-				if (checkProduct($string) == FALSE)
+				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 					return;
 				
 				$links[] = htmlspecialchars($url);
@@ -441,7 +411,7 @@
 				{
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 					else 
 						$titles[] = $string;
@@ -453,7 +423,7 @@
 				if ($res->length != 0)
 				{
 					$string = trim($res->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						return;
 					else
 						$titles[] = $string;	
@@ -472,7 +442,7 @@
 				{
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 				
 					//Estraggo il prezzo nuovo 
@@ -509,7 +479,7 @@
 					return;
 				
 				$string = trim($res->item(0)->nodeValue);
-				if (checkProduct($string) == FALSE)
+				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 					return;
 				
 				$res = $xpath->query('//div[@class="pricetext"]//span[@itemprop="price"]');
@@ -548,7 +518,7 @@
 				{
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 				
 					$platf = $xpath->query('.//div[@class="singleProdInfo"]//h4/text()', $curr);
@@ -572,7 +542,7 @@
 					return;
 				
 				$string = trim($res->item(0)->nodeValue);
-				if (checkProduct($string) == FALSE)
+				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 					return;
 				
 				$res = $xpath->query('//div[@class="prodDet"]//span[contains(@class, "platLogo")]');
@@ -600,7 +570,7 @@
 				{
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 				
 					$house = $xpath->query('.//div[@class="singleProdInfo"]/h4//strong', $curr);
@@ -624,7 +594,7 @@
 					return;
 				
 				$string = trim($res->item(0)->nodeValue);
-				if (checkProduct($string) == FALSE)
+				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 					return;
 				
 				$res = $xpath->query('//div[@class="prodDet"]//strong[@itemprop="brand"]');
@@ -652,7 +622,7 @@
 				{
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 				
 					$age = $xpath->query('.//div[@class="singleProdInfo"]//p/strong[contains(text(), "PEGI")]', $curr);
@@ -683,7 +653,7 @@
 					return;
 				
 				$string = trim($res->item(0)->nodeValue);
-				if (checkProduct($string) == FALSE)
+				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 					return;
 
 				$pegi[] = "N/A";	
@@ -701,7 +671,7 @@
 				{
 					$title = $xpath->query('.//div[@class="singleProdInfo"]//h3/a', $curr);
 					$string = trim($title->item(0)->nodeValue);
-					if (checkProduct($string) == FALSE)
+					if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 						continue;
 				
 					$release = $xpath->query('.//div[@class="singleProdInfo"]//ul/li/strong[contains(string(.), "Data di uscita")]', $curr);
@@ -725,7 +695,7 @@
 					return;
 				
 				$string = trim($res->item(0)->nodeValue);
-				if (checkProduct($string) == FALSE)
+				if (stripos($search, $string) === FALSE && stripos($string, $search) === FALSE)
 					return;
 
 				$res = $xpath->query('//div[@class="addedDetInfo"]//p/label[contains(text(), "Rilascio")]/following-sibling::span[1]/text()');	
@@ -740,31 +710,5 @@
 				else
 					$pDates[] = "";
 			}
-	}
-	
-	function transform($string)
-	{
-		if (stripos($string, "×") !== FALSE)
-			$string = str_replace("×", "x", $string);
-
-		return $string;
-	}
-	
-	function checkProduct($string)
-	{
-		global $searchTitle, $en_name, $origin;
-		
-		$modString = str_replace("-", " ", $string);
-		
-		if (stripos($searchTitle, $string) !== FALSE || stripos($string, $searchTitle) !== FALSE || stripos($searchTitle, $modString) !== FALSE || stripos($modString, $searchTitle) !== FALSE)
-			return TRUE;
-		
-		if (stripos($en_name, $string) !== FALSE || stripos($string, $en_name) !== FALSE || stripos($en_name, $modString) !== FALSE || stripos($modString, $en_name) !== FALSE)
-			return TRUE;
-		
-		if (stripos($origin, $string) !== FALSE || stripos($string, $origin) !== FALSE || stripos($origin, $modString) !== FALSE || stripos($modString, $origin) !== FALSE)
-			return TRUE;
-		
-		return FALSE;
 	}
 ?>
