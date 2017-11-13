@@ -718,7 +718,7 @@
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
 
-      $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/Panini.gif" /></a>');
+      $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height="120" width="200"  src="assets/img/Panini.gif" /></a>');
       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab16" class="panel-collapse collapse"><div class="tab-content Panini top-container-offers"></div></div></div>');
       $(data).find('offer').each(function()
       {
@@ -977,7 +977,8 @@
 
       toReturn = '<h5><b>Data d\'uscita in Giappone: </b>' + episode.find('dateJPN').text() + '</h5>';
       toReturn += '<h5><b>Data d\'uscita in Italia: </b>' + episode.find('dateIT').text() + '</h5>';
-      toReturn += '<div style="margin-top:35px;"><h5><b>Trama:</b></h5><p>' + episode.find('story').text() + '</p></div>';
+      if(episode.find('story').text() != "")
+        toReturn += '<div style="margin-top:35px;"><h5><b>Trama:</b></h5><p>' + episode.find('story').text() + '</p></div>';
       return toReturn;
 
      }

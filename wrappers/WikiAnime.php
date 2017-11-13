@@ -1,7 +1,7 @@
 <?php
 
 	header("Content-type: application/xml");
-	
+	error_reporting(0);
 	$datesIT = array();
 	$datesJPN = array();
 	$numep = array();
