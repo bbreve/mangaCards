@@ -2,12 +2,62 @@
 
 	header("Content-type: application/xml");
 	
+	$series = $_POST['series'];
+	
+		
+	$querySQL = "SELECT COUNT(DISTINCT VersioneAnime) as NumeroAnime FROM `episodi_anime` WHERE NomeAnime LIKE '%$series%'";
+	$queryProva="SELECT * FROM `episodi_anime` WHERE NomeAnime LIKE '%$series%'";
+	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: ".$conn->connect_error);
+						}
+						
+	$conn->set_charset("utf8");
+	
+	$resultQuery=mysqli_query($conn,$querySQL);
+	$RisultatoProva=mysqli_query($conn,$queryProva);
+	if($RisultatoProva->num_rows !=0){
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_anime_products></list_anime_products>');
+		while ($row=$resultQuery->fetch_object()){
+		      $numeroAnime=intval($row->NumeroAnime);
+	    }
+		
+		for($i=1;$i<=$numeroAnime;$i++){
+			$firstQuery="SELECT * FROM `episodi_anime` WHERE NomeAnime LIKE '%$series%' AND VersioneAnime='$i' ORDER BY Numero";
+			$RisultatoQuery=mysqli_query($conn,$firstQuery);
+			$l=0;
+			while ($row=$RisultatoQuery->fetch_object()){
+				if($l==0){
+			  $a = $xml->addChild("anime");
+			  $a->addChild("title", $row->NomeAnime);
+			  $episodes = $a->addChild("episodes");
+				}
+			  
+			  $prodotto = $episodes->addChild("episode");
+			  $prodotto->addChild("title", $row->NomeEpisodio);
+			  $prodotto->addChild("number", $row->Numero);
+			  $prodotto->addChild("dateJPN", $row->DataJPN);
+              $prodotto->addChild("dateIT", $row->DataITA);			  
+			  $prodotto->addChild("story", $row->Trama);
+			  $l=1;
+			}
+		}
+		
+			
+			
+		
+		echo $xml->asXML();
+		$conn->close();
+	}else{
+	$conn->close();
+	
 	$datesIT = array();
 	$datesJPN = array();
 	$numep = array();
 	$stories = array();
 	$references = array();
 	$titles = array();
+	$versionAnime=array();
 	
 	$anime = array();
 	$animeCount = 0;
@@ -299,6 +349,7 @@
 	}
 	echo $xml->asXML();
 	
+	}
 	//Si aggiungono eventuali film e OAV all'xml
 	function writeMovOAVSpecialsXML()
 	{
@@ -336,9 +387,24 @@
 	//Si aggiungono gli episodi di un anime all'xml
 	function writeEpisodesXML()
 	{
-		global $xml, $anime, $animeCount, $datesIT, $titles, $datesJPN, $numep, $references, $stories;
+		global $xml, $anime, $animeCount, $datesIT, $titles, $datesJPN, $numep, $references, $stories, $versionAnime;
 		
 		$count = 0;
+		$titoloAnime="";
+		$numeroEpisodioAnime="";
+		$nomeEpisodio="";
+		$dataUscitaJpn="";
+		$dataUscitaIta="";
+		$tramaAnime="";
+		$versioneAnime="";
+		
+		$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+		$conn->set_charset("utf8");
+		
 		for ($i = 0; $i < count($titles); $i++)
 		{
 			if ($numep[0] == 0)
@@ -350,39 +416,71 @@
 			{
 				$a = $xml->addChild("anime");
 				$a->addChild("title", change($anime[$count++]));
+				$titoloAnime=change($anime[($count - 1)]);
+				$versionAnime[]=change($anime[($count - 1)]);
 				$episodes = $a->addChild("episodes");	
 			}
 			
+			$versioneAnime=count($versionAnime);
 			$prodotto = $episodes->addChild("episode");
 			
 			$prodotto->addChild("title", $titles[$i]);
-			if(is_null($numep[$i]))
+			$nomeEpisodio=$titles[$i];
+			if(is_null($numep[$i])){
 				$prodotto->addChild("number", 'IN USCITA');
-			else
+				$numeroEpisodioAnime="IN USCITA";
+			}
+			else{
 				$prodotto->addChild("number", $numep[$i]);
+				$numeroEpisodioAnime=$numep[$i];
+			}
 			
 			if(count($datesJPN) > $i)
 			{
 				$prodotto->addChild("dateJPN", $datesJPN[$i]);	
+				$dataUscitaJpn=$datesJPN[$i];
 			}	
 			else
 			{
 				$prodotto->addChild("dateJPN", "N.D.");
+				$dataUscitaJpn="N.D.";
 			}
 			
 			if (count($datesIT) > $i)
 			{
 				$prodotto->addChild("dateIT", $datesIT[$i]);
+				$dataUscitaIta=$datesIT[$i];
 			}
-			else
+			else{
 				$prodotto->addChild("dateIT", "N.D.");
+				$dataUscitaIta="N.D.";
+			}
 
 			//Si assume che per la descrizione della trama e le referenze di adattamento ci siano valori con pi? di due parole
 			if ($references[$numep[$i].$anime[$count-1]] != "" && count(explode(" ", $references[$numep[$i].$anime[$count-1]])) > 2)
 				$prodotto->addChild("reference", htmlspecialchars($references[$numep[$i].$anime[$count-1]]));
 			
-			if ($stories[$numep[$i].$anime[$count-1]] != "" && count(explode(" ", $stories[$numep[$i].$anime[$count-1]])) > 2)
+			if ($stories[$numep[$i].$anime[$count-1]] != "" && count(explode(" ", $stories[$numep[$i].$anime[$count-1]])) > 2){
 				$prodotto->addChild("story", htmlspecialchars($stories[$numep[$i].$anime[$count-1]]));
+				$tramaAnime=htmlspecialchars($stories[$numep[$i].$anime[$count-1]]);
+			}
+			
+			$titoloAnime=str_replace(array("\"","\'"),"",$titoloAnime);
+			$nomeEpisodio=str_replace(array("\"","\'"),"",$nomeEpisodio);
+			$tramaAnime=str_replace(array("\"","\'"),"",$tramaAnime);
+			
+			$toinsert = 'INSERT INTO episodi_anime
+							(Numero, NomeAnime, VersioneAnime, NomeEpisodio, DataJPN, DataITA, Trama)
+							VALUES
+							('.intval($numeroEpisodioAnime).', "'.$titoloAnime.'", "'.$versioneAnime.'" ,"'.$nomeEpisodio.'", "'.$dataUscitaJpn.'", "'.$dataUscitaIta.'", "'.$tramaAnime.'")';
+							
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
+			
 		}
 		
 		//Si reinizializzano le variabili per una nuova successiva aggiunta
@@ -394,6 +492,7 @@
 		$datesJPN = array();
 		$stories = array();
 		$references = array();
+		$conn->close();
 	}
 
 	//Funzione di estrazione delle date italiane

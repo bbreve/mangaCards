@@ -135,7 +135,7 @@
 								}
 								else
 								{
-									$this->appendArray($title, $pl->nodeValue, $price, $image, $producer, $platform, $rDate, $number[0][0]);
+									$this->appendArray($title, $pl->nodeValue	, $price, $image, $producer, $platform, $rDate, $number[0][0]);
 								}
 							}		
 						}
@@ -169,6 +169,13 @@
 			usort($offers_array, function($a, $b){
 				return strcmp($a['title'], $b['title']);
 			});
+			
+			 $conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+				$conn->set_charset("utf8");
+			
 				
 			$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
 
@@ -185,8 +192,23 @@
 				$offer_element->addChild("plat", $offer['plat']);
 				$offer_element->addChild('release_date', $offer['day']);
 				$offer_element->addChild("url_to_product", htmlspecialchars($offer['url_to_product']));
+				
+				$titoloProdotto=str_replace(array("\"","\'"),"",htmlspecialchars($offer['title']));
+				$serieProdotto= str_replace(array("\"","\'"),"",$_POST['title']);
+		
+				
+				$toinsert = 'INSERT INTO amazon
+							(NomeOfferta, TipoProdotto, Serie, DataUscita, Prezzo, Autore, Piattaforma, Immagine, LinkAcquisto)
+							VALUES
+							("'.$titoloProdotto.'", "'.$search.'", "'.$serieProdotto.'" , "'.$offer['day'].'", "'.$offer['price'].'", "'.$offer['author'].'", "'.$offer['plat'].'", "'. $offer['cover'].'", "'.htmlspecialchars($offer['url_to_product']).'")';
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
 			}
-
+             $conn->close();
 			return $xml;
 		}
 		

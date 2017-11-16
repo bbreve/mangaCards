@@ -1,7 +1,52 @@
 <?php
 
 //	header("Content-type: application/xml");
+$series = $title;
+$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+	$conn->set_charset("utf8");
+$querySQL="SELECT * FROM `volumi_manga` WHERE NomeManga='$series' ORDER BY Numero";
+$resultQuery=mysqli_query($conn,$querySQL);
+//echo $resultQuery->num_rows;
+if($resultQuery->num_rows !=0){
+	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');
+	 while ($row=$resultQuery->fetch_object())
+    {
+		$prodotto = $xml->addChild("volume");
+		$prodotto->addChild("title", $row->NomeVolume);
+		$prodotto->addChild("number", $row->Numero);
+		$prodotto->addChild("dateIT", $row->DataITA);
+		$prodotto->addChild("dateJPN", $row->DataJPN);
+		$prodotto->addChild("story", $row->Trama);
+		$prodotto->addChild("chapters_list", $row->ListaCapitoli);	
+      
+    }
 	
+	foreach($xml->volume as $volume){
+	$arr[]=$volume;
+}
+
+	usort($arr,function($a,$b){
+		return $a->number - $b->number;
+	});	
+	$xmlOrdered=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_volumes></list_volumes>');	
+	foreach($arr as $volume){
+		$prodotto = $xmlOrdered->addChild("volume");
+		$prodotto->addChild("title", (string)$volume->title);
+		$prodotto->addChild("number", (string)$volume->number);
+		$prodotto->addChild("dateIT", (string)$volume->dateIT);
+		$prodotto->addChild("dateJPN", (string)$volume->dataJPN);
+		$prodotto->addChild("story", (string)$volume->story);
+		$prodotto->addChild("chapters_list", (string)$volume->chapters_list);
+	}
+	
+	echo $xmlOrdered->asXML();
+	$conn->close();
+}else{
+	$conn->close();
 	$datesIT = array();
 	$datesJPN = array();
 	$numvol = array();
@@ -130,20 +175,42 @@
 	}
 
 	echo $xml->asXML();
-	
+}
+
 	function writeVolumesXML()
 	{
-		global $datesIT, $datesJPN, $titles, $num_vol_jp, $numvol, $stories, $volChapters, $xml, $double_numeration, $stories_and_chapters;
+		global $datesIT, $datesJPN, $titles, $num_vol_jp, $numvol, $stories, $volChapters, $xml, $double_numeration, $stories_and_chapters, $series;
+		
+		$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+		$conn->set_charset("utf8");
 
 		for ($i = 0; $i < count($titles); $i++)
 		{
+			
+			$nomeManga="";
+			$numeroVolume="";
+			$nomeVolume="";
+			$dataJPN="";
+			$dataITA="";
+			$tramaVolume="";
+			$listaCapitoli="";
+			
 			$prodotto = $xml->addChild("volume");
 			
 			$prodotto->addChild("title", htmlspecialchars($titles[$i]));
-			if(is_null($numvol[$i]))
+			$nomeVolume=htmlspecialchars($titles[$i]);
+			if(is_null($numvol[$i])){
 				$prodotto->addChild("number", 'IN USCITA');
-			else
+				$numeroVolume="IN USCITA";
+			}
+			else{
 				$prodotto->addChild("number", $numvol[$i]);
+				$numeroVolume=$numvol[$i];
+			}
 			if(count($datesIT[$i]) > 1)
 			{
 				$dates_publication = "";
@@ -152,10 +219,12 @@
 					$dates_publication .= $date."-";
 				}
 				$prodotto->addChild("dateIT", $dates_publication);	
+				$dataITA=$dates_publication;
 			}	
 			else
 			{
 				$prodotto->addChild("dateIT", $datesIT[$i][0]);
+				$dataITA=$datesIT[$i][0];
 			}
 			
 			if(count($datesJPN[$i]) > 1)
@@ -166,31 +235,61 @@
 					$dates_publication .= $date."-";
 				}
 				$prodotto->addChild("dateJPN", $dates_publication);	
+				$dataJPN=$dates_publication;
 			}	
 			else
 			{
 				$prodotto->addChild("dateJPN", $datesJPN[$i][0]);
+				$dataJPN=$datesJPN[$i][0];
 			}
 			
 
 			if(!$double_numeration)
 			{	
-				if ($stories_and_chapters[$numvol[$i]]['story'] <> "")
+				if ($stories_and_chapters[$numvol[$i]]['story'] <> ""){
 					$prodotto->addChild("story", $stories_and_chapters[$numvol[$i]]['story']);
+					$tramaVolume=$stories_and_chapters[$numvol[$i]]['story'];
+				}
 				
-				if (htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']) <> "")
-					$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']));		
+				if (htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']) <> ""){
+					$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']));	
+                    $listaCapitoli=	htmlspecialchars($stories_and_chapters[$numvol[$i]]['chapters']);	
+				}					
 			}
 			else
 			{	
-				if ($stories_and_chapters[$num_vol_jp[$i]]['story'] <> "")
+				if ($stories_and_chapters[$num_vol_jp[$i]]['story'] <> ""){
 					$prodotto->addChild("story", $stories_and_chapters[$num_vol_jp[$i]]['story']);
-				
-				if (htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']) <> "")
-					$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']));		
+					$tramaVolume=$stories_and_chapters[$num_vol_jp[$i]]['story'];
+					
+				}
+				if (htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']) <> ""){
+					$prodotto->addChild("chapters_list", htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']));	
+                    $listaCapitoli=htmlspecialchars($stories_and_chapters[$num_vol_jp[$i]]['chapters']);
+				}					
 			}
 			
+			$nomeManga=$series;
+			$nomeManga=str_replace(array("\"","\'"),"",$nomeManga);
+			$nomeVolume=str_replace(array("\"","\'"),"",$nomeVolume);
+			$tramaVolume=str_replace(array("\"","\'"),"",$tramaVolume);
+			$listaCapitoli=str_replace(array("\"","\'"),"",$listaCapitoli);
+			
+			
+			$toinsert = 'INSERT INTO volumi_manga
+							(Numero, NomeManga, NomeVolume, DataJPN, DataITA, Trama, ListaCapitoli)
+							VALUES
+							("'.$numeroVolume.'", "'.$nomeManga.'", "'.$nomeVolume.'", "'.$dataJPN.'", "'.$dataITA.'", "'.$tramaVolume.'", "'.$listaCapitoli.'")';
+							
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
+			
 		}
+		$conn->close();
 	}
 	
 	function extractDatesJPN()
