@@ -21,7 +21,14 @@
 	
 	//Parametri di ricerca
 	$title = $_POST['title'];
-	$search = str_replace(":", "", $title);	
+	
+	//Modifica parametro di ricerca
+	if (stripos($title, "(") !== FALSE)
+	{
+		$search = trim(explode("(", $title)[0]);
+	}
+	$search = str_replace(":", "", $search);	
+	
 	$pag = 1;
 
 	//Chiamata prima pagina

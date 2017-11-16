@@ -1,7 +1,6 @@
 <?php
   $title = $_POST['work_selected'];
-  
-  
+ 
   ob_start();
   require __DIR__.'\wrappers\WikipediaWrapper.php';
   $page_info = ob_get_clean(); 
@@ -12,13 +11,19 @@
   $chapters_link = $work_info->work->chapters_link;
   $work_link = $work_info->work->work_link;
   
+  $type_search = $work_info->work->type_element;
+  
+  $origin_name = $work_info->work->original_name;
+  
+  $en_name = $work_info->work->en_name;
+  
   $pag_name = str_replace(array("\n","\r")," ",$work_info->work->name);
+  
   
   ob_start();  
   require __DIR__.'\wrappers\Wiki.php';
   $chapters_info = ob_get_clean(); 
   $chapters_xml = simplexml_load_string($chapters_info);
-
   ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,22 +67,38 @@
             <h1><?php echo $pag_name?></h1>
           </div>
 		  <?php  
-		      if(count($work_info->work->original_name)!=0){
+		      if(count($origin_name)!=0){
 				  echo'<div class="agile-row">';
 					echo'<h4>Nome originale: ';  
-							  echo $work_info->work->original_name;
+							  echo $origin_name;
 					  echo'</h4>';
 				  echo'</div>'; }
+
+			  if(count($en_name) != 0)
+			  {
+				if (stripos($en_name, $pag_name) === FALSE && stripos($en_name, "(") === FALSE)
+				{
+					echo'<div class="agile-row">';
+						echo'<h4>Nome inglese: ';  
+							  echo $en_name;
+						echo'</h4>';
+					echo'</div>';
+				}
+			  }
 		  
 				if(count($work_info->work->authors->author)!=0){
 				  echo'<div class="agile-row">';
 					echo'<h5>Autore/i: ';  $authors_list = "";
+							  $prev = "";
 							  foreach($work_info->work->authors->author as $author) 
-							  {
-								  if($author!="")
-								$authors_list .= $author.", ";
+							  { 
+								if ($author != "" && $author != "-" && $author != "," && $author != "." && trim($author) != $prev)
+									$authors_list .= $author.", ";
+								$prev = $author;
 							  }
+							  
 							  $authors_list = rtrim($authors_list, ", ");
+							  $authors_list = str_replace(array("\n","\r")," ",$authors_list);
 							  echo $authors_list;
 					  echo'</h5>';
 				  echo'</div>'; }
@@ -85,11 +106,14 @@
 				  if(count($work_info->work->authors->testi)!=0){
 				  echo'<div class="agile-row">';
 					echo'<h5>Testi: ';  $testi_list = "";
+						  $prev = "";
 						  foreach($work_info->work->authors->testi as $author) 
 						  {
-							  if($author!="")
-							$testi_list .= $author.", ";
+							  if ($author != "" && $author != "-" && $author != "," && $author != "." && $prev != trim($author))
+								$testi_list .= $author.", ";
+							  $prev = $author;	
 						  }
+						  
 						  $testi_list = rtrim($testi_list, ", ");
 						  echo $testi_list;
 						  echo'</h5>';
@@ -98,10 +122,12 @@
 				  if(count($work_info->work->authors->disegni)!=0){
 				  echo'<div class="agile-row">';
 					echo'<h5>Disegni: ';  $disegni_list = "";
+						  $prev = "";	
 						  foreach($work_info->work->authors->disegni as $author) 
 						  {
-							  if($author!="")
-							$disegni_list .= $author.", ";
+							  if($author != "" && $author != "-" && $author != "," && $author != "." && $prev != trim($author))
+								$disegni_list .= $author.", ";
+							  $prev = $author;	
 						  }
 						  $disegni_list = rtrim($disegni_list, ", ");
 						  echo $disegni_list;
@@ -111,11 +137,14 @@
 		  
           <div class="agile-row">
             <h5>Editore: <?php  $editors_list = "";
-              foreach($work_info->work->editors->editor as $editor) 
+              $prev = "";
+			  foreach($work_info->work->editors->editor as $editor) 
               {
-				  if($editor!="")
-                $editors_list .= $editor.", ";
+				if($editor != "" && $editor != "-" && $editor != "," && $editor != "." && $prev != trim($editor))
+					$editors_list .= $editor.", ";
+				$prev = $editor;
               } 
+			  
               $editors_list = rtrim($editors_list, ", ");
               echo $editors_list;
               ?></h5>
@@ -224,14 +253,17 @@
     <!-- Bootstrap 3 has typeahead optionally -->
     <script src="assets/js/typeahead.min.js"></script>
     <script>
-      function amazonAjax(search_params)
+      function amazonAjax(title, search, origin, aut)
       {
         return $.ajax(
         {
           type: "POST",
           data:
           {
-            'title': search_params,
+            'title': title,
+			'type' : search,
+			'origin' : origin,
+			'authors' : aut
           },
           url: "wrappers/AmazonWrapper.php",
           async: true
@@ -243,15 +275,18 @@
           parseAmazonXML(data);
         });
       }
-
-      function amazonGamesAjax(search_params)
+	  
+	  function amazonGamesAjax(title, search, origin, aut)
       {
         return $.ajax(
         {
           type: "POST",
           data:
           {
-            'title': search_params,
+            'title': title,
+			'type' : search,
+			'origin' : origin,
+			'authors' : aut
           },
           url: "wrappers/AmazonGamesWrapper.php",
           async: true
@@ -304,7 +339,7 @@
           });
       }
 
-      function executeProgress()
+	  function executeProgress()
       {
         maxPercentage = $('.container.main').width();
         currentPercentage = $('.progress-bar').width();
@@ -313,15 +348,18 @@
         $('.progress-bar').css('width', newPercentage);
         setTimeout(executeProgress, 3000)
       }
-      function paniniAjax(title)
+	  
+      function paniniAjax(title, type, origin)
       {
-        setTimeout(executeProgress, 3000);
+		  setTimeout(executeProgress, 3000);
         return $.ajax(
           {
             type: "POST",
             data:
             {
-              'title': title
+              'title': title,
+			  'type' : type,
+			  'origin' : origin
             },
             url: "wrappers/PaniniWrapper.php",
             async: true
@@ -334,14 +372,17 @@
           });
       }
 
-      function gamestopAjax(search_params)
+      function gamestopAjax(title, search, origin, en)
       {
         return $.ajax(
         {
           type: "POST",
           data:
           {
-            'series': search_params
+            'title': title,
+			'type' : search,
+			'origin' : origin,
+			'english' : en
           },
           url: "wrappers/GamestopWrapper.php",
           async: true
@@ -376,13 +417,33 @@
      $(document).ready(function()
      {
       var Editors = "<?php echo $editors_list; ?>";
-
-      var search_params = <?php echo '"'.$title.'"'; ?>;
-      if (Editors.search(/Marvel/i) !== -1 || Editors.search(/DC Comics/i) !== -1)
-        search_params = <?php echo '"'.$pag_name.'"'; ?>
-
-      amazonReq = amazonAjax(search_params);
+	  
+	//Ottengo le variabili di ricerca
       
+	  var search = <?php echo '"'.$type_search.'"'; ?>;
+	  var pag_name = <?php echo '"'.$pag_name.'"'; ?>;
+	  var original_name = <?php echo '"'.$origin_name.'"'; ?>;
+	  var selectTitle = <?php echo '"'.$title.'"'; ?>;  
+	  var en = <?php echo '"'.$en_name.'"'; ?>;  
+	  var text_list = <?php echo '"'.$testi_list.'"'; ?>; 
+	  var aut_list = <?php echo '"'.$authors_list.'"'; ?>;  
+	  
+	//Chiamata AJAX per Amazon (Manga/Comic)
+	
+	if (search == "manga")
+	{
+		original_name = "";
+		amazonReq = amazonAjax(pag_name, search, original_name, aut_list);
+	}
+	else
+	{
+		if (aut_list == "")
+			amazonReq = amazonAjax(pag_name, search, original_name, text_list);
+		else
+			amazonReq = amazonAjax(pag_name, search, original_name, aut_list);
+    }
+	
+	//Chiamata AJAX per J-POP
 
       if (Editors.search(/J-Pop/i) !== -1 || Editors.search(/JPop/i) !== -1)
       {
@@ -392,6 +453,8 @@
       {
         jpopReq = amazonReq;
       }
+	  
+	//Chiamata AJAX per RW Edizoni
 
       if (Editors.search(/DC Comics/i) !== -1)
       {
@@ -400,40 +463,47 @@
       else
         rwReq = amazonReq;
 
+	//Chiamata AJAX per Panini (Comic)
+	
       if (Editors.search(/Marvel/i) !== -1)
       {
-        paniniReq = paniniAjax(<?php echo '"'.$pag_name.'"'; ?>);
+        paniniReq = paniniAjax(pag_name, search, original_name);
       }
       else 
         paniniReq = amazonReq;
 
+	//Chiamata AJAX per Panini (Manga)
+	
       if (Editors.search(/Panini/i) !== -1 || Editors.search(/Planet Manga/i) !== -1)
       {
-        paniniReq = paniniAjax(<?php echo '"'.$title.'"'; ?>);
+        paniniReq = paniniAjax(pag_name, search, "");
       }
       else
          paniniReq = amazonReq;
 
+	//Chiamata AJAX per Gamestop
 
-      var search_params = <?php echo '"'.$title.'"'; ?>;
-      if (Editors.search(/Marvel/i) !== -1 || Editors.search(/DC Comics/i) !== -1)
-        search_params = <?php echo '"'.$pag_name.'"'; ?>
+	if (search == "manga")
+		original_name = "";
+	
+	gamestopReq = gamestopAjax(pag_name, search, original_name, en);
+	
+	//Chiamata AJAX per Amazon (videogiochi)
+	
+	amazonGamesReq = amazonGamesAjax(pag_name, search, original_name, en);
 
-      gamestopReq = gamestopAjax(search_params);
-
-      amazonGamesReq = amazonGamesAjax(search_params);
-
+	  
+	// Chiamata AJAX per gli anime
       animeReq = animeAjax();
       
-      $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq, amazonGamesReq).done(function(a1, a2, a3, a4){
+      $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq).done(function(a1, a2, a3, a4){
         $('.progress-bar').css('width', '100%');
-        $('.progress.animated').fadeOut(500);
-
-          $('.animated.bounceInUp').removeClass('animated bounceInUp');
-      });
+        $('.progress.animated').fadeOut();
 
       });
 
+      });
+	  
      function showOverlay()
      {
       $(".overlay").fadeIn(400);
@@ -475,6 +545,8 @@
       newPercentage = currentPercentage + ((maxPercentage * 5) / 100);
       $('.progress-bar').css('width', newPercentage);
 
+	  if ($(data).find('offer').length != 0)
+	 {	
       $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab14" ><img class="animated bounceInUp" height=70" width="160"  src="assets/img/amazonLogo2.jpg" /></a>');
       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab14" class="panel-collapse collapse"><div class="tab-content amazon top-container-offers"></div></div></div>');
       $(data).find('offer').each(function()
@@ -484,23 +556,30 @@
         image = $(this).find('cover').text();
 
         price = $(this).find('price').text();
+		
+		release = $(this).find('release_date').text();
 
         author = $(this).find('author').text();
-
-
-
-        $('.amazon').append(
-          '<div class="row">' +
+     
+        s =  '<div class="row">' +
           '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="' + image + '"/></a></div>' +
           '  <div class="col-sm-6">' +
           '    <div class="agile-row">' +
           '      <h4>' + title + '</h4>' +
-          '    </div>' +
-          '    <div class="agile-row">' +
-          '      <p>di ' + author + '</p>' +
-          '    </div>' +
-          '    <div class="agile-row">' +
+          '    </div>';
+		  
+		  if (author != "" && author != null)
+		  {
+			s += '    <div class="agile-row">' +
+			'      <p>di ' + author + '</p>' +
+			'    </div>';
+		  }
+          
+		  s += '    <div class="agile-row">' +
           '      <h2>' + price + '</h2>' +
+          '    </div>' +
+		  '	<div class="agile-row">' +
+          '      <h3>' + release + '</h3>' +
           '    </div>' +
           '  </div>' +
           '  <div class="col-sm-2">' +
@@ -512,10 +591,11 @@
           '    </div>' +
           '  </div>' +
           '</div>' +
-          '<hr>');
-
+          '<hr>';
+		  
+		  $('.amazon').append(s);
       });
-
+	  }	
      }
 
      function parseAmazonGamesXML(data)
@@ -525,7 +605,8 @@
       newPercentage = currentPercentage + ((maxPercentage * 5) / 100);
       $('.progress-bar').css('width', newPercentage);
 
-
+	 if ($(data).find('offer').length > 0)
+    {	
       $('.container-games').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-games" href="#tab52" ><img class="animated bounceInUp" height=70" width="160"  src="assets/img/amazonLogo2.jpg" /></a>');
       $('.container-products-games').append('<div class="panel panel-default" style="border:hidden"><div id="tab52" class="panel-collapse collapse"><div class="tab-content amazon-games top-container-offers"></div></div></div>');
       $(data).find('offer').each(function()
@@ -534,24 +615,35 @@
         url = $(this).find('url_to_product').text();
         image = $(this).find('cover').text();
 
+		plat = $(this).find('plat').text();
         price = $(this).find('price').text();
+		
+		release = $(this).find('release_date').text();
 
         author = $(this).find('author').text();
 
-
-
-        $('.amazon-games').append(
-          '<div class="row">' +
+        s =  '<div class="row">' +
           '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="' + image + '"/></a></div>' +
           '  <div class="col-sm-6">' +
           '    <div class="agile-row">' +
           '      <h4>' + title + '</h4>' +
+          '    </div>';
+		  
+		  if (author != "" && author != null)
+		  {
+			s += '    <div class="agile-row">' +
+			'      <p>di ' + author + '</p>' +
+			'    </div>';
+		  }
+          
+		  s += '    <div class="agile-row">' +
+          '      <h3>' + plat + '</h3>' +
           '    </div>' +
-          '    <div class="agile-row">' +
-          '      <p>di ' + author + '</p>' +
-          '    </div>' +
-          '    <div class="agile-row">' +
+		  '    <div class="agile-row">' +
           '      <h2>' + price + '</h2>' +
+          '    </div>' +
+		  '	<div class="agile-row">' +
+          '      <h3>' + release + '</h3>' +
           '    </div>' +
           '  </div>' +
           '  <div class="col-sm-2">' +
@@ -563,10 +655,11 @@
           '    </div>' +
           '  </div>' +
           '</div>' +
-          '<hr>');
-
+          '<hr>';
+		  
+		  $('.amazon-games').append(s);
       });
-
+	  }	
      }
 
      function parseJPopXML(data)
@@ -577,6 +670,8 @@
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
 
+	 if ($(data).find('offer').length != 0)
+	  {  
       $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab15" ><img class="animated bounceInUp" height=70" width="150"  src="assets/img/JPopLogo.png" /></a>');
       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab15" class="panel-collapse collapse"><div class="tab-content JPop top-container-offers"></div></div></div>');
       $(data).find('offer').each(function()
@@ -619,16 +714,19 @@
           '<hr>');
 
       });
+	  }
      }
 
      function parseRWXML(data)
      {
 
-      maxPercentage = $('.container.main').width();
+      maxPercentage = $('.container.test').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
 
+	if ($(data).find('offer').length != 0)
+	{
       $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab17" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/RW-EDIZIONI-LOGO.jpg" /></a>');
       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab17" class="panel-collapse collapse"><div class="tab-content RW top-container-offers"></div></div></div>');
       //document.write($(data).find('offer').length);
@@ -680,7 +778,7 @@
 
 
         s += '    <div class="agile-row">' +
-          '      <h5>' + price + '<h5>' +
+          '      <h2>' + price + '<h2>' +
           '   </div>';
 
         if (rDate != "" && rDate != null)
@@ -708,17 +806,20 @@
 
         $('.RW').append(s);
       });
-     }
+	}
+   }
 
      function parsePaniniXML(data)
      {
 
-      maxPercentage = $('.container.main').width();
+      maxPercentage = $('.container.test').width();
       currentPercentage = $('.progress-bar').width();
       newPercentage = currentPercentage + ((maxPercentage * 20) / 100);
       $('.progress-bar').css('width', newPercentage);
 
-      $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height="120" width="200"  src="assets/img/Panini.gif" /></a>');
+	if ($(data).find('offer').length != 0)
+	{
+      $('.container-shops').append('<a class="accordion-toggle" data-toggle="collapse" data-parent="#products-shops" href="#tab16" ><img class="animated bounceInUp" height=70" width="200"  src="assets/img/Panini.gif" /></a>');
       $('.container-products-shops').append('<div class="panel panel-default" style="border:hidden"><div id="tab16" class="panel-collapse collapse"><div class="tab-content Panini top-container-offers"></div></div></div>');
       $(data).find('offer').each(function()
       {
@@ -763,12 +864,17 @@
           '      <h5><del>' + old + '</del><h5>' +
           '         <h2>' + price + '</h2>' +
           '                  <h4>' + rDate + '</h4>  ' +
-          '    </div>' +
-          '    <div class="agile-row">' +
+          '    </div>';
+		  
+		if (description != null && description != "")
+	    {
+          s += '    <div class="agile-row">' +
           '         <h4>' + 'Descrizione:' + '</h4>' +
           '                  <p>' + description + '</p>  ' +
-          '    </div>' +
-          '  </div>' +
+          '    </div>';
+		}
+        
+		s +=		'  </div>' +
           '  <div class="col-sm-2">' +
           '    <div class="agile-row">' +
           '      <img src="assets/img/paninicomics.gif" style="width: 100%"/>' +
@@ -782,7 +888,8 @@
 
         $('.Panini').append(s);
       });
-     }
+	}
+   }
 
      function parseGamestopXML(data)
      {
@@ -977,8 +1084,8 @@
 
       toReturn = '<h5><b>Data d\'uscita in Giappone: </b>' + episode.find('dateJPN').text() + '</h5>';
       toReturn += '<h5><b>Data d\'uscita in Italia: </b>' + episode.find('dateIT').text() + '</h5>';
-      if(episode.find('story').text() != "")
-        toReturn += '<div style="margin-top:35px;"><h5><b>Trama:</b></h5><p>' + episode.find('story').text() + '</p></div>';
+	  if (episode.find('story').text() != "")
+		toReturn += '<div style="margin-top:35px;"><h5><b>Trama:</b></h5><p>' + episode.find('story').text() + '</p></div>';
       return toReturn;
 
      }
