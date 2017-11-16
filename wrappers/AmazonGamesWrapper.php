@@ -131,11 +131,11 @@
 								//Si fa ciò per fare in modo che i prodotti che non hanno un numero nel titolo, vangano posti alla fine della lista di prodotti ordinata.
 								if(count($number[0]) == 0)
 								{
-									$this->appendArray($title, $node, $price, $image, $producer, $platform, $rDate, 30000);
+									$this->appendArray($title, $pl->nodeValue, $price, $image, $producer, $platform, $rDate, 30000);
 								}
 								else
 								{
-									$this->appendArray($title, $node, $price, $image, $producer, $platform, $rDate, $number[0][0]);
+									$this->appendArray($title, $pl->nodeValue, $price, $image, $producer, $platform, $rDate, $number[0][0]);
 								}
 							}		
 						}

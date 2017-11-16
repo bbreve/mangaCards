@@ -26,8 +26,12 @@
 	if (stripos($title, "(") !== FALSE)
 	{
 		$search = trim(explode("(", $title)[0]);
+		$search = str_replace(":", "", $search);
 	}
-	$search = str_replace(":", "", $search);	
+	else
+	{
+		$search = str_replace(":", "", $title);
+	}
 	
 	$pag = 1;
 
