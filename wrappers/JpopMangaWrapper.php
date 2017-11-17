@@ -180,7 +180,7 @@ $conn = new mysqli("localhost", "root", "", "db_mangacards");//database connecti
 						die("Connection failed: " . $conn->connect_error);
 						}
 						
-	$conn->set_charset("utf8");
+$conn->set_charset("utf8");
 $querySQL="SELECT * FROM `jpop` WHERE Serie='$titles' ORDER BY NomeOfferta";
 $resultQuery=mysqli_query($conn,$querySQL);
 if($resultQuery->num_rows !=0){

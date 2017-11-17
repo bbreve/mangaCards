@@ -3,10 +3,11 @@
 	header("Content-type: application/xml");
 	
 	$series = $_POST['series'];
-	
+	preg_match('!(((\w+ )|(\w+)|( \w+))(\'?)(:?))*!ui',$_POST['series'], $title_cleaned);
+	$series=trim($title_cleaned[0]);
 		
-	$querySQL = "SELECT COUNT(DISTINCT VersioneAnime) as NumeroAnime FROM `episodi_anime` WHERE NomeAnime LIKE '%$series%'";
-	$queryProva="SELECT * FROM `episodi_anime` WHERE NomeAnime LIKE '%$series%'";
+	$querySQL = "SELECT Max(VersioneAnime) as NumeroAnime FROM `episodi_anime` WHERE NomeAnime LIKE '%$series%'";
+	$queryProva="SELECT * FROM `episodi_anime` WHERE NomeAnime='$series'";
 	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
 				if ($conn->connect_error) {
 						die("Connection failed: ".$conn->connect_error);
@@ -34,11 +35,11 @@
 				}
 			  
 			  $prodotto = $episodes->addChild("episode");
-			  $prodotto->addChild("title", $row->NomeEpisodio);
-			  $prodotto->addChild("number", $row->Numero);
-			  $prodotto->addChild("dateJPN", $row->DataJPN);
-              $prodotto->addChild("dateIT", $row->DataITA);			  
-			  $prodotto->addChild("story", $row->Trama);
+			  $prodotto->addChild("title", htmlspecialchars($row->NomeEpisodio));
+			  $prodotto->addChild("number", htmlspecialchars($row->Numero));
+			  $prodotto->addChild("dateJPN", htmlspecialchars($row->DataJPN));
+              $prodotto->addChild("dateIT",htmlspecialchars($row->DataITA));			  
+			  $prodotto->addChild("story", htmlspecialchars($row->Trama));
 			  $l=1;
 			}
 		}
@@ -472,7 +473,7 @@
 			$toinsert = 'INSERT INTO episodi_anime
 							(Numero, NomeAnime, VersioneAnime, NomeEpisodio, DataJPN, DataITA, Trama)
 							VALUES
-							('.intval($numeroEpisodioAnime).', "'.$titoloAnime.'", "'.$versioneAnime.'" ,"'.$nomeEpisodio.'", "'.$dataUscitaJpn.'", "'.$dataUscitaIta.'", "'.$tramaAnime.'")';
+							('.intval($numeroEpisodioAnime).', "'.$titoloAnime.'", "'.$versioneAnime.'" ,"'.$nomeEpisodio.'", "'.$dataUscitaJpn.'", "'.$dataUscitaIta.'", "'.$tramaAnime.'") ON DUPLICATE KEY UPDATE VersioneAnime="'.$versioneAnime.'"';
 							
 							
 							if ($conn->query($toinsert) === TRUE) {

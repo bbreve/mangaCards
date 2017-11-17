@@ -1,6 +1,47 @@
 <?php
 	header("Content-type: application/xml");
-
+    $title = $_POST['title'];
+	$title=transform($title);
+	$title=str_replace(array("\"","\'"),"",$title);
+	preg_match('!(((\w+ )|(\w+)|( \w+))(\'?)(:?))*!ui',$title, $title_cleaned);
+	$title=trim($title_cleaned[0]);
+	
+	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+			if ($conn->connect_error) {
+				die("Connection failed: " . $conn->connect_error);
+						}
+						
+					
+    $conn->set_charset("utf8");
+	$querySQL="SELECT * FROM `panini` WHERE Serie='$title'";
+	$resultQuery=mysqli_query($conn,$querySQL);
+	if($resultQuery->num_rows !=0){
+		   $xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+		   while ($row=$resultQuery->fetch_object()){
+			   $value = $xml->addChild('offer');
+			   $value->addChild('title',$row->NomeOfferta);
+			   $value->addChild('product_type',$row->TipoProdotto);
+			   $value->addChild('productNumber',$row->NumeroVolume);
+			   if($row->Autori!="")
+			   $value->addChild('authors',$row->Autori);
+		       if($row->Descrizione!="")
+		       $value->addChild('description',$row->Descrizione);
+		       if($row->Edizione!="")
+			   $value->addChild('edition',$row->Edizione);
+		       if($row->InfoEdizione!="")
+		       $value->addChild('info_volume',$row->InfoEdizione);
+		       $value->addChild('price',$row->PrezzoScontato);
+		       $value->addChild('old_price',$row->Prezzo);	
+			   $value->addChild('release_date',$row->DataUscita);
+			   $value->addChild('cover',$row->Immagine);
+			   $value->addChild('url_to_product',$row->LinkAcquisto);
+			   
+		   
+		   }
+		   echo $xml->asXML();
+			$conn->close();
+	}else{
+	  $conn->close();
 	//Dichiaro gli array per le informazioni
 	$editions = array();
 	$images = array();
@@ -15,7 +56,7 @@
 	$descriptions = array();
 	
 	//Parametri di ricerca
-	$title = $_POST['title'];
+	 $title = $_POST['title'];
 	$search = transform($title);
 	$type = $_POST['type'];
 	$origin_name = $_POST['origin'];
@@ -121,6 +162,8 @@
 	
 	echo $xml->asXML();
 	
+	}
+	
 	function writeXML()
 	{
 		global $images, $links, $titles, $volume_numbers, $volume_infos, $editions, $pDates, $prices, $currPrices, $authors, $descriptions, $xml;
@@ -158,30 +201,89 @@
 			return $a->productNumber - $b->productNumber;
 		});
 		
+		  $conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+		  $conn->set_charset("utf8");
 		
 		$xml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
 		foreach($arr as $product){
+			$titoloProdotto="";
+			$tipoProdotto="";
+			$autoriProdotto="";
+			$serieProdotto="";
+			$descrizioneProdotto="";
+			$edizioneProdotto="";
+			$infoEdizioneProdotto="";
+			$prezzoVecchioProdotto="";
+			$prezzoScontatoProdotto="";
+			$dataUscitaProdotto="";
+			$immagineProdotto="";
+			$linkAcquistoProdotto="";
+			$numeroVolumeProdotto="";
+			
 			$value = $xml->addChild('offer');
 			$value->addChild('title',(string)$product->title);
+			$titoloProdotto=(string)$product->title;
 			$value->addChild('product_type',(string)$product->product_type);
+			$tipoProdotto=(string)$product->product_type;
 			$value->addChild('productNumber',(string)$product->productNumber);
+			$numeroVolumeProdotto=(string)$product->productNumber;
 			
-			if (((string) $product->authors) != NULL)
+			if (((string) $product->authors) != NULL){
 				$value->addChild('authors',(string)$product->authors);
-			if (((string) $product->description) != NULL)
+				$autoriProdotto=(string)$product->authors;
+			}
+			if (((string) $product->description) != NULL){
 				$value->addChild('description',(string)$product->description);
+				$descrizioneProdotto=(string)$product->description;
+			}
 			
-			if (((string) $product->edition) != NULL)
+			if (((string) $product->edition) != NULL){
 				$value->addChild('edition',(string)$product->edition);
-			if (((string) $product->info_volume) != NULL)
+				$edizioneProdotto=(string)$product->edition;
+			}
+			if (((string) $product->info_volume) != NULL){
 				$value->addChild('info_volume',(string)$product->info_volume);
+				$infoEdizioneProdotto=(string)$product->info_volume;
+			}
 			
 			$value->addChild('price',(string)$product->curr_price);
+			$prezzoScontatoProdotto=(string)$product->curr_price;
+			
 			$value->addChild('old_price',(string)$product->old_price);
+			$prezzoVecchioProdotto=(string)$product->old_price;
+			
 			$value->addChild('release_date',(string)$product->release_date);
+			$dataUscitaProdotto=(string)$product->release_date;
+			
 			$value->addChild('cover',(string)$product->cover);
+			$immagineProdotto=(string)$product->cover;
+			
 			$value->addChild('url_to_product',(string)$product->url_to_product);
+			$linkAcquistoProdotto=(string)$product->url_to_product;
+			$serieProdotto=$_POST['title'];
+			
+			$titoloProdotto=str_replace(array("\"","\'"),"",$titoloProdotto);
+			$descrizioneProdotto=str_replace(array("\"","\'"),"",$descrizioneProdotto);
+			$serieProdotto=str_replace(array("\"","\'"),"",$serieProdotto);
+			
+			
+			$toinsert = 'INSERT INTO panini
+							(NomeOfferta, Serie, TipoProdotto, Autori, Descrizione, Edizione, InfoEdizione, Prezzo, PrezzoScontato, DataUscita, Immagine, LinkAcquisto, NumeroVolume)
+							VALUES
+							("'.$titoloProdotto.'", "'.$serieProdotto.'", "'.$tipoProdotto.'", "'.$autoriProdotto.'", "'.$descrizioneProdotto.'", "'.$edizioneProdotto.'", "'.$infoEdizioneProdotto.'", "'.$prezzoVecchioProdotto.'", "'.$prezzoScontatoProdotto.'", "'.$dataUscitaProdotto.'", "'.$immagineProdotto.'", "'.$linkAcquistoProdotto.'", "'.$numeroVolumeProdotto.'")';
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
+			
 		}
+		$conn->close();
 	}
 	
 	function extractImage()

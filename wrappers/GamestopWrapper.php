@@ -9,7 +9,42 @@
 	//Platform 37 SWITCH
 	
 	libxml_use_internal_errors(true);
+	$title = $_POST['title'];
+	preg_match('!(((\w+ )|(\w+)|( \w+))(\'?)(:?))*!ui',$title, $title_cleaned);
+	$title=$title_cleaned[0];
 	
+	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+			if ($conn->connect_error) {
+				die("Connection failed: " . $conn->connect_error);
+						}
+						
+					
+    $conn->set_charset("utf8");
+	$querySQL="SELECT * FROM `gamestop` WHERE Serie='$title'";
+	$resultQuery=mysqli_query($conn,$querySQL);
+	if($resultQuery->num_rows !=0){
+		   $xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+		while ($row=$resultQuery->fetch_object()){
+			$value = $xml->addChild('offer');
+			$value->addChild('title',$row->NomeOfferta);
+			$value->addChild('producer',$row->Produttore);
+			$value->addChild('platform',$row->Piattaforma);
+			if($row->Prezzo)
+			$value->addChild('price',$row->Prezzo);
+		    if($row->PrezzoUsato!="")
+			$value->addChild('used_price',$row->PrezzoUsato);	
+		    
+			$value->addChild('release_date',$row->DataUscita);
+			$value->addChild('pegi',$row->PEGI);
+			$value->addChild('cover',$row->Immagine);
+			$value->addChild('url_to_product',$row->LinkAcquisto);
+			
+			
+		}
+			echo $xml->asXML();
+			$conn->close();
+	}else{
+	   $conn->close();
 	//Dichiaro l'XML di ritorno
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
 
@@ -26,7 +61,7 @@
 	
 	//Parametri di ricerca
 	$pag = 1;
-	$title = $_POST['title'];
+	
 	$origin = $_POST['origin'];
 	$type = $_POST['type'];
 	$en_name = $_POST['english'];
@@ -273,7 +308,7 @@
 	}
 	
 	echo $xml->asXML();
-	
+}
 	function writeXML()
 	{					
 			global $images, $links, $titles, $prices, $usedPrices, $pegi, $platforms, $producers, $pDates, $xml;
@@ -317,26 +352,72 @@
 				return strcmp($a->name, $b->name);
 			});
 			
+			$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+		    $conn->set_charset("utf8");
+			
 			$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
 			foreach($arr as $product)
 			{
+				$nomeProdotto="";
+				$serieProdotto="";
+				$piattaformaProdotto="";
+				$produttoreProdotto="";
+				$prezzoProdotto="";
+				$prezzoUsatoProdotto="";
+				$dataUscitaProdotto="";
+				$pegiProdotto="";
+				$immagineProdotto="";
+				$linkAcquistoProdotto="";
+				
 				$value = $xml->addChild('offer');
 				$value->addChild('title',(string)$product->name);
+				$nomeProdotto=(string)$product->name;
 				$value->addChild('producer',(string)$product->producer);
+				$produttoreProdotto=(string)$product->producer;
 				$value->addChild('platform',(string)$product->platform);
+				$piattaformaProdotto=(string)$product->platform;
 				
-				if (((string) $product->price) != NULL)
+				if (((string) $product->price) != NULL){
 					$value->addChild('price',(string)$product->price);
-				if (((string) $product->usedPrice) != NULL)
+					$prezzoProdotto=(string)$product->price;
+				}
+				if (((string) $product->usedPrice) != NULL){
 					$value->addChild('used_price',(string)$product->usedPrice);	
+					$prezzoUsatoProdotto=(string)$product->usedPrice;
+				}
 
 				$value->addChild('release_date',(string)$product->release_date);
+				$dataUscitaProdotto=(string)$product->release_date;
 				$value->addChild('pegi',(string)$product->pegi);
+				$pegiProdotto=(string)$product->pegi;
 				
 				
 				$value->addChild('cover',(string)$product->image);
+				$immagineProdotto=(string)$product->image;
 				$value->addChild('url_to_product',(string)$product->prod_link);
+				$linkAcquistoProdotto=(string)$product->prod_link;
+				$serieProdotto=$_POST['title'];
+				
+				$nomeProdotto=str_replace(array("\"","\'"),"",$nomeProdotto);
+				$produttoreProdotto=str_replace(array("\"","\'"),"",$produttoreProdotto);
+				
+				$toinsert = 'INSERT INTO gamestop
+							(NomeOfferta, Serie, Piattaforma, Produttore, Prezzo, PrezzoUsato, DataUscita, PEGI, Immagine, LinkAcquisto)
+							VALUES
+							("'.$nomeProdotto.'", "'.$serieProdotto.'", "'.$piattaformaProdotto.'", "'.$produttoreProdotto.'", "'.$prezzoProdotto.'", "'.$prezzoUsatoProdotto.'", "'.$dataUscitaProdotto.'", "'.$pegiProdotto.'", "'.$immagineProdotto.'", "'.$linkAcquistoProdotto.'")';
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
+				
 			}
+			$conn->close();
 	}
 	
 	function extractImage()

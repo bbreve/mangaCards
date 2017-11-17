@@ -1,6 +1,45 @@
 <?php 
 	header("Content-type: application/xml");
-
+	$title = $_POST['title'];
+	preg_match('!(((\w+ )|(\w+)|( \w+))(\'?)(:?))*!ui',$title, $title_cleaned);
+	$title=$title_cleaned[0];
+	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+    $conn->set_charset("utf8");
+	$querySQL="SELECT * FROM `rwedizioni` WHERE Serie='$title'";
+	$resultQuery=mysqli_query($conn,$querySQL);
+	if($resultQuery->num_rows !=0){
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+		 while ($row=$resultQuery->fetch_object()){
+				$value = $xml->addChild('offer');
+				$value->addChild('title',$row->NomeOfferta);
+				if($row->SerieEditoriale!="")
+				$value->addChild('ed_series',$row->SerieEditoriale);
+			    if($row->Collana!="")
+				$value->addChild('collection',$row->Collana);
+			    if($row->Linea!="")
+		        $value->addChild('imprint',$row->Linea);
+			    if($row->Autori!="")
+				$value->addChild('authors',$row->Autori);
+			    if($row->Prezzo!="")
+				$value->addChild('price',$row->Prezzo);
+			    if($row->DataUscita!="")
+				$value->addChild('release_date',$row->DataUscita);
+			    if($row->Contenuti!="")
+				$value->addChild('containedChapters',$row->Contenuti);	
+			    if($row->Descrizione!="")
+				$value->addChild('description',$row->Descrizione);	
+			    if($row->Immagine!="")
+				$value->addChild('cover',$row->Immagine);
+				$value->addChild('url_to_product',$row->LinkAcquisto);			
+	}
+				echo $xml->asXML();
+				$conn->close();
+	}else{
+	$conn->close();
 	//Dichiaro gli array per le informazioni
 	$images = array();
 	$links = array();
@@ -20,7 +59,7 @@
 	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><list_products></list_products>');
 	
 	//Parametri di ricerca
-	$title = $_POST['title'];
+	
 	
 	//Modifica parametro di ricerca
 	if (stripos($title, "(") !== FALSE)
@@ -85,7 +124,7 @@
 	
 	writeXML();
 	echo $xml->asXML();
-	
+	}
 		
 	function writeXML()
 	{
@@ -132,38 +171,104 @@
 				return strcmp($a->name, $b->name);
 			});
 			
+			$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+				if ($conn->connect_error) {
+						die("Connection failed: " . $conn->connect_error);
+						}
+						
+		    $conn->set_charset("utf8");
+			
 			$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
 			foreach($arr as $product)
 			{
+				
+				$nomeProdotto="";
+				$lineaProdotto="";
+				$autoriProdotto="";
+				$serieProdotto="";
+				$descrizioneProdotto="";
+				$serieEditorialeProdotto="";
+				$contenutiProdotto="";
+				$collanaProdotto="";
+				$prezzoProdotto="";
+				$dataUscitaProdotto="";
+				$immagineProdotto="";
+				$linkAcquistoProdotto="";
+				
+				
 				$value = $xml->addChild('offer');
 				$value->addChild('title',(string)$product->title);
+				$nomeProdotto=(string)$product->title;
 				
-				if (((string) $product->editorial_series) != NULL)
+				if (((string) $product->editorial_series) != NULL){
 					$value->addChild('ed_series',(string)$product->editorial_series);
-				if (((string) $product->collection) != NULL)
+					$serieEditorialeProdotto=(string)$product->editorial_series;
+				}
+				if (((string) $product->collection) != NULL){
 					$value->addChild('collection',(string)$product->collection);
-				if (((string) $product->imprint) != NULL)
+					$collanaProdotto=(string)$product->collection;
+					
+				}
+				if (((string) $product->imprint) != NULL){
 					$value->addChild('imprint',(string)$product->imprint);
+					$lineaProdotto=(string)$product->imprint;
+				}
 				
-				if (((string) $product->authors) != NULL)
+				if (((string) $product->authors) != NULL){
 					$value->addChild('authors',(string)$product->authors);
+					$autoriProdotto=(string)$product->authors;
+				}
 				
-				if (((string) $product->price) != NULL)
+				if (((string) $product->price) != NULL){
 					$value->addChild('price',(string)$product->price);
+					$prezzoProdotto=(string)$product->price;
+				}
 				
-				if (((string) $product->release_date) != NULL)
+				if (((string) $product->release_date) != NULL){
 					$value->addChild('release_date',(string)$product->release_date);
+					$dataUscitaProdotto=(string)$product->release_date;
+				}
 				
-				if (((string) $product->containedChapters) != NULL)
+				if (((string) $product->containedChapters) != NULL){
 					$value->addChild('containedChapters',(string)$product->containedChapters);	
+					$contenutiProdotto=(string)$product->containedChapters;
+				}
 				
-				if (((string) $product->description) != NULL)
+				if (((string) $product->description) != NULL){
 					$value->addChild('description',(string)$product->description);	
+					$descrizioneProdotto=(string)$product->description;
+				}
 				
-				if (((string) $product->image) != NULL)
+				if (((string) $product->image) != NULL){
 					$value->addChild('cover',(string)$product->image);
+					$immagineProdotto=(string)$product->image;
+				}
 				$value->addChild('url_to_product',(string)$product->prod_link);
+				$linkAcquistoProdotto=(string)$product->prod_link;
+				
+				$serieProdotto=$_POST['title'];
+				
+				$nomeProdotto=str_replace(array("\"","\'"),"",$nomeProdotto);
+				$descrizioneProdotto=str_replace(array("\"","\'"),"",$descrizioneProdotto);
+				$serieProdotto=str_replace(array("\"","\'"),"",$serieProdotto);
+				$contenutiProdotto=str_replace(array("\"","\'"),"",$contenutiProdotto);
+				$lineaProdotto=str_replace(array("\"","\'"),"",$lineaProdotto);
+				$collanaProdotto=str_replace(array("\"","\'"),"",$collanaProdotto);
+				
+					
+				$toinsert = 'INSERT INTO rwedizioni
+							(NomeOfferta, Serie, Linea, Collana, SerieEditoriale, Autori, Prezzo, DataUscita, Contenuti, Descrizione, Immagine, LinkAcquisto)
+							VALUES
+							("'.$nomeProdotto.'", "'.$serieProdotto.'", "'.$lineaProdotto.'", "'.$collanaProdotto.'", "'.$serieEditorialeProdotto.'", "'.$autoriProdotto.'", "'.$prezzoProdotto.'", "'.$dataUscitaProdotto.'", "'.$contenutiProdotto.'", "'.$descrizioneProdotto.'", "'.$immagineProdotto.'", "'.$linkAcquistoProdotto.'")';
+							
+							if ($conn->query($toinsert) === TRUE) {
+									//echo "New record created successfully";
+									} else {
+										//echo "Error: " . $sql . "<br>" . $conn->error;
+												}
+				
 			}
+				$conn->close();
 	}
 	
 	function extractInPage()
