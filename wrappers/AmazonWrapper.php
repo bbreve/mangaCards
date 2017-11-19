@@ -138,14 +138,17 @@
 		{
 			global $offers_array, $search;
 
+
 			if ($search == "comic")
 			{
+				$tipoProdotto = "fumetto";
 				usort($offers_array, function($a, $b){
 					return strcmp($a['title'], $b['title']);
 				});
 			}
 			else
 			{
+				$tipoProdotto = "manga";
 				usort($offers_array,function($a,$b){
 					return $a['productNumber'] - $b['productNumber'];
 				});
@@ -175,7 +178,7 @@
 				$toinsert = 'INSERT INTO amazon
 							(NomeOfferta, TipoProdotto, Serie, DataUscita, Prezzo, Autore, Immagine, LinkAcquisto)
 							VALUES
-							("'.$titoloProdotto.'", "'.$search.'", "'.$serieProdotto.'" , "'.$offer['day'].'", "'.$offer['price'].'", "'.$offer['author'].'", "'. $offer['cover'].'", "'.htmlspecialchars($offer['url_to_product']).'")';
+							("'.$titoloProdotto.'", "'.$tipoProdotto.'", "'.$serieProdotto.'" , "'.$offer['day'].'", "'.$offer['price'].'", "'.$offer['author'].'", "'. $offer['cover'].'", "'.htmlspecialchars($offer['url_to_product']).'")';
 							
 							
 							if ($conn->query($toinsert) === TRUE) {
@@ -191,45 +194,6 @@
 		
 	}
 
-	$title = $_POST['title'];
-	$type_search = $_POST['type'];
-	$origin_name = $_POST['origin'];
-	$authors = $_POST['authors'];
-
-	//Trasforma caratteri speciali in particolari manga/comic
-	$title = transform($title);
-	
-	//Si eliminano info superflue dal nome
-	preg_match('!(((\w+ )|(\w+)|( \w+))(\'?)(:?))*!ui',$title, $title_cleaned);
-	$cleanTitle = $title_cleaned[0];
-
-	
-	//Si mantiene in memoria il nome originale
-	$temp = $cleanTitle;
-	
-	//Si eliminano, se esiste, il "due punti" dalla ricerca
-	$title = str_replace(":", "", $cleanTitle);	
-	$amazon = new AmazonWrapper($title, $type_search, 5);
-	$xml = $amazon->execute();
-
-	//Se non è stato trovato nulla
-	if ($xml->count() == 0 && $type_search = "comic")
-	{
-		$title = $temp;
-		//Si verifica se esiste un "due punti" nel nome
-		if ($stripos($title, ":") !== FALSE)
-		{
-			//Si individua la seconda parte del nome, ossia quella dopo il due punti
-			//Viene effettuato ciò poichè per i fumetti le informazioni essenziali per questi comic risiedono nella seconda parte del nome
-			$arr = explode(":", $title);
-			$title = trim($arr[1]);
-			$amazon = new AmazonWrapper($title, $type_search, 5);
-			$xml = $amazon->execute();
-		}
-	}
-	
-	echo $xml->asXML();
-	
 	function transform($string)
 	{
 		if (stripos($string, "×") !== FALSE)
@@ -295,4 +259,82 @@
 		return FALSE;
 	}	
 
+	function createXMLFromDB($resultQuery)
+	{
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+		while ($row=$resultQuery->fetch_object())
+		{
+			$offer_element = $xml->addChild("offer");
+			$offer_element->addChild("title", htmlspecialchars($row->NomeOfferta));
+			$offer_element->addChild("price", $row->Prezzo);
+			$offer_element->addChild("author", $row->Autore);
+			$offer_element->addChild("cover", $row->Immagine);
+			$offer_element->addChild('release_date', $row->DataUscita);
+			$offer_element->addChild("url_to_product", htmlspecialchars($row->LinkAcquisto));
+		}	
+		return $xml;			
+	}
+
+
+	$title = $_POST['title'];
+	$type_search = $_POST['type'];
+	$origin_name = $_POST['origin'];
+	$authors = $_POST['authors'];
+
+	//Trasforma caratteri speciali in particolari manga/comic
+	$title = transform($title);
+	
+	//Si eliminano info superflue dal nome
+	preg_match('!(((\w+ )|(\w+)|( \w+))(\'?)(:?))*!ui',$title, $title_cleaned);
+	$cleanTitle = $title_cleaned[0];
+
+	
+	//Si mantiene in memoria il nome originale
+	$temp = $cleanTitle;
+	
+	//Si eliminano, se esiste, il "due punti" dalla ricerca
+	$title = str_replace(":", "", $cleanTitle);	
+	
+
+	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+	if ($conn->connect_error) 
+	{
+		die("Connection failed: " . $conn->connect_error);
+	}
+						
+	$conn->set_charset("utf8");
+	$querySQL="SELECT * FROM `amazon` WHERE Serie='$title' AND Piattaforma IS NULL ";
+    $resultQuery=mysqli_query($conn,$querySQL);
+	if($resultQuery->num_rows != 0){
+		$xml = createXMLFromDB($resultQuery);
+		$conn->close();
+	}
+	else
+	{
+		$conn->close();
+		$amazon = new AmazonWrapper($title, $type_search, 5);
+		$xml = $amazon->execute();
+	}
+
+
+
+	//Se non è stato trovato nulla
+	if ($xml->count() == 0 && $type_search = "comic")
+	{
+		$title = $temp;
+		//Si verifica se esiste un "due punti" nel nome
+		if ($stripos($title, ":") !== FALSE)
+		{
+			//Si individua la seconda parte del nome, ossia quella dopo il due punti
+			//Viene effettuato ciò poichè per i fumetti le informazioni essenziali per questi comic risiedono nella seconda parte del nome
+			$arr = explode(":", $title);
+			$title = trim($arr[1]);
+			$amazon = new AmazonWrapper($title, $type_search, 5);
+			$xml = $amazon->execute();
+		}
+	}
+	
+	echo $xml->asXML();
+	
+	
 ?>

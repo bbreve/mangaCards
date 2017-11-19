@@ -1,6 +1,6 @@
 	<?php
 	//header("Content-type: application/xml");
-			
+
 	error_reporting(0);
 	class AmazonWrapper{
 		
@@ -200,7 +200,7 @@
 				$toinsert = 'INSERT INTO amazon
 							(NomeOfferta, TipoProdotto, Serie, DataUscita, Prezzo, Autore, Piattaforma, Immagine, LinkAcquisto)
 							VALUES
-							("'.$titoloProdotto.'", "'.$search.'", "'.$serieProdotto.'" , "'.$offer['day'].'", "'.$offer['price'].'", "'.$offer['author'].'", "'.$offer['plat'].'", "'. $offer['cover'].'", "'.htmlspecialchars($offer['url_to_product']).'")';
+							("'.$titoloProdotto.'", "videogioco", "'.$serieProdotto.'" , "'.$offer['day'].'", "'.$offer['price'].'", "'.$offer['author'].'", "'.$offer['plat'].'", "'. $offer['cover'].'", "'.htmlspecialchars($offer['url_to_product']).'")';
 							
 							if ($conn->query($toinsert) === TRUE) {
 									//echo "New record created successfully";
@@ -240,11 +240,29 @@
 	
 	//Si eliminano, se esiste, il "due punti" dalla ricerca
 	$title = str_replace(":", "", $cleanTitle);	
-	$amazon = new AmazonWrapper($title, $type_search, 3);
-	$xml = $amazon->execute();
+
+	$conn = new mysqli("localhost", "root", "", "db_mangacards");//database connection
+	if ($conn->connect_error) 
+	{
+		die("Connection failed: " . $conn->connect_error);
+	}
+
+	$conn->set_charset("utf8");
+	$querySQL="SELECT * FROM `amazon` WHERE Serie='$title' AND Piattaforma IS NOT NULL ";
+    $resultQuery=mysqli_query($conn,$querySQL);
+	if($resultQuery->num_rows != 0){
+		$xml = createXMLFromDB($resultQuery);
+		$conn->close();
+	}
+	else
+	{
+		$conn->close();
+		$amazon = new AmazonWrapper($title, $type_search, 5);
+		$xml = $amazon->execute();
+	}
 
 	//Se non è stato trovato nulla
-	if ($xml->count() == 0 && $type_search = "comic")
+	if ($xml->count() == 0)
 	{
 		$title = $temp;
 		//Si verifica se esiste un "due punti" nel nome
@@ -262,6 +280,29 @@
 	
 	echo $xml->asXML();
 	
+
+	function createXMLFromDB($resultQuery)
+	{
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><offers></offers>');
+		while ($row=$resultQuery->fetch_object())
+		{
+
+			$titoloProdotto=str_replace(array("\"","\'"),"",htmlspecialchars($offer['title']));
+			$serieProdotto= str_replace(array("\"","\'"),"",$_POST['title']);
+		
+			$offer_element = $xml->addChild("offer");
+			$offer_element->addChild("title", htmlspecialchars($row->NomeOfferta));
+			$offer_element->addChild("price", $row->Prezzo);
+			$offer_element->addChild("author", $row->Autore);
+			$offer_element->addChild("cover", $row->Immagine);
+			$offer_element->addChild("plat", $row->Piattaforma);
+			$offer_element->addChild('release_date', $row->DataUscita);
+			$offer_element->addChild("url_to_product", htmlspecialchars($row->LinkAcquisto));
+		}	
+		return $xml;			
+	}
+	
+
 	function transform($string)
 	{
 		if (stripos($string, "×") !== FALSE)

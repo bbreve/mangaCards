@@ -499,11 +499,11 @@
       $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq).done(function(a1, a2, a3, a4){
         $('.progress-bar').css('width', '100%');
         $('.progress.animated').fadeOut();
+        $('.animated.bounceInUp').removeClass('animated bounceInUp');
+
+      }); 
 
       });
-
-      });
-	  
      function showOverlay()
      {
       $(".overlay").fadeIn(400);
