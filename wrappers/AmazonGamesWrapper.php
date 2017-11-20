@@ -82,9 +82,18 @@
 						$price = substr($price, 4)."€";
 						$image = $xmlPageXPath -> query('.//img/@src', $product_row)->item(0)->textContent;
 						
-						$day = $xmlPageXPath->query('.//span[@class="a-size-small a-color-secondary"]', $product_row);
-						$rDate = transformDate(trim($day->item(0)->textContent));
-					
+						$day = $xmlPageXPath->query('.//div[@class="a-row a-spacing-none"]/span[@class="a-size-small a-color-secondary"]', $product_row);
+						if ($day->length == 0)
+							$rDate = "";
+						else
+						{
+							$transformed = transformDate(trim($day->item(0)->textContent));
+							if (stripos($transformed, "di ") !== FALSE || stripos($transformed, "Classificazione") !== FALSE)
+								$rDate = "";
+							else
+								$rDate = $transformed;
+					    }
+						
 						preg_match_all('!\d+!', $title, $number);
 						//$this->save_product($number[0][0], $title, $url_to_product, $price, $image);
 
@@ -190,7 +199,8 @@
 				$offer_element->addChild("author", $offer['author']);
 				$offer_element->addChild("cover", $offer['cover']);
 				$offer_element->addChild("plat", $offer['plat']);
-				$offer_element->addChild('release_date', $offer['day']);
+				if ($offer['day'] != "")
+					$offer_element->addChild('release_date', $offer['day']);
 				$offer_element->addChild("url_to_product", htmlspecialchars($offer['url_to_product']));
 				
 				$titoloProdotto=str_replace(array("\"","\'"),"",htmlspecialchars($offer['title']));
@@ -248,7 +258,7 @@
 	}
 
 	$conn->set_charset("utf8");
-	$querySQL="SELECT * FROM `amazon` WHERE Serie='$title' AND Piattaforma IS NOT NULL ";
+	$querySQL="SELECT * FROM `amazon` WHERE Serie LIKE '%$title%' AND Piattaforma IS NOT NULL ";
     $resultQuery=mysqli_query($conn,$querySQL);
 	if($resultQuery->num_rows != 0){
 		$xml = createXMLFromDB($resultQuery);
@@ -296,7 +306,8 @@
 			$offer_element->addChild("author", $row->Autore);
 			$offer_element->addChild("cover", $row->Immagine);
 			$offer_element->addChild("plat", $row->Piattaforma);
-			$offer_element->addChild('release_date', $row->DataUscita);
+			if ($row->DataUscita != "")
+				$offer_element->addChild('release_date', $row->DataUscita);
 			$offer_element->addChild("url_to_product", htmlspecialchars($row->LinkAcquisto));
 		}	
 		return $xml;			

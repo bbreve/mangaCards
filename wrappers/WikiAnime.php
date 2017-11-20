@@ -416,10 +416,12 @@
 			if (intval($numep[$i]) == $start)
 			{
 				$a = $xml->addChild("anime");
-				$a->addChild("title", change($anime[$count++]));
-				$titoloAnime=change($anime[($count - 1)]);
-				$versionAnime[]=change($anime[($count - 1)]);
+				$anime_name = change($anime[$count]);
+				$a->addChild("title", change($anime_name));
+				$titoloAnime=change($anime_name);
+				$versionAnime[]=change($anime_name);
 				$episodes = $a->addChild("episodes");	
+				$count += 1;
 			}
 			
 			$versioneAnime=count($versionAnime);
@@ -507,7 +509,7 @@
 		}
 		else
 		{
-			$query = '//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep")]';
+			$query = '//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]';
 		}		
 		$eps = $xpath->query($query);
 		
@@ -556,7 +558,7 @@
 				if ($query_season->length == 0)
 					break;
 				
-				$eps = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]', $query_season->item(0));
+				$eps = $xpath->query('./following::table[1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]', $query_season->item(0));
 				foreach($eps as $ep)
 				{			
 					$dates_it_query = $xpath->query('./td[contains(@style, "white-space:nowrap")][2]', $ep);
@@ -598,7 +600,7 @@
 		
 		if ($format_page == 2)
 		{
-			$dates_jpn_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep")]/td[contains(@style, "white-space:nowrap")][1]/text()');
+			$dates_jpn_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[contains(@style, "white-space:nowrap")][1]/text()');
 		}
 		else 
 		{	
@@ -636,7 +638,7 @@
 				if ($query_season->length == 0)
 					break;
 				
-				$dates_jpn_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[contains(@style, "white-space:nowrap")][1]', $query_season->item(0));
+				$dates_jpn_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[contains(@style, "white-space:nowrap")][1]', $query_season->item(0));
 				foreach($dates_jpn_query as $date_jpn)
 				{			
 					if ($date_jpn == "" || $date_jpn == " " || $date_jpn == NULL)
@@ -668,7 +670,7 @@
 		
 		if ($format_page == 2)
 		{
-			$titles_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep")]/td[./i/b or ./b/i or contains(span/@lang, "ja")]');
+			$titles_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[./i/b or ./b/i or contains(span/@lang, "ja")]');
 		}
 		else 
 		{
@@ -692,7 +694,7 @@
 				if ($query_season->length == 0)
 					break;
 
-				$titles_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[./i/b or ./b/i or contains(span/@lang, "ja")]', $query_season->item(0));
+				$titles_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[./i/b or ./b/i or contains(span/@lang, "ja")]', $query_season->item(0));
 				foreach($titles_query as $title_query)
 				{		
 					$titles[] = $title_query->nodeValue;
@@ -720,9 +722,9 @@
 			else
 			{
 				if ($numTot->length == 0)
-					$nums_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep")]/td[1]');
+					$nums_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[1]');
 				else
-					$nums_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep")]/td[2]');
+					$nums_query = $xpath->query('//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[2]');
 			}
 			
 			foreach($nums_query as $num_query)
@@ -751,9 +753,9 @@
 						break;
 				
 					if ($numTot->length == 0)
-						$nums_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[1]', $query_season->item(0));
+						$nums_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[1]', $query_season->item(0));
 					else
-						$nums_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]/td[2]', $query_season->item(0));
+						$nums_query = $xpath->query('./following::table[1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]/td[2]', $query_season->item(0));
 					
 					if (stripos($num_query->nodeValue,'(') !== FALSE)
 					{
@@ -782,7 +784,7 @@
 		}
 		else
 		{
-			$query = '//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep")]';
+			$query = '//span[@id = "Anime" or @id = "Episodi"]/following::table[@class="wikitable"][1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]';
 		}		
 		$eps_tr = $xpath->query($query);
 
@@ -855,7 +857,7 @@
 				if ($query_season->length == 0)
 					break;
 				
-				$eps_tr = $xpath->query('./following::table[1]//tr[contains(@id, "ep")]', $query_season->item(0));
+				$eps_tr = $xpath->query('./following::table[1]//tr[contains(@id, "ep") and (count(td[2]//b) > 0 or count(td[3]//b) > 0)]', $query_season->item(0));
 				foreach($eps_tr as $ep_tr)
 				{
 					$id = $xpath->query('./td[1]/text()', $ep_tr);

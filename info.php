@@ -178,15 +178,21 @@
                     foreach($chapters_xml->volume as $volume) 
                     {
                       $content = insertPanelContent($volume);
+					  $idN = $volume->number;
+					  if (stripos($idN, "(") !== FALSE)
+					  {
+						$arr = explode("(", $idN);
+						$idN = trim($arr[0]);	
+					  }
                       echo '
                       <div class="panel panel-default">
                         <div class="panel-heading">
                           <h4 class="panel-title">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#volume'.str_replace(' ', '', $volume->number).'">['.$volume->number."] ".$volume->title.'
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-panel" href="#volume'.str_replace(' ', '', $idN).'">['.$idN."] ".$volume->title.'
                             </a>
                           </h4>
                         </div>
-                        <div id="volume'.str_replace(' ', '', $volume->number).'" class="panel-collapse collapse">
+                        <div id="volume'.str_replace(' ', '', $idN).'" class="panel-collapse collapse">
                           <div class="panel-body">';
                       echo $content;
                       echo'
