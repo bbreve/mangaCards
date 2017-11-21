@@ -129,6 +129,16 @@
         $(document).ready(function(){
           hideOverlay();
         });
+		
+		 $(document).ready(function(){
+         $.ajax({
+				url: 'DeleteDBData.php',
+				method: 'POST', // or GET
+				success: function() {
+					console.log("Dati cancellati dal db");
+           }
+});
+        });
  
  
         function MangaSelect(){
