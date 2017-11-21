@@ -502,7 +502,7 @@
 	// Chiamata AJAX per gli anime
       animeReq = animeAjax();
       
-      $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq).done(function(a1, a2, a3, a4){
+      $.when(amazonReq, paniniReq, rwReq, animeReq, jpopReq, gamestopReq, amazonGamesReq).done(function(a1, a2, a3, a4){
         $('.progress-bar').css('width', '100%');
         $('.progress.animated').fadeOut();
         $('.animated.bounceInUp').removeClass('animated bounceInUp');
@@ -629,18 +629,12 @@
         author = $(this).find('author').text();
 
         s =  '<div class="row">' +
-          '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img src="' + image + '"/></a></div>' +
+          '  <div class="col-sm-3"><a href="#" class="mini-thumbnail"><img style="max-width:200px" src="' + image + '"/></a></div>' +
           '  <div class="col-sm-6">' +
           '    <div class="agile-row">' +
           '      <h4>' + title + '</h4>' +
           '    </div>';
 		  
-		  if (author != "" && author != null)
-		  {
-			s += '    <div class="agile-row">' +
-			'      <p>di ' + author + '</p>' +
-			'    </div>';
-		  }
           
 		  s += '    <div class="agile-row">' +
           '      <h3>' + plat + '</h3>' +

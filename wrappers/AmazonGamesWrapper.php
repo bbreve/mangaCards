@@ -1,7 +1,6 @@
 	<?php
 	//header("Content-type: application/xml");
 
-	error_reporting(0);
 	class AmazonWrapper{
 		
 		public function AmazonWrapper($query, $type_search, $precision)
@@ -120,7 +119,7 @@
 							$doc->loadHTMLFile($pl->nodeValue);
 							$xpath = new DomXPath($doc);
 							$image = $xpath->query('//div[@id="imgTagWrapperId"]/img/@src')->item(0)->textContent;
-			
+						
 							$title = $xpath->query('//span[@id="productTitle"]')->item(0)->textContent;
 
 							$untrimmed = $xpath->query('//div[@class="a-section a-spacing-none"]')->item(0)->textContent;
@@ -206,12 +205,11 @@
 				$titoloProdotto=str_replace(array("\"","\'"),"",htmlspecialchars($offer['title']));
 				$serieProdotto= str_replace(array("\"","\'"),"",$_POST['title']);
 		
-				
 				$toinsert = 'INSERT INTO amazon
 							(NomeOfferta, TipoProdotto, Serie, DataUscita, Prezzo, Autore, Piattaforma, Immagine, LinkAcquisto)
 							VALUES
 							("'.$titoloProdotto.'", "videogioco", "'.$serieProdotto.'" , "'.$offer['day'].'", "'.$offer['price'].'", "'.$offer['author'].'", "'.$offer['plat'].'", "'. $offer['cover'].'", "'.htmlspecialchars($offer['url_to_product']).'")';
-							
+				
 							if ($conn->query($toinsert) === TRUE) {
 									//echo "New record created successfully";
 									} else {
